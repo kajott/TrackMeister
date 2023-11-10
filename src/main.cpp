@@ -1,14 +1,20 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 #ifdef _WIN32
     #define WIN32_LEAN_AND_MEAN
     #define NOMINMAX
     #include <windows.h>
 #endif
 
+#include <cstddef>
 #include <cstdio>
 #include <cstdlib>
 
+#include <vector>
+
 #include <SDL.h>
 #include <glad/glad.h>
+#include <libopenmpt/libopenmpt.hpp>
 
 [[noreturn]] static void fatal(const char *what, const char *how) {
     #if defined(_WIN32) && defined(NDEBUG)
@@ -69,6 +75,24 @@ int main(int argc, char* argv[]) {
     #endif
 
     glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
+
+    FILE *f = fopen("D:\\Sound\\_mod\\krunkd.mod", "rb");
+    if (!f) { fatal("sorry", "could not open file"); }
+    fseek(f, 0, SEEK_END);
+    int fsize = ftell(f);
+    fseek(f, 0, SEEK_SET);
+    std::vector<std::byte> modData(fsize);
+    fread(modData.data(), 1, fsize, f);
+    fclose(f);
+    openmpt::module mod(modData);
+
+    f = fopen("abfall.raw", "wb");
+    for (int frame = 1024;  frame;  --frame) {
+        short buf[4096];
+        mod.read_interleaved_stereo(48000, 2048, buf);
+        fwrite(buf, 2, 4096, f);
+    }
+    fclose(f);
 
     bool active = true;
     while (active) {

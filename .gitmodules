@@ -1,0 +1,4 @@
+[submodule "external/openmpt"]
+	path = external/openmpt
+	url = https://github.com/OpenMPT/openmpt.git
+	branch = OpenMPT-1.31

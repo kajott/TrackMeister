@@ -14,7 +14,7 @@ endif ()
 
 # set C/C++ language standards for compilers that respect them
 set (CMAKE_C_STANDARD 99)
-set (CMAKE_CXX_STANDARD 11)
+set (CMAKE_CXX_STANDARD 17)
 
 # ensure we have a working SDL2 library; on Win32, bootstrap it ourselves
 if (WIN32)
@@ -56,12 +56,172 @@ else ()
     find_package (SDL2 REQUIRED)
 endif ()
 
+# provide libopenmpt (which doesn't have a CMake build system yet, so it's all
+# manual by now)
+add_library (libopenmpt STATIC
+    external/openmpt/common/ComponentManager.cpp
+    external/openmpt/common/Logging.cpp
+    external/openmpt/common/Profiler.cpp
+    external/openmpt/common/mptFileIO.cpp
+    external/openmpt/common/mptFileTemporary.cpp
+    external/openmpt/common/mptFileType.cpp
+    external/openmpt/common/mptPathString.cpp
+    external/openmpt/common/mptRandom.cpp
+    external/openmpt/common/mptStringBuffer.cpp
+    external/openmpt/common/mptTime.cpp
+    external/openmpt/common/serialization_utils.cpp
+    external/openmpt/common/version.cpp
+    external/openmpt/libopenmpt/libopenmpt_c.cpp
+    external/openmpt/libopenmpt/libopenmpt_cxx.cpp
+    external/openmpt/libopenmpt/libopenmpt_ext_impl.cpp
+    external/openmpt/libopenmpt/libopenmpt_impl.cpp
+    external/openmpt/sounddsp/AGC.cpp
+    external/openmpt/sounddsp/DSP.cpp
+    external/openmpt/sounddsp/EQ.cpp
+    external/openmpt/sounddsp/Reverb.cpp
+    external/openmpt/soundlib/AudioCriticalSection.cpp
+    external/openmpt/soundlib/ContainerMMCMP.cpp
+    external/openmpt/soundlib/ContainerPP20.cpp
+    external/openmpt/soundlib/ContainerUMX.cpp
+    external/openmpt/soundlib/ContainerXPK.cpp
+    external/openmpt/soundlib/Dlsbank.cpp
+    external/openmpt/soundlib/Fastmix.cpp
+    external/openmpt/soundlib/ITCompression.cpp
+    external/openmpt/soundlib/ITTools.cpp
+    external/openmpt/soundlib/InstrumentExtensions.cpp
+    external/openmpt/soundlib/Load_667.cpp
+    external/openmpt/soundlib/Load_669.cpp
+    external/openmpt/soundlib/Load_amf.cpp
+    external/openmpt/soundlib/Load_ams.cpp
+    external/openmpt/soundlib/Load_c67.cpp
+    external/openmpt/soundlib/Load_dbm.cpp
+    external/openmpt/soundlib/Load_digi.cpp
+    external/openmpt/soundlib/Load_dmf.cpp
+    external/openmpt/soundlib/Load_dsm.cpp
+    external/openmpt/soundlib/Load_dsym.cpp
+    external/openmpt/soundlib/Load_dtm.cpp
+    external/openmpt/soundlib/Load_far.cpp
+    external/openmpt/soundlib/Load_fmt.cpp
+    external/openmpt/soundlib/Load_gdm.cpp
+    external/openmpt/soundlib/Load_gt2.cpp
+    external/openmpt/soundlib/Load_imf.cpp
+    external/openmpt/soundlib/Load_it.cpp
+    external/openmpt/soundlib/Load_itp.cpp
+    external/openmpt/soundlib/Load_mdl.cpp
+    external/openmpt/soundlib/Load_med.cpp
+    external/openmpt/soundlib/Load_mid.cpp
+    external/openmpt/soundlib/Load_mo3.cpp
+    external/openmpt/soundlib/Load_mod.cpp
+    external/openmpt/soundlib/Load_mt2.cpp
+    external/openmpt/soundlib/Load_mtm.cpp
+    external/openmpt/soundlib/Load_mus_km.cpp
+    external/openmpt/soundlib/Load_okt.cpp
+    external/openmpt/soundlib/Load_plm.cpp
+    external/openmpt/soundlib/Load_psm.cpp
+    external/openmpt/soundlib/Load_ptm.cpp
+    external/openmpt/soundlib/Load_s3m.cpp
+    external/openmpt/soundlib/Load_sfx.cpp
+    external/openmpt/soundlib/Load_stm.cpp
+    external/openmpt/soundlib/Load_stp.cpp
+    external/openmpt/soundlib/Load_symmod.cpp
+    external/openmpt/soundlib/Load_uax.cpp
+    external/openmpt/soundlib/Load_ult.cpp
+    external/openmpt/soundlib/Load_wav.cpp
+    external/openmpt/soundlib/Load_xm.cpp
+    external/openmpt/soundlib/Load_xmf.cpp
+    external/openmpt/soundlib/MIDIEvents.cpp
+    external/openmpt/soundlib/MIDIMacros.cpp
+    external/openmpt/soundlib/MPEGFrame.cpp
+    external/openmpt/soundlib/Message.cpp
+    external/openmpt/soundlib/MixFuncTable.cpp
+    external/openmpt/soundlib/MixerLoops.cpp
+    external/openmpt/soundlib/MixerSettings.cpp
+    external/openmpt/soundlib/ModChannel.cpp
+    external/openmpt/soundlib/ModInstrument.cpp
+    external/openmpt/soundlib/ModSample.cpp
+    external/openmpt/soundlib/ModSequence.cpp
+    external/openmpt/soundlib/OPL.cpp
+    external/openmpt/soundlib/OggStream.cpp
+    external/openmpt/soundlib/Paula.cpp
+    external/openmpt/soundlib/RowVisitor.cpp
+    external/openmpt/soundlib/S3MTools.cpp
+    external/openmpt/soundlib/SampleFormatBRR.cpp
+    external/openmpt/soundlib/SampleFormatFLAC.cpp
+    external/openmpt/soundlib/SampleFormatMP3.cpp
+    external/openmpt/soundlib/SampleFormatMediaFoundation.cpp
+    external/openmpt/soundlib/SampleFormatOpus.cpp
+    external/openmpt/soundlib/SampleFormatSFZ.cpp
+    external/openmpt/soundlib/SampleFormatVorbis.cpp
+    external/openmpt/soundlib/SampleFormats.cpp
+    external/openmpt/soundlib/SampleIO.cpp
+    external/openmpt/soundlib/Snd_flt.cpp
+    external/openmpt/soundlib/Snd_fx.cpp
+    external/openmpt/soundlib/Sndfile.cpp
+    external/openmpt/soundlib/Sndmix.cpp
+    external/openmpt/soundlib/SoundFilePlayConfig.cpp
+    external/openmpt/soundlib/Tables.cpp
+    external/openmpt/soundlib/Tagging.cpp
+    external/openmpt/soundlib/TinyFFT.cpp
+    external/openmpt/soundlib/UMXTools.cpp
+    external/openmpt/soundlib/UpgradeModule.cpp
+    external/openmpt/soundlib/WAVTools.cpp
+    external/openmpt/soundlib/WindowedFIR.cpp
+    external/openmpt/soundlib/XMTools.cpp
+    external/openmpt/soundlib/load_j2b.cpp
+    external/openmpt/soundlib/mod_specifications.cpp
+    external/openmpt/soundlib/modcommand.cpp
+    external/openmpt/soundlib/modsmp_ctrl.cpp
+    external/openmpt/soundlib/pattern.cpp
+    external/openmpt/soundlib/patternContainer.cpp
+    external/openmpt/soundlib/plugins/DigiBoosterEcho.cpp
+    external/openmpt/soundlib/plugins/LFOPlugin.cpp
+    external/openmpt/soundlib/plugins/PlugInterface.cpp
+    external/openmpt/soundlib/plugins/PluginManager.cpp
+    external/openmpt/soundlib/plugins/SymMODEcho.cpp
+    external/openmpt/soundlib/plugins/dmo/Chorus.cpp
+    external/openmpt/soundlib/plugins/dmo/Compressor.cpp
+    external/openmpt/soundlib/plugins/dmo/DMOPlugin.cpp
+    external/openmpt/soundlib/plugins/dmo/DMOUtils.cpp
+    external/openmpt/soundlib/plugins/dmo/Distortion.cpp
+    external/openmpt/soundlib/plugins/dmo/Echo.cpp
+    external/openmpt/soundlib/plugins/dmo/Flanger.cpp
+    external/openmpt/soundlib/plugins/dmo/Gargle.cpp
+    external/openmpt/soundlib/plugins/dmo/I3DL2Reverb.cpp
+    external/openmpt/soundlib/plugins/dmo/ParamEq.cpp
+    external/openmpt/soundlib/plugins/dmo/WavesReverb.cpp
+    external/openmpt/soundlib/tuning.cpp
+    external/openmpt/soundlib/tuningCollection.cpp
+    external/openmpt/include/miniz/miniz.c
+    external/openmpt/include/minimp3/minimp3.c
+    external/openmpt/include/stb_vorbis/stb_vorbis.c
+)
+target_include_directories (libopenmpt PUBLIC
+    external/openmpt
+)
+target_include_directories (libopenmpt PRIVATE
+    external/openmpt/common
+    external/openmpt/src
+    external/openmpt/include
+)
+target_compile_definitions (libopenmpt PRIVATE
+    LIBOPENMPT_BUILD
+    MPT_CHECK_CXX_IGNORE_PREPROCESSOR
+    MPT_CHECK_WINDOWS_IGNORE_WARNING_NO_UNICODE
+    MPT_WITH_MINIZ
+    MPT_WITH_MINIMP3
+    MPT_WITH_STBVORBIS
+    STB_VORBIS_HEADER_ONLY
+    STB_VORBIS_NO_PULLDATA_API
+    STB_VORBIS_NO_STDIO
+)
+
 # set sources for main program and third-party libs
 add_executable (tmcp
     src/main.cpp
 )
 add_library (tmcp_external STATIC
     external/glad/src/glad.c
+    external/openmpt/include/stb_vorbis/stb_vorbis.c  # only ever gets included as a header in libopenmpt itself
 )
 
 # set include directories
@@ -73,7 +233,7 @@ target_include_directories (tmcp_external PUBLIC
 target_include_directories (tmcp PRIVATE src)
 
 # set library dependencies
-target_link_libraries (tmcp PUBLIC tmcp_external ${SDL2_LIBRARIES})
+target_link_libraries (tmcp PUBLIC tmcp_external libopenmpt ${SDL2_LIBRARIES})
 if (WIN32)
     target_link_libraries (tmcp PUBLIC opengl32)
 else ()
