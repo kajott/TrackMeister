@@ -1,0 +1,6 @@
+_build*
+build*
+*.exe
+*.pdb
+*.ilk
+external/SDL2-*
