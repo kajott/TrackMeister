@@ -6,6 +6,7 @@
     #include <windows.h>
 #endif
 
+#include <cstdint>
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>
@@ -16,6 +17,12 @@
 #include <glad/glad.h>
 #include <libopenmpt/libopenmpt.hpp>
 
+#ifdef _DEBUG
+    #define Dprintf printf
+#else
+    #define Dprintf (void)
+#endif
+
 [[noreturn]] static void fatal(const char *what, const char *how) {
     #if defined(_WIN32) && defined(NDEBUG)
         MessageBoxA(nullptr, how, what, MB_OK | MB_ICONERROR);
@@ -23,6 +30,54 @@
         fprintf(stderr, "FATAL: %s - %s\n", what, how);
     #endif
     std::exit(1);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+openmpt::module *mod = nullptr;
+std::vector<std::byte> modData;
+int sampleRate = 48000;
+bool paused = true;
+SDL_AudioDeviceID audioDevice = 0;
+
+void SetPaused(bool newPaused) {
+    paused = newPaused && (mod != nullptr);
+    SDL_PauseAudioDevice(audioDevice, paused ? SDL_TRUE : SDL_FALSE);
+}
+
+void RenderAudio(void*, Uint8* stream, int len) {
+    if (mod) {
+        mod->read_interleaved_stereo(sampleRate, len >> 2, (int16_t*)stream);
+    } else {
+        SDL_memset(stream, 0, len);
+    }
+}
+
+bool LoadModule(const char* path) {
+    bool res = false;
+    SetPaused(true);
+    SDL_LockAudioDevice(audioDevice);
+    delete mod;
+    mod = nullptr;
+    modData.clear();
+    SDL_UnlockAudioDevice(audioDevice);
+    Dprintf("module unloaded, playback paused\n");
+    if (!path || !path[0]) { return res; }
+
+    Dprintf("loading module: %s\n", path);
+    FILE *f = fopen(path, "rb");
+    if (!f) { Dprintf("could not open module file.\n"); return res; }
+    fseek(f, 0, SEEK_END);
+    modData.resize(ftell(f));
+    fseek(f, 0, SEEK_SET);
+    res = (fread(modData.data(), 1, modData.size(), f) == modData.size());
+    fclose(f);
+    if (res) { mod = new openmpt::module(modData); }
+    if (mod) {
+        Dprintf("module loaded successfully, starting playback.\n");
+        SetPaused(false);
+    }
+    return res;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -76,23 +131,21 @@ int main(int argc, char* argv[]) {
 
     glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
 
-    FILE *f = fopen("D:\\Sound\\_mod\\krunkd.mod", "rb");
-    if (!f) { fatal("sorry", "could not open file"); }
-    fseek(f, 0, SEEK_END);
-    int fsize = ftell(f);
-    fseek(f, 0, SEEK_SET);
-    std::vector<std::byte> modData(fsize);
-    fread(modData.data(), 1, fsize, f);
-    fclose(f);
-    openmpt::module mod(modData);
-
-    f = fopen("abfall.raw", "wb");
-    for (int frame = 1024;  frame;  --frame) {
-        short buf[4096];
-        mod.read_interleaved_stereo(48000, 2048, buf);
-        fwrite(buf, 2, 4096, f);
+    SDL_AudioSpec requestedFormat, audioFormat;
+    SDL_memset(&requestedFormat, 0, sizeof(requestedFormat));
+    requestedFormat.freq = 48000;
+    requestedFormat.format = AUDIO_S16SYS;
+    requestedFormat.channels = 2;
+    requestedFormat.samples = 512;
+    requestedFormat.callback = RenderAudio;
+    audioDevice = SDL_OpenAudioDevice(nullptr, SDL_FALSE, &requestedFormat, &audioFormat, SDL_AUDIO_ALLOW_FREQUENCY_CHANGE | SDL_AUDIO_ALLOW_SAMPLES_CHANGE);
+    if (!audioDevice) {
+        fatal("could not open audio device", SDL_GetError());
     }
-    fclose(f);
+    sampleRate = audioFormat.freq;
+
+    if (argc > 1) { LoadModule(argv[1]); }
+    SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
 
     bool active = true;
     while (active) {
@@ -100,7 +153,43 @@ int main(int argc, char* argv[]) {
         while (SDL_PollEvent(&ev)) {
             switch (ev.type) {
                 case SDL_KEYDOWN:
+                    switch (ev.key.keysym.sym) {
+                        case SDLK_q:
+                            active = false;
+                            break;
+                        case SDLK_SPACE:
+                            SetPaused(!paused);
+                            break;
+                        case SDLK_LEFT:
+                            if (mod) {
+                                int32_t dest = mod->get_current_order() - 1;
+                                Dprintf("seeking to order %d\n", dest);
+                                if (dest >= 0) {
+                                    SDL_LockAudioDevice(audioDevice);
+                                    mod->set_position_order_row(dest, 0);
+                                    SDL_UnlockAudioDevice(audioDevice);
+                                }
+                            }
+                            break;
+                        case SDLK_RIGHT:
+                            if (mod) {
+                                int32_t dest = mod->get_current_order() + 1;
+                                Dprintf("seeking to order %d/%d\n", dest, mod->get_num_orders());
+                                if (dest < mod->get_num_orders()) {
+                                    SDL_LockAudioDevice(audioDevice);
+                                    mod->set_position_order_row(dest, 0);
+                                    SDL_UnlockAudioDevice(audioDevice);
+                                }
+                            }
+                            break;
+                        default:
+                            break;
+                    }
                     if (ev.key.keysym.sym == SDLK_q) { active = false; }
+                    break;
+                case SDL_DROPFILE:
+                    LoadModule(ev.drop.file);
+                    SDL_free(ev.drop.file);
                     break;
                 case SDL_QUIT:
                     active = false;
@@ -112,9 +201,12 @@ int main(int argc, char* argv[]) {
 
         glClear(GL_COLOR_BUFFER_BIT);
 
+if (mod && !paused) { printf("@ %03d.%02X \r", mod->get_current_order(), mod->get_current_row()); fflush(stdout); }
         SDL_GL_SwapWindow(win);
     }
 
+    LoadModule(nullptr);
+    SDL_CloseAudioDevice(audioDevice);
     SDL_GL_MakeCurrent(nullptr, nullptr);
     SDL_GL_DeleteContext(ctx);
     SDL_DestroyWindow(win);
