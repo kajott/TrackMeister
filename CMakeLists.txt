@@ -56,6 +56,8 @@ else ()
     find_package (SDL2 REQUIRED)
 endif ()
 
+###############################################################################
+
 # provide libopenmpt (which doesn't have a CMake build system yet, so it's all
 # manual by now)
 add_library (libopenmpt STATIC
@@ -215,9 +217,12 @@ target_compile_definitions (libopenmpt PRIVATE
     STB_VORBIS_NO_STDIO
 )
 
+###############################################################################
+
 # set sources for main program and third-party libs
 add_executable (tmcp
-    src/main.cpp
+    src/main_sdl2.cpp
+    src/app.cpp
 )
 add_library (tmcp_external STATIC
     external/glad/src/glad.c
