@@ -7,12 +7,16 @@
 #include <libopenmpt/libopenmpt.hpp>
 
 #include "system.h"
+#include "renderer.h"
 #include "app.h"
 
 void Application::init(int argc, char* argv[]) {
     (void)argc, (void)argv;
     m_sys.initVideo("Tracked Music Compo Player");
     m_sys.initAudio(true);
+    if (!m_renderer.init()) {
+        m_sys.fatalError("initialization failed", "could not initialize text box renderer");
+    }
     glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
     if (argc > 1) { loadModule(argv[1]); }
 }
@@ -20,11 +24,24 @@ void Application::init(int argc, char* argv[]) {
 void Application::draw(float dt) {
     (void)dt;
     glClear(GL_COLOR_BUFFER_BIT);
+
+    if (!m_mod) {
+        m_renderer.text(
+            float(m_renderer.viewportWidth())  * 0.5f,
+            float(m_renderer.viewportHeight()) * 0.5f,
+            float(m_renderer.viewportHeight()) * 0.05f,
+            "Drag module files here to play them.",
+            Align::Center + Align::Middle, 0x80FFFFFF);
+        m_renderer.flush();
+        return;
+    }
+
 if (m_mod && m_sys.isPlaying()) { printf("@ %03d.%02X \r", m_mod->get_current_order(), m_mod->get_current_row()); fflush(stdout); }
 }
 
-void Application::done() {
+void Application::shutdown() {
     unloadModule();
+    m_renderer.shutdown();
 }
 
 bool Application::renderAudio(int16_t* data, int sampleCount, bool stereo, int sampleRate) {

@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "system.h"
+#include "renderer.h"
 
 namespace openmpt {
     class module;
@@ -16,6 +17,7 @@ namespace openmpt {
 
 class Application {
     SystemInterface& m_sys;
+    TextBoxRenderer m_renderer;
     openmpt::module* m_mod = nullptr;
     std::vector<std::byte> m_mod_data;
 
@@ -24,7 +26,7 @@ public:  // interface from SystemInterface
 
     void init(int argc, char* argv[]);
     void draw(float dt);
-    void done();
+    void shutdown();
 
     bool renderAudio(int16_t* data, int sampleCount, bool stereo, int sampleRate);
 

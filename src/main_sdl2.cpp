@@ -68,9 +68,6 @@ void SystemInterface::initVideo(const char* title, bool fullscreen, int windowWi
         printf("OpenGL version:  %s\n", glGetString(GL_VERSION));
         printf("GLSL   version:  %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
     #endif
-    GLuint vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
 
     if (fullscreen) { SDL_ShowCursor(SDL_DISABLE); }
 }
@@ -189,7 +186,7 @@ int main(int argc, char* argv[]) {
     sys.lockAudioMutex();
     priv.app = nullptr;  // stop feeding audio
     sys.unlockAudioMutex();
-    app.done();
+    app.shutdown();
     if (priv.audio) {
         SDL_CloseAudioDevice(priv.audio);
     }
