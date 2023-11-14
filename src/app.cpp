@@ -3,6 +3,14 @@
 
 #define _CRT_SECURE_NO_WARNINGS  // disable nonsense MSVC warnings
 
+#include <cstdint>
+#include <cstddef>
+
+#include <vector>
+#include <map>
+#include <string>
+#include <iostream>
+
 #include <glad/glad.h>
 #include <libopenmpt/libopenmpt.hpp>
 
@@ -46,10 +54,16 @@ void Application::shutdown() {
 
 bool Application::renderAudio(int16_t* data, int sampleCount, bool stereo, int sampleRate) {
     if (!m_mod) { return false; }
+    int done;
     if (stereo) {
-        m_mod->read_interleaved_stereo(sampleRate, sampleCount, data);
+        done = int(m_mod->read_interleaved_stereo(sampleRate, sampleCount, data));
     } else {
-        m_mod->read(sampleRate, sampleCount, data);
+        done = int(m_mod->read(sampleRate, sampleCount, data));
+    }
+    if (done < sampleCount) {
+        data += stereo ? (done << 1) : done;
+        sampleCount -= done;
+        ::memset(static_cast<void*>(data), 0, stereo ? (sampleCount << 2) : (sampleCount << 1));
     }
     return true;
 }
@@ -110,10 +124,14 @@ bool Application::loadModule(const char* path) {
     res = (fread(m_mod_data.data(), 1, m_mod_data.size(), f) == m_mod_data.size());
     fclose(f);
     if (res) {
-        m_mod = new openmpt::module(m_mod_data);
+        std::map<std::string, std::string> ctls;
+        ctls["play.at_end"] = "stop";
+        ctls["render.resampler.emulate_amiga"] = "1";
+        m_mod = new openmpt::module(m_mod_data, std::clog, ctls);
     }
     if (m_mod) {
         Dprintf("module loaded successfully.\n");
+        m_mod->set_render_param(openmpt::module::render_param::RENDER_STEREOSEPARATION_PERCENT, 20);
     }
     return res;
 }
