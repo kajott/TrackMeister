@@ -10,6 +10,8 @@
 
 #include "system.h"
 #include "renderer.h"
+#include "config.h"
+#include "layout.h"
 
 namespace openmpt {
     class module;
@@ -18,6 +20,8 @@ namespace openmpt {
 class Application {
     SystemInterface& m_sys;
     TextBoxRenderer m_renderer;
+    Config m_config;
+    Layout m_layout;
     openmpt::module* m_mod = nullptr;
     std::vector<std::byte> m_mod_data;
 
@@ -36,4 +40,5 @@ public:  // interface from SystemInterface
 private:  // business logic
     void unloadModule();
     bool loadModule(const char* path);
+    void updateLayout();
 };

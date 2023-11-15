@@ -16,30 +16,35 @@
 
 #include "system.h"
 #include "renderer.h"
+#include "config.h"
 #include "app.h"
 
 void Application::init(int argc, char* argv[]) {
-    (void)argc, (void)argv;
     m_sys.initVideo("Tracked Music Compo Player");
-    m_sys.initAudio(true);
+    m_sys.initAudio(true, m_config.sampleRate, m_config.audioBufferSize);
     if (!m_renderer.init()) {
         m_sys.fatalError("initialization failed", "could not initialize text box renderer");
     }
-    glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
+    updateLayout();
     if (argc > 1) { loadModule(argv[1]); }
 }
 
 void Application::draw(float dt) {
     (void)dt;
+
+    // set background color
+    uint32_t clearColor = m_mod ? m_config.patternBackground : m_config.emptyBackground;
+    glClearColor(float( clearColor        & 0xFF) * float(1.f/255.f),
+                 float((clearColor >>  8) & 0xFF) * float(1.f/255.f),
+                 float((clearColor >> 16) & 0xFF) * float(1.f/255.f), 1.f);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    // draw "no module loaded" screen
     if (!m_mod) {
         m_renderer.text(
-            float(m_renderer.viewportWidth())  * 0.5f,
-            float(m_renderer.viewportHeight()) * 0.5f,
-            float(m_renderer.viewportHeight()) * 0.05f,
-            "Drag module files here to play them.",
-            Align::Center + Align::Middle, 0x80FFFFFF);
+            m_layout.screenSizeX * 0.5f, m_layout.screenSizeY * 0.5f,
+            m_layout.emptyTextSize, "No file loaded.",
+            Align::Center + Align::Middle, m_config.emptyTextColor);
         m_renderer.flush();
         return;
     }
@@ -126,12 +131,37 @@ bool Application::loadModule(const char* path) {
     if (res) {
         std::map<std::string, std::string> ctls;
         ctls["play.at_end"] = "stop";
-        ctls["render.resampler.emulate_amiga"] = "1";
+        switch (m_config.interpolation) {
+            case InterpolationMethod::Amiga:
+                ctls["render.resampler.emulate_amiga"] = "1";
+                break;
+            case InterpolationMethod::A500:
+                ctls["render.resampler.emulate_amiga"] = "1";
+                ctls["render.resampler.emulate_amiga_type"] = "a500";
+                break;
+            case InterpolationMethod::A1200:
+                ctls["render.resampler.emulate_amiga"] = "1";
+                ctls["render.resampler.emulate_amiga_type"] = "a1200";
+                break;
+            default: break;  // no Amiga resampler -> set later using set_render_param
+        }
         m_mod = new openmpt::module(m_mod_data, std::clog, ctls);
     }
     if (m_mod) {
         Dprintf("module loaded successfully.\n");
-        m_mod->set_render_param(openmpt::module::render_param::RENDER_STEREOSEPARATION_PERCENT, 20);
+        switch (m_config.interpolation) {
+            case InterpolationMethod::None:   m_mod->set_render_param(openmpt::module::render_param::RENDER_INTERPOLATIONFILTER_LENGTH, 1); break;
+            case InterpolationMethod::Linear: m_mod->set_render_param(openmpt::module::render_param::RENDER_INTERPOLATIONFILTER_LENGTH, 2); break;
+            case InterpolationMethod::Cubic:  m_mod->set_render_param(openmpt::module::render_param::RENDER_INTERPOLATIONFILTER_LENGTH, 4); break;
+            case InterpolationMethod::Sinc:   m_mod->set_render_param(openmpt::module::render_param::RENDER_INTERPOLATIONFILTER_LENGTH, 8); break;
+            default: break;  // Auto or Amiga -> no need to set anything up
+        }
+        m_mod->set_render_param(openmpt::module::render_param::RENDER_STEREOSEPARATION_PERCENT, m_config.stereoSeparationPercent);
     }
+    updateLayout();
     return res;
+}
+
+void Application::updateLayout() {
+    m_layout.update(m_config, m_renderer);
 }
