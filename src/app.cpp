@@ -104,6 +104,12 @@ void Application::handleDropFile(const char* path) {
     loadModule(path);
 }
 
+void Application::handleResize(int w, int h) {
+    glViewport(0, 0, w, h);
+    m_renderer.viewportChanged();
+    updateLayout();
+}
+
 void Application::unloadModule() {
     m_sys.pause();
     {

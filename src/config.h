@@ -54,7 +54,7 @@ struct Config {
     uint32_t emptyBackground          = makeRGB(.1f, .2f, .3f);
     uint32_t patternBackground        = emptyBackground;
 
-    int      emptyTextSize            = 48;
+    int      emptyTextSize            = 32;
     uint32_t emptyTextColor           = 0x80FFFFFF;
 
     inline Config() {}

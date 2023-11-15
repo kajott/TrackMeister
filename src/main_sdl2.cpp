@@ -48,7 +48,7 @@ void SystemInterface::initVideo(const char* title, bool fullscreen, int windowWi
         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
         windowWidth, windowHeight,
         SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI |
-        (fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0));
+        (fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : SDL_WINDOW_RESIZABLE));
     if (!m_priv->win) {
         fatalError("could not create window", SDL_GetError());
     }
@@ -166,6 +166,11 @@ int main(int argc, char* argv[]) {
                 case SDL_DROPFILE:
                     app.handleDropFile(ev.drop.file);
                     SDL_free(ev.drop.file);
+                    break;
+                case SDL_WINDOWEVENT:
+                    if (ev.window.event == SDL_WINDOWEVENT_RESIZED) {
+                        app.handleResize(ev.window.data1, ev.window.data2);
+                    }
                     break;
                 case SDL_QUIT:
                     sys.quit();

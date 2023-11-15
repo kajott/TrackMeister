@@ -36,6 +36,7 @@ public:  // interface from SystemInterface
 
     void handleKey(int key);
     void handleDropFile(const char* path);
+    void handleResize(int w, int h);
 
 private:  // business logic
     void unloadModule();
