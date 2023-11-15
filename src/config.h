@@ -53,9 +53,22 @@ struct Config {
 
     uint32_t emptyBackground          = makeRGB(.1f, .2f, .3f);
     uint32_t patternBackground        = emptyBackground;
+    uint32_t infoBackground           = makeRGB(.2f, .2f, .2f);
+    uint32_t shadowColor              = 0x80000000u;
 
     int      emptyTextSize            = 32;
-    uint32_t emptyTextColor           = 0x80FFFFFF;
+    uint32_t emptyTextColor           = 0x80FFFFFFu;
+
+    int      infoMarginX              = 16;
+    int      infoMarginY              = 8;
+    int      infoLineSpacing          = 4;
+    int      infoShadowSize           = 16;
+    int      infoTextSize             = 48;
+    int      infoDetailsTextSize      = 24;
+    uint32_t infoKeyColor             = makeRGB(.9f, .9f, .1f);
+    uint32_t infoColonColor           = 0x80FFFFFFu;
+    uint32_t infoValueColor           = 0xFFFFFFFFu;
+    uint32_t infoDetailsColor         = 0xC0FFFFFFu;
 
     inline Config() {}
 };

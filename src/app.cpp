@@ -39,17 +39,44 @@ void Application::draw(float dt) {
                  float((clearColor >> 16) & 0xFF) * float(1.f/255.f), 1.f);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    // draw info box
+    if (m_infoEndY > 0) {
+        m_renderer.box(0, 0, m_screenSizeX, m_infoEndY, m_config.infoBackground);
+        if (m_infoShadowEndY > m_infoEndY) {
+            m_renderer.box(0, m_infoEndY, m_screenSizeX, m_infoShadowEndY, m_config.shadowColor, m_config.shadowColor & 0xFFFFFFu);
+        }
+        if (!m_filename.empty()) {
+            float x = m_renderer.text(float(m_infoKeyX), float(m_infoFilenameY), float(m_infoTextSize), "File", 0, m_config.infoKeyColor);
+            m_renderer.text(x, float(m_infoFilenameY), float(m_infoTextSize), ":", 0, m_config.infoColonColor);
+            m_renderer.text(float(m_infoValueX), float(m_infoFilenameY), float(m_infoTextSize), m_filename.c_str(), 0, m_config.infoValueColor);
+        }
+        if (!m_artist.empty()) {
+            float x = m_renderer.text(float(m_infoKeyX), float(m_infoArtistY), float(m_infoTextSize), "Artist", 0, m_config.infoKeyColor);
+            m_renderer.text(x, float(m_infoArtistY), float(m_infoTextSize), ":", 0, m_config.infoColonColor);
+            m_renderer.text(float(m_infoValueX), float(m_infoArtistY), float(m_infoTextSize), m_artist.c_str(), 0, m_config.infoValueColor);
+        }
+        if (!m_title.empty()) {
+            float x = m_renderer.text(float(m_infoKeyX), float(m_infoTitleY), float(m_infoTextSize), "Title", 0, m_config.infoKeyColor);
+            m_renderer.text(x, float(m_infoTitleY), float(m_infoTextSize), ":", 0, m_config.infoColonColor);
+            m_renderer.text(float(m_infoValueX), float(m_infoTitleY), float(m_infoTextSize), m_title.c_str(), 0, m_config.infoValueColor);
+        }
+        if (!m_details.empty()) {
+            m_renderer.text(float(m_infoKeyX), float(m_infoDetailsY), float(m_infoDetailsSize), m_details.c_str(), 0, m_config.infoDetailsColor);
+        }
+    }
+
     // draw "no module loaded" screen
     if (!m_mod) {
         m_renderer.text(
-            m_layout.screenSizeX * 0.5f, m_layout.screenSizeY * 0.5f,
-            m_layout.emptyTextSize, "No file loaded.",
+            float(m_screenSizeX >> 1), float((m_infoEndY + m_screenSizeY) >> 1),
+            float(m_emptyTextSize), "Nothing to play.",
             Align::Center + Align::Middle, m_config.emptyTextColor);
         m_renderer.flush();
         return;
     }
 
 if (m_mod && m_sys.isPlaying()) { printf("@ %03d.%02X \r", m_mod->get_current_order(), m_mod->get_current_row()); fflush(stdout); }
+    m_renderer.flush();
 }
 
 void Application::shutdown() {
@@ -118,6 +145,10 @@ void Application::unloadModule() {
         m_mod = nullptr;
         m_mod_data.clear();
     }
+    m_filename.clear();
+    m_title.clear();
+    m_artist.clear();
+    m_details.clear();
     Dprintf("module unloaded, playback paused\n");
 }
 
@@ -126,14 +157,29 @@ bool Application::loadModule(const char* path) {
     unloadModule();
     if (!path || !path[0]) { return res; }
 
+    // set filename metadata
+    const char* fn = path;
+    for (const char* s = path;  *s;  ++s) {
+        if ((*s == '/') || (*s == '\\')) { fn = &s[1]; }
+    }
+    m_filename.assign(fn);
+
+    // load file into memory
     Dprintf("loading module: %s\n", path);
     FILE *f = fopen(path, "rb");
-    if (!f) { Dprintf("could not open module file.\n"); return res; }
+    if (!f) {
+        Dprintf("could not open module file.\n");
+        m_details.assign("could not open file");
+        return res;
+    }
     fseek(f, 0, SEEK_END);
     m_mod_data.resize(ftell(f));
     fseek(f, 0, SEEK_SET);
     res = (fread(m_mod_data.data(), 1, m_mod_data.size(), f) == m_mod_data.size());
     fclose(f);
+
+    // load and setup OpenMPT instance
+    AudioMutexGuard mtx_(m_sys);
     if (res) {
         std::map<std::string, std::string> ctls;
         ctls["play.at_end"] = "stop";
@@ -153,21 +199,40 @@ bool Application::loadModule(const char* path) {
         }
         m_mod = new openmpt::module(m_mod_data, std::clog, ctls);
     }
-    if (m_mod) {
-        Dprintf("module loaded successfully.\n");
-        switch (m_config.interpolation) {
-            case InterpolationMethod::None:   m_mod->set_render_param(openmpt::module::render_param::RENDER_INTERPOLATIONFILTER_LENGTH, 1); break;
-            case InterpolationMethod::Linear: m_mod->set_render_param(openmpt::module::render_param::RENDER_INTERPOLATIONFILTER_LENGTH, 2); break;
-            case InterpolationMethod::Cubic:  m_mod->set_render_param(openmpt::module::render_param::RENDER_INTERPOLATIONFILTER_LENGTH, 4); break;
-            case InterpolationMethod::Sinc:   m_mod->set_render_param(openmpt::module::render_param::RENDER_INTERPOLATIONFILTER_LENGTH, 8); break;
-            default: break;  // Auto or Amiga -> no need to set anything up
-        }
-        m_mod->set_render_param(openmpt::module::render_param::RENDER_STEREOSEPARATION_PERCENT, m_config.stereoSeparationPercent);
+    if (!m_mod) {
+        Dprintf("module loading failed.\n");
+        m_details.assign("invalid module data");
+        updateLayout();
     }
+    Dprintf("module loaded successfully.\n");
+    switch (m_config.interpolation) {
+        case InterpolationMethod::None:   m_mod->set_render_param(openmpt::module::render_param::RENDER_INTERPOLATIONFILTER_LENGTH, 1); break;
+        case InterpolationMethod::Linear: m_mod->set_render_param(openmpt::module::render_param::RENDER_INTERPOLATIONFILTER_LENGTH, 2); break;
+        case InterpolationMethod::Cubic:  m_mod->set_render_param(openmpt::module::render_param::RENDER_INTERPOLATIONFILTER_LENGTH, 4); break;
+        case InterpolationMethod::Sinc:   m_mod->set_render_param(openmpt::module::render_param::RENDER_INTERPOLATIONFILTER_LENGTH, 8); break;
+        default: break;  // Auto or Amiga -> no need to set anything up
+    }
+    m_mod->set_render_param(openmpt::module::render_param::RENDER_STEREOSEPARATION_PERCENT, m_config.stereoSeparationPercent);
+
+    // get metadata
+    m_artist.assign(m_mod->get_metadata("artist"));
+    m_title.assign(m_mod->get_metadata("title"));
+    auto addDetail = [&] (const std::string& s) {
+        if (s.empty()) { return; }
+        if (!m_details.empty()) { m_details.append(", "); }
+        m_details.append(s);
+    };
+    addDetail(m_mod->get_metadata("type_long"));
+    addDetail(std::to_string(m_mod->get_num_channels()) + " channels");
+    addDetail(std::to_string(m_mod->get_num_patterns()) + " patterns");
+    addDetail(std::to_string(m_mod->get_num_orders()) + " orders");
+    if (m_mod->get_num_instruments()) { addDetail(std::to_string(m_mod->get_num_instruments()) + " instruments"); }
+    addDetail(std::to_string(m_mod->get_num_samples()) + " samples");
+    addDetail(std::to_string((m_mod_data.size() + 1023u) >> 10) + "K bytes");
+    int sec = int(m_mod->get_duration_seconds());
+    addDetail(std::to_string(sec / 60) + ":" + std::to_string((sec / 10) % 6) + std::to_string(sec % 10));
+
+    // done!
     updateLayout();
     return res;
-}
-
-void Application::updateLayout() {
-    m_layout.update(m_config, m_renderer);
 }

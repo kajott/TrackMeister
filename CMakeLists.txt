@@ -223,8 +223,8 @@ target_compile_definitions (libopenmpt PRIVATE
 add_executable (tmcp
     src/main_sdl2.cpp
     src/app.cpp
+    src/app_layout.cpp
     src/renderer.cpp
-    src/layout.cpp
     font/font_data.cpp
 )
 add_library (tmcp_external STATIC
