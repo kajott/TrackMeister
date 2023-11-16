@@ -40,7 +40,7 @@ void SystemInterface::initVideo(const char* title, bool fullscreen, int windowWi
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,  SDL_GL_CONTEXT_PROFILE_CORE);
-    #ifdef _DEBUG
+    #ifndef NDEBUG
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS,     SDL_GL_CONTEXT_DEBUG_FLAG);
     #endif
 
@@ -62,7 +62,7 @@ void SystemInterface::initVideo(const char* title, bool fullscreen, int windowWi
     if (!gladLoadGL()) {
         fatalError("could not initialize OpenGL", "failed to load OpenGL functions");
     }
-    #ifdef _DEBUG
+    #ifndef NDEBUG
         printf("OpenGL vendor:   %s\n", glGetString(GL_VENDOR));
         printf("OpenGL renderer: %s\n", glGetString(GL_RENDERER));
         printf("OpenGL version:  %s\n", glGetString(GL_VERSION));

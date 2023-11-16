@@ -118,7 +118,7 @@ bool TextBoxRenderer::init() {
     glGetShaderiv(vs, GL_COMPILE_STATUS, &res);
     if (res != GL_TRUE) {
         m_error = "Vertex Shader compilation failed";
-        #ifdef _DEBUG
+        #ifndef NDEBUG
             ::puts(vsSrc);
             printf("%s.\n", m_error);
             glGetShaderiv(vs, GL_INFO_LOG_LENGTH, &res);
@@ -138,7 +138,7 @@ bool TextBoxRenderer::init() {
     glGetShaderiv(fs, GL_COMPILE_STATUS, &res);
     if (res != GL_TRUE) {
         m_error = "Fragment Shader compilation failed";
-        #ifdef _DEBUG
+        #ifndef NDEBUG
             ::puts(fsSrc);
             printf("%s.\n", m_error);
             glGetShaderiv(fs, GL_INFO_LOG_LENGTH, &res);
@@ -159,7 +159,7 @@ bool TextBoxRenderer::init() {
     glGetProgramiv(fs, GL_LINK_STATUS, &res);
     if (res != GL_TRUE) {
         m_error = "Shader Program linking failed";
-        #ifdef _DEBUG
+        #ifndef NDEBUG
             printf("%s.\n", m_error);
             glGetProgramiv(fs, GL_INFO_LOG_LENGTH, &res);
             char* msg = new(std::nothrow) char[res];

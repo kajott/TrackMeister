@@ -5,6 +5,8 @@
 
 #include <cstdint>
 #include <cstddef>
+#include <cstdlib>
+#include <cstring>
 
 #include <vector>
 #include <map>

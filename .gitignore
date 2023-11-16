@@ -3,4 +3,6 @@ build*
 *.exe
 *.pdb
 *.ilk
+tmcp
+tmcp_debug
 external/SDL2-*

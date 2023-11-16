@@ -216,6 +216,9 @@ target_compile_definitions (libopenmpt PRIVATE
     STB_VORBIS_NO_PULLDATA_API
     STB_VORBIS_NO_STDIO
 )
+if (CMAKE_BUILD_TYPE STREQUAL Debug)
+    target_compile_definitions (libopenmpt PRIVATE _DEBUG)
+endif ()
 
 ###############################################################################
 
@@ -241,7 +244,7 @@ target_include_directories (tmcp_external PUBLIC
 target_include_directories (tmcp PRIVATE src)
 
 # set library dependencies
-target_link_libraries (tmcp PUBLIC tmcp_external libopenmpt ${SDL2_LIBRARIES})
+target_link_libraries (tmcp PUBLIC libopenmpt tmcp_external ${SDL2_LIBRARIES})
 if (WIN32)
     target_link_libraries (tmcp PUBLIC opengl32)
 else ()
@@ -261,7 +264,7 @@ if (WIN32)
 else ()
     set (THREADS_PREFER_PTHREAD_FLAG TRUE)
     find_package (Threads REQUIRED)
-    target_link_libraries (tmcp Threads::Threads)
+    target_link_libraries (tmcp PRIVATE Threads::Threads)
 endif ()
 
 # compiler options
