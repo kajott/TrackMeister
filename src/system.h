@@ -48,6 +48,8 @@ public:
 
     inline void quit() { m_active = false; }
     inline bool active() { return m_active; }
+
+    void setWindowTitle(const char* title);
 };
 
 class AudioMutexGuard {

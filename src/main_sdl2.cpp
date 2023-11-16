@@ -125,6 +125,10 @@ bool SystemInterface::setPaused(bool paused) {
     return m_priv->paused;
 }
 
+void SystemInterface::setWindowTitle(const char* title) {
+    SDL_SetWindowTitle(m_priv->win, title);
+}
+
 int main(int argc, char* argv[]) {
     SystemInterfacePrivateData priv;
     SystemInterface sys(priv);

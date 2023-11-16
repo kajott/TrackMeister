@@ -21,8 +21,10 @@
 #include "config.h"
 #include "app.h"
 
+constexpr const char* baseWindowTitle = "Tracked Music Compo Player";
+
 void Application::init(int argc, char* argv[]) {
-    m_sys.initVideo("Tracked Music Compo Player");
+    m_sys.initVideo(baseWindowTitle);
     m_sys.initAudio(true, m_config.sampleRate, m_config.audioBufferSize);
     if (!m_renderer.init()) {
         m_sys.fatalError("initialization failed", "could not initialize text box renderer");
@@ -151,6 +153,7 @@ void Application::unloadModule() {
     m_title.clear();
     m_artist.clear();
     m_details.clear();
+    m_sys.setWindowTitle(baseWindowTitle);
     Dprintf("module unloaded, playback paused\n");
 }
 
@@ -235,6 +238,7 @@ bool Application::loadModule(const char* path) {
     addDetail(std::to_string(sec / 60) + ":" + std::to_string((sec / 10) % 6) + std::to_string(sec % 10));
 
     // done!
+    m_sys.setWindowTitle((m_filename + " - " + baseWindowTitle).c_str());
     updateLayout();
     return res;
 }
