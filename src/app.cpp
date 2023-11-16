@@ -158,9 +158,8 @@ void Application::unloadModule() {
 }
 
 bool Application::loadModule(const char* path) {
-    bool res = false;
     unloadModule();
-    if (!path || !path[0]) { return res; }
+    if (!path || !path[0]) { return false; }
 
     // set filename metadata
     const char* fn = path;
@@ -175,39 +174,53 @@ bool Application::loadModule(const char* path) {
     if (!f) {
         Dprintf("could not open module file.\n");
         m_details.assign("could not open file");
-        return res;
+        updateLayout();
+        return false;
     }
     fseek(f, 0, SEEK_END);
     m_mod_data.resize(ftell(f));
     fseek(f, 0, SEEK_SET);
-    res = (fread(m_mod_data.data(), 1, m_mod_data.size(), f) == m_mod_data.size());
+    if (fread(m_mod_data.data(), 1, m_mod_data.size(), f) != m_mod_data.size()) {
+        Dprintf("could not read module file.\n");
+        m_details.assign("could not read file");
+        updateLayout();
+        return false;
+    }
     fclose(f);
 
     // load and setup OpenMPT instance
     AudioMutexGuard mtx_(m_sys);
-    if (res) {
-        std::map<std::string, std::string> ctls;
-        ctls["play.at_end"] = "stop";
-        switch (m_config.interpolation) {
-            case InterpolationMethod::Amiga:
-                ctls["render.resampler.emulate_amiga"] = "1";
-                break;
-            case InterpolationMethod::A500:
-                ctls["render.resampler.emulate_amiga"] = "1";
-                ctls["render.resampler.emulate_amiga_type"] = "a500";
-                break;
-            case InterpolationMethod::A1200:
-                ctls["render.resampler.emulate_amiga"] = "1";
-                ctls["render.resampler.emulate_amiga_type"] = "a1200";
-                break;
-            default: break;  // no Amiga resampler -> set later using set_render_param
-        }
+    std::map<std::string, std::string> ctls;
+    ctls["play.at_end"] = "stop";
+    switch (m_config.interpolation) {
+        case InterpolationMethod::Amiga:
+            ctls["render.resampler.emulate_amiga"] = "1";
+            break;
+        case InterpolationMethod::A500:
+            ctls["render.resampler.emulate_amiga"] = "1";
+            ctls["render.resampler.emulate_amiga_type"] = "a500";
+            break;
+        case InterpolationMethod::A1200:
+            ctls["render.resampler.emulate_amiga"] = "1";
+            ctls["render.resampler.emulate_amiga_type"] = "a1200";
+            break;
+        default: break;  // no Amiga resampler -> set later using set_render_param
+    }
+    try {
         m_mod = new openmpt::module(m_mod_data, std::clog, ctls);
+    } catch (openmpt::exception& e) {
+        Dprintf("exception caught from OpenMPT: %s\n", e.what());
+        m_details.assign(std::string("invalid module - ") + e.what());
+        delete m_mod;
+        m_mod = nullptr;
+        updateLayout();
+        return false;
     }
     if (!m_mod) {
         Dprintf("module loading failed.\n");
         m_details.assign("invalid module data");
         updateLayout();
+        return false;
     }
     Dprintf("module loaded successfully.\n");
     switch (m_config.interpolation) {
@@ -240,5 +253,5 @@ bool Application::loadModule(const char* path) {
     // done!
     m_sys.setWindowTitle((m_filename + " - " + baseWindowTitle).c_str());
     updateLayout();
-    return res;
+    return true;
 }
