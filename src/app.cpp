@@ -36,12 +36,45 @@ void Application::init(int argc, char* argv[]) {
 void Application::draw(float dt) {
     (void)dt;
 
+    // latch current position
+    if (m_mod) {
+        AudioMutexGuard mtx_(m_sys);
+        m_currentOrder = m_mod->get_current_order();
+        int pat = m_mod->get_current_pattern();
+        if (pat != m_currentPattern) { m_patternLength = m_mod->get_pattern_num_rows(pat); }
+        m_currentPattern = pat;
+        m_currentRow = m_mod->get_current_row();
+    }
+
     // set background color
     uint32_t clearColor = m_mod ? m_config.patternBackground : m_config.emptyBackground;
     glClearColor(float( clearColor        & 0xFF) * float(1.f/255.f),
                  float((clearColor >>  8) & 0xFF) * float(1.f/255.f),
                  float((clearColor >> 16) & 0xFF) * float(1.f/255.f), 1.f);
     glClear(GL_COLOR_BUFFER_BIT);
+
+    // draw pattern display
+    if (m_mod) {
+        m_renderer.box(m_pdBarStartX, m_pdTextY0, m_pdBarEndX, m_pdTextY0 + m_pdTextSize,
+                       m_config.patternBarBackground, m_config.patternBarBackground,
+                       m_pdBarRadius);
+        char posText[16], posAttr[16];
+        for (int dRow = -m_pdRows;  dRow <= m_pdRows;  ++dRow) {
+            int row = dRow + m_currentRow;
+            if ((row < 0) || (row >= m_patternLength)) { continue; }
+            float y = float(m_pdTextY0 + dRow * m_pdTextDY);
+            if (m_pdPosChars) {
+                formatPosition(m_currentOrder, m_currentPattern, row, posText, posAttr, m_pdPosChars);
+                drawPatternDisplayCell(float(m_pdPosX), y, posText, posAttr, false);
+            }
+            for (int ch = 0;  ch < m_numChannels;  ++ch) {
+                drawPatternDisplayCell(float(m_pdChannelX0 + ch * m_pdChannelDX), y,
+                       m_mod->format_pattern_row_channel(m_currentPattern, row, ch, m_pdChannelChars).c_str(),
+                    m_mod->highlight_pattern_row_channel(m_currentPattern, row, ch, m_pdChannelChars).c_str(),
+                    (m_pdPosChars > 0) || (ch > 0));
+            }
+        }
+    }
 
     // draw info box
     if (m_infoEndY > 0) {
@@ -81,6 +114,36 @@ void Application::draw(float dt) {
 
 if (m_mod && m_sys.isPlaying()) { printf("@ %03d.%02X \r", m_mod->get_current_order(), m_mod->get_current_row()); fflush(stdout); }
     m_renderer.flush();
+}
+
+void Application::drawPatternDisplayCell(float x, float y, const char* text, const char* attr, bool pipe) {
+    const float sz = float(m_pdTextSize);
+    if (pipe) {
+        m_renderer.text(x - m_pdPipeDX, y, sz, "|", 0u, m_config.patternSepColor);
+    }
+    char c[2] = " ";
+    while (*text) {
+        c[0] = *text++;
+        char a = *attr;
+        uint32_t color;
+        switch (a) {
+            case '.': color = m_config.patternDotColor;         break;
+            case 'n': color = m_config.patternNoteColor;        break;
+            case 'm': color = m_config.patternSpecialColor;     break;
+            case 'i': color = m_config.patternInstrumentColor;  break;
+            case 'u': color = m_config.patternVolEffectColor;   break;
+            case 'v': color = m_config.patternVolParamColor;    break;
+            case 'e': color = m_config.patternEffectColor;      break;
+            case 'f': color = m_config.patternEffectParamColor; break;
+            case 'O': color = m_config.patternPosOrderColor;    break;
+            case 'P': color = m_config.patternPosPatternColor;  break;
+            case 'R': color = m_config.patternPosRowColor;      break;
+            case ':': color = m_config.patternPosDotColor;      break;
+            default:  color = m_config.patternTextColor;        break;
+        }
+        x = m_renderer.text(x, y, sz, c, 0u, color);
+        if (a) { ++attr; }
+    }
 }
 
 void Application::shutdown() {
@@ -153,6 +216,9 @@ void Application::unloadModule() {
     m_title.clear();
     m_artist.clear();
     m_details.clear();
+    m_numChannels = 0;
+    m_currentPattern = -1;
+    m_patternLength = 0;
     m_sys.setWindowTitle(baseWindowTitle);
     Dprintf("module unloaded, playback paused\n");
 }
@@ -252,6 +318,7 @@ bool Application::loadModule(const char* path) {
 
     // done!
     m_sys.setWindowTitle((m_filename + " - " + baseWindowTitle).c_str());
+    m_numChannels = m_mod->get_num_channels();
     updateLayout();
     return true;
 }

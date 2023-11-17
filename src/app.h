@@ -31,6 +31,13 @@ class Application {
     std::string m_title;
     std::string m_details;
 
+    // current position and size information
+    int m_currentOrder;
+    int m_currentPattern;
+    int m_currentRow;
+    int m_numChannels;
+    int m_patternLength;
+
     // computed layout information (from updateLayout())
     int m_screenSizeX, m_screenSizeY;
     int m_emptyTextSize;
@@ -38,6 +45,12 @@ class Application {
     int m_infoEndY, m_infoShadowEndY;
     int m_infoKeyX, m_infoValueX;
     int m_infoFilenameY, m_infoArtistY, m_infoTitleY, m_infoDetailsY;
+    int m_metaStartX, m_metaShadowStartX;
+    int m_pdPosChars, m_pdChannelChars;
+    int m_pdTextSize, m_pdTextY0, m_pdTextDY, m_pdRows;
+    int m_pdPosX, m_pdChannelX0, m_pdChannelDX;
+    float m_pdPipeDX;
+    int m_pdBarStartX, m_pdBarEndX, m_pdBarRadius;
 
 public:  // interface from SystemInterface
     explicit inline Application(SystemInterface& sys) : m_sys(sys) {}
@@ -58,4 +71,6 @@ private:  // business logic
     int toPixels(int value);
     int textWidth(int size, const char* text);
     void updateLayout();
+    void drawPatternDisplayCell(float x, float y, const char* text, const char* attr, bool pipe=true);
+    static void formatPosition(int order, int pattern, int row, char* text, char* attr, int size);
 };

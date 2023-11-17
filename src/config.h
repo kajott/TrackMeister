@@ -70,5 +70,27 @@ struct Config {
     uint32_t infoValueColor           = 0xFFFFFFFFu;
     uint32_t infoDetailsColor         = 0xC0FFFFFFu;
 
+    int      patternTextSize          = 32;
+    int      patternMinTextSize       = 10;
+    int      patternLineSpacing       = 0;
+    int      patternMarginX           = 8;
+    int      patternBarPaddingX       = 4;
+    int      patternBarBorderPercent  = 20;
+    uint32_t patternBarBackground     = 0x40FFFFFFu;
+    uint32_t patternTextColor         = 0xC0FFFFFFu;
+    uint32_t patternDotColor          = 0x40FFFFFFu;
+    uint32_t patternNoteColor         = 0xFFFFFFFFu;
+    uint32_t patternSpecialColor      = patternNoteColor;
+    uint32_t patternInstrumentColor   = makeRGBA(.5f, 1.f, .5f, .875f);
+    uint32_t patternVolEffectColor    = makeRGBA(.5f, .5f, 1.f, 1.f);
+    uint32_t patternVolParamColor     = patternVolEffectColor;
+    uint32_t patternEffectColor       = makeRGBA(1.f, .5f, .5f, .75f);
+    uint32_t patternEffectParamColor  = patternEffectColor;
+    uint32_t patternPosOrderColor     = patternTextColor;
+    uint32_t patternPosPatternColor   = patternTextColor;
+    uint32_t patternPosRowColor       = patternTextColor;
+    uint32_t patternPosDotColor       = 0x80FFFFFFu;
+    uint32_t patternSepColor          = 0x20FFFFFFu;
+
     inline Config() {}
 };
