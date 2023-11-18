@@ -88,8 +88,8 @@ void Application::updateLayout() {
 
     // set up pattern display geometry -- step 2: the actual formatting function
     auto doFormat = [&] (const PDFormat &fmt) -> int {
-        m_pdPosChars = strlen(fmt.posFormat);
-        m_pdChannelChars = strlen(fmt.channelFormat);
+        m_pdPosChars = int(strlen(fmt.posFormat));
+        m_pdChannelChars = int(strlen(fmt.channelFormat));
         int gapWidth = textWidth(m_pdTextSize, fmt.sep);
         m_pdTextY0 = (m_infoEndY + m_screenSizeY - m_pdTextSize) >> 1;
         m_pdTextDY = m_pdTextSize + toPixels(m_config.patternLineSpacing);
