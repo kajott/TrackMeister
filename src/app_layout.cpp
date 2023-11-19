@@ -108,9 +108,14 @@ void Application::updateLayout() {
     int pdWidth = doFormat(pdFormats[0]);
     if (pdWidth > pdMaxWidth) {
         // if the most compact format doesn't fit, we need to shrink the text size
-        m_pdTextSize = std::max(toPixels(m_config.patternMinTextSize),
-                                m_pdTextSize * pdMaxWidth / pdWidth);
-        pdWidth = doFormat(pdFormats[0]);
+        int minSize = toPixels(m_config.patternMinTextSize);
+        // make a first guess; shrink later if neccessary
+        m_pdTextSize = std::max(minSize, m_pdTextSize * pdMaxWidth / pdWidth);
+        for (;;) {
+            pdWidth = doFormat(pdFormats[0]);
+            if ((pdWidth <= pdMaxWidth) || (m_pdTextSize <= minSize)) { break; }
+            m_pdTextSize--;
+        }
     } else {
         // most compact format fits -> try successively less compact formats
         // until it stops fitting
