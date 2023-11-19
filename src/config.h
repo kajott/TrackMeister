@@ -65,6 +65,7 @@ struct Config {
     int      emptyTextSize            = 32;
     uint32_t emptyTextColor           = 0x80FFFFFFu;
 
+    bool     infoEnabled              = true;
     int      infoMarginX              = 16;
     int      infoMarginY              = 8;
     int      infoLineSpacing          = 4;
@@ -76,6 +77,10 @@ struct Config {
     uint32_t infoValueColor           = 0xFFFFFFFFu;
     uint32_t infoDetailsColor         = 0xC0FFFFFFu;
 
+    bool     metaEnabled              = true;
+    bool     metaShowMessage          = true;
+    bool     metaShowInstrumentNames  = true;
+    bool     metaShowSampleNames      = true;
     int      metaMarginX              = 16;
     int      metaMarginY              = 8;
     int      metaTextSize             = 32;

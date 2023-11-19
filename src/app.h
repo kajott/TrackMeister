@@ -60,6 +60,7 @@ class Application {
     // current view state
     float m_metaTextY, m_metaTextTargetY;
     bool m_metaTextAutoScroll = true;
+    bool m_infoVisible, m_metaVisible;
 
 public:  // interface from SystemInterface
     explicit inline Application(SystemInterface& sys) : m_sys(sys), m_metadata(m_renderer) {}
@@ -78,11 +79,14 @@ public:  // interface from SystemInterface
 private:  // business logic
     void unloadModule();
     bool loadModule(const char* path);
+    void cycleBoxVisibility();
     int toPixels(int value) const;
     int textWidth(int size, const char* text) const;
-    void updateLayout();
+    void updateLayout(bool resetBoxVisibility=false);
     void drawPatternDisplayCell(float x, float y, const char* text, const char* attr, float alpha=1.0f, bool pipe=true);
     static void formatPosition(int order, int pattern, int row, char* text, char* attr, int size);
     void addMetadataGroup(TextArea& block, const std::vector<std::string>& data, const char* title, bool numbering=true);
     void setMetadataScroll(float y);
+    inline bool infoValid() const { return !m_filename.empty() || !m_title.empty() || !m_artist.empty() || !m_details.empty(); }
+    inline bool metaValid() const { return !m_metadata.empty(); }
 };

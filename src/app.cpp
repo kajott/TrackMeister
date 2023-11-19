@@ -94,7 +94,7 @@ void Application::draw(float dt) {
     }
 
     // draw info box
-    if (m_infoEndY > 0) {
+    if (m_infoVisible) {
         m_renderer.box(0, 0, m_metaStartX, m_infoEndY, m_config.infoBackground);
         if (m_infoShadowEndY > m_infoEndY) {
             m_renderer.box(0, m_infoEndY, m_screenSizeX, m_infoShadowEndY, m_config.shadowColor, m_config.shadowColor & 0x00FFFFFFu, false);
@@ -120,7 +120,7 @@ void Application::draw(float dt) {
     }
 
     // draw metadata sidebar
-    if (!m_metadata.empty()) {
+    if (m_metaVisible) {
         m_renderer.box(m_metaStartX, 0, m_screenSizeX, m_screenSizeY, m_config.metaBackground);
         if (m_metaShadowStartX < m_metaStartX) {
             m_renderer.box(m_metaShadowStartX, 0, m_metaStartX, m_screenSizeY, m_config.shadowColor & 0x00FFFFFFu, m_config.shadowColor, true);
@@ -201,6 +201,9 @@ void Application::handleKey(int key) {
         case ' ':
             if (m_mod) { m_sys.togglePause(); }
             break;
+        case 9:  // Tab
+            cycleBoxVisibility();
+            break;
         case keyCode("Left"):
             if (m_mod) {
                 AudioMutexGuard mtx_(m_sys);
@@ -239,6 +242,19 @@ void Application::setMetadataScroll(float y) {
     m_metaTextTargetY = std::max(m_metaTextMaxY, std::min(m_metaTextMinY, y));
 }
 
+void Application::cycleBoxVisibility() {
+    if (m_infoVisible && m_metaVisible) {
+        m_metaVisible = false;
+    } else if (m_infoVisible) {
+        m_infoVisible = false;
+    } else if (m_metaVisible) {
+        if (infoValid()) { m_infoVisible = true; } else { m_metaVisible = false; }
+    } else {
+        if (metaValid()) { m_metaVisible = true; } else { m_infoVisible = infoValid(); }
+    }
+    updateLayout();
+}
+
 void Application::unloadModule() {
     m_sys.pause();
     {
@@ -256,6 +272,7 @@ void Application::unloadModule() {
     m_currentPattern = -1;
     m_patternLength = 0;
     m_sys.setWindowTitle(baseWindowTitle);
+    updateLayout(true);
     Dprintf("module unloaded, playback paused\n");
 }
 
@@ -276,7 +293,7 @@ bool Application::loadModule(const char* path) {
     if (!f) {
         Dprintf("could not open module file.\n");
         m_details.assign("could not open file");
-        updateLayout();
+        updateLayout(true);
         return false;
     }
     fseek(f, 0, SEEK_END);
@@ -285,7 +302,7 @@ bool Application::loadModule(const char* path) {
     if (fread(m_mod_data.data(), 1, m_mod_data.size(), f) != m_mod_data.size()) {
         Dprintf("could not read module file.\n");
         m_details.assign("could not read file");
-        updateLayout();
+        updateLayout(true);
         return false;
     }
     fclose(f);
@@ -315,13 +332,13 @@ bool Application::loadModule(const char* path) {
         m_details.assign(std::string("invalid module - ") + e.what());
         delete m_mod;
         m_mod = nullptr;
-        updateLayout();
+        updateLayout(true);
         return false;
     }
     if (!m_mod) {
         Dprintf("module loading failed.\n");
         m_details.assign("invalid module data");
-        updateLayout();
+        updateLayout(true);
         return false;
     }
     Dprintf("module loaded successfully.\n");
@@ -358,9 +375,16 @@ bool Application::loadModule(const char* path) {
     TextArea meta2(m_renderer);
     m_metadata.defaultSize = meta2.defaultSize;
     m_metadata.defaultColor = m_config.metaTextColor;
-    addMetadataGroup(meta2, m_mod->get_instrument_names(), "Instrument Names:");
-    addMetadataGroup(meta2, m_mod->get_sample_names(), "Sample Names:");
-    std::string msgStr(m_mod->get_metadata("message_raw"));
+    if (m_config.metaShowInstrumentNames) {
+        addMetadataGroup(meta2, m_mod->get_instrument_names(), "Instrument Names:");
+    }
+    if (m_config.metaShowSampleNames) {
+        addMetadataGroup(meta2, m_mod->get_sample_names(), "Sample Names:");
+    }
+    std::string msgStr;
+    if (m_config.metaShowMessage) {
+        msgStr.assign(m_mod->get_metadata("message_raw"));
+    }
     if (!msgStr.empty()) {
         // split string into lines, collapse multiple empty lines into single
         std::vector<std::string> msgLines;
@@ -393,7 +417,7 @@ bool Application::loadModule(const char* path) {
     m_numChannels = m_mod->get_num_channels();
     m_duration = std::min(float(m_mod->get_duration_seconds()), m_config.maxScrollDuration);
     m_metaTextAutoScroll = m_config.enableAutoScroll;
-    updateLayout();
+    updateLayout(true);
     return true;
 }
 

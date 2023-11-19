@@ -21,15 +21,24 @@ int Application::toPixels(int value) const {
     return int(m_screenSizeY * float(value) * .001f + .5f);
 }
 
-void Application::updateLayout() {
+void Application::updateLayout(bool resetBoxVisibility) {
     m_screenSizeX = m_renderer.viewportWidth();
     m_screenSizeY = m_renderer.viewportHeight();
+
+    // set info/metadata box visibility flags
+    if (resetBoxVisibility) {
+        m_infoVisible = m_config.infoEnabled && infoValid();
+        m_metaVisible = m_config.metaEnabled && metaValid();
+    } else {
+        m_infoVisible = m_infoVisible && infoValid();
+        m_metaVisible = m_metaVisible && metaValid();
+    }
 
     // set up "no module loaded" screen geometry
     m_emptyTextSize = toPixels(m_config.emptyTextSize);
 
     // set up info box geometry
-    if (m_filename.empty() && m_title.empty() && m_artist.empty() && m_details.empty()) {
+    if (!m_infoVisible) {
         // no info box at all
         m_infoEndY = m_infoShadowEndY = 0;
     } else {
@@ -67,8 +76,8 @@ void Application::updateLayout() {
     }
 
     // set up metadata box geometry
-    if (m_metadata.empty()) {
-        m_metaStartX = m_metaShadowStartX = m_metaStartX;
+    if (!m_metaVisible) {
+        m_metaStartX = m_metaShadowStartX = m_screenSizeX;
     } else {
         // fix up sizes first
         float textSize = float(toPixels(m_config.metaTextSize));
