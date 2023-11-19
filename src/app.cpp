@@ -72,16 +72,17 @@ void Application::draw(float dt) {
         for (int dRow = -m_pdRows;  dRow <= m_pdRows;  ++dRow) {
             int row = dRow + m_currentRow;
             if ((row < 0) || (row >= m_patternLength)) { continue; }
+            float alpha = 1.0f - std::pow(std::abs(float(dRow) / float(m_pdRows + 1)), m_config.patternAlphaFalloffShape) * m_config.patternAlphaFalloff;
             float y = float(m_pdTextY0 + dRow * m_pdTextDY);
             if (m_pdPosChars) {
                 formatPosition(m_currentOrder, m_currentPattern, row, posText, posAttr, m_pdPosChars);
-                drawPatternDisplayCell(float(m_pdPosX), y, posText, posAttr, false);
+                drawPatternDisplayCell(float(m_pdPosX), y, posText, posAttr, alpha, false);
             }
             for (int ch = 0;  ch < m_numChannels;  ++ch) {
                 drawPatternDisplayCell(float(m_pdChannelX0 + ch * m_pdChannelDX), y,
                        m_mod->format_pattern_row_channel(m_currentPattern, row, ch, m_pdChannelChars).c_str(),
                     m_mod->highlight_pattern_row_channel(m_currentPattern, row, ch, m_pdChannelChars).c_str(),
-                    (m_pdPosChars > 0) || (ch > 0));
+                    alpha, (m_pdPosChars > 0) || (ch > 0));
             }
         }
     }
@@ -131,14 +132,14 @@ void Application::draw(float dt) {
         return;
     }
 
-if (m_mod && m_sys.isPlaying()) { printf("@ %03d.%02X dt=%.3f\r", m_mod->get_current_order(), m_mod->get_current_row(), dt); fflush(stdout); }
+    // done
     m_renderer.flush();
 }
 
-void Application::drawPatternDisplayCell(float x, float y, const char* text, const char* attr, bool pipe) {
+void Application::drawPatternDisplayCell(float x, float y, const char* text, const char* attr, float alpha, bool pipe) {
     const float sz = float(m_pdTextSize);
     if (pipe) {
-        m_renderer.text(x - m_pdPipeDX, y, sz, "|", 0u, m_config.patternSepColor);
+        m_renderer.text(x - m_pdPipeDX, y, sz, "|", 0u, m_renderer.extraAlpha(m_config.patternSepColor, alpha));
     }
     char c[2] = " ";
     while (*text) {
@@ -160,7 +161,7 @@ void Application::drawPatternDisplayCell(float x, float y, const char* text, con
             case ':': color = m_config.patternPosDotColor;      break;
             default:  color = m_config.patternTextColor;        break;
         }
-        x = m_renderer.text(x, y, sz, c, 0u, color);
+        x = m_renderer.text(x, y, sz, c, 0u, m_renderer.extraAlpha(color, alpha));
         if (a) { ++attr; }
     }
 }

@@ -81,7 +81,7 @@ private:  // business logic
     int toPixels(int value) const;
     int textWidth(int size, const char* text) const;
     void updateLayout();
-    void drawPatternDisplayCell(float x, float y, const char* text, const char* attr, bool pipe=true);
+    void drawPatternDisplayCell(float x, float y, const char* text, const char* attr, float alpha=1.0f, bool pipe=true);
     static void formatPosition(int order, int pattern, int row, char* text, char* attr, int size);
     void addMetadataGroup(TextArea& block, const std::vector<std::string>& data, const char* title, bool numbering=true);
     void setMetadataScroll(float y);

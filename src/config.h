@@ -104,6 +104,8 @@ struct Config {
     uint32_t patternPosRowColor       = patternTextColor;
     uint32_t patternPosDotColor       = 0x80FFFFFFu;
     uint32_t patternSepColor          = 0x20FFFFFFu;
+    float    patternAlphaFalloff      = 1.0f;
+    float    patternAlphaFalloffShape = 1.5f;
 
     inline Config() {}
 };

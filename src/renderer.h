@@ -51,7 +51,6 @@ class TextBoxRenderer {
     Vertex* newVertices(uint8_t mode, float x0, float y0, float x1, float y1, float u0, float v0, float u1, float v1);
 
     const FontData::Glyph* getGlyph(uint32_t codepoint) const;
-    static uint32_t nextCodepoint(const char* &utf8string);
     void alignText(float &x, float &y, float size, const char* text, uint8_t align);
 
 public:
@@ -106,6 +105,10 @@ public:
                 const char* control, const char* label=nullptr,
                 uint32_t textColor=0xFFFFFFFF, uint32_t backgroundColor=0xFF000000);
 
+    // helper functions
+    static uint32_t nextCodepoint(const char* &utf8string);
     static inline uint32_t makeAlpha(float alpha)
         { return uint32_t(std::min(1.f, std::max(0.f, alpha)) * 255.f + .5f) << 24; }
+    static inline uint32_t extraAlpha(uint32_t color, float alpha)
+        { return (color & 0x00FFFFFFu) | (uint32_t(std::min(1.f, std::max(0.f, alpha)) * float(color >> 24) + .5f) << 24); }
 };
