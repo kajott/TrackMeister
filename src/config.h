@@ -46,6 +46,9 @@ enum class InterpolationMethod {
 };
 
 struct Config {
+    bool     fullscreen               = false;
+    int      windowWidth              = 1920;
+    int      windowHeight             = 1080;
     int      sampleRate               = 48000;
     int      audioBufferSize          = 512;
     InterpolationMethod interpolation = InterpolationMethod::Auto;

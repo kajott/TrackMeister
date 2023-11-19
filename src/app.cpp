@@ -27,7 +27,13 @@ constexpr const char* baseWindowTitle = "Tracked Music Compo Player";
 constexpr float scrollAnimationSpeed = -10.f;
 
 void Application::init(int argc, char* argv[]) {
-    m_sys.initVideo(baseWindowTitle);
+    m_sys.initVideo(baseWindowTitle,
+        #ifdef NDEBUG
+            m_config.fullscreen,
+        #else
+            false,
+        #endif
+        m_config.windowWidth, m_config.windowHeight);
     m_sys.initAudio(true, m_config.sampleRate, m_config.audioBufferSize);
     if (!m_renderer.init()) {
         m_sys.fatalError("initialization failed", "could not initialize text box renderer");
