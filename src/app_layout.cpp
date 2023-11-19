@@ -6,16 +6,18 @@
 
 #include <algorithm>
 
+#include <libopenmpt/libopenmpt.hpp>
+
 #include "system.h"
 #include "config.h"
 #include "renderer.h"
 #include "app.h"
 
-int Application::textWidth(int size, const char* text) {
+int Application::textWidth(int size, const char* text) const {
     return int(std::ceil(m_renderer.textWidth(text) * float(size)));
 }
 
-int Application::toPixels(int value) {
+int Application::toPixels(int value) const {
     return int(m_screenSizeY * float(value) * .001f + .5f);
 }
 
@@ -65,8 +67,24 @@ void Application::updateLayout() {
     }
 
     // set up metadata box geometry
-    m_metaStartX = m_screenSizeX;
-    m_metaShadowStartX = m_metaStartX - 0;
+    if (m_metadata.empty()) {
+        m_metaStartX = m_metaShadowStartX = m_metaStartX;
+    } else {
+        // fix up sizes first
+        float textSize = float(toPixels(m_config.metaTextSize));
+        float gapHeight = float(toPixels(m_config.metaSectionMargin));
+        for (auto& line : m_metadata.lines) {
+            line->size = textSize;
+            if (line->marginTop > 0.f) { line->marginTop = gapHeight; }
+        }
+        // then, get dimensions of the bar
+        int margin = toPixels(m_config.metaMarginX);
+        m_metaStartX = m_screenSizeX - int(std::ceil(m_metadata.width())) - 2 * margin;
+        m_metaTextX = float(m_metaStartX + margin);
+        m_metaShadowStartX = m_metaStartX - toPixels(m_config.metaShadowSize);
+        m_metaTextMinY = float(toPixels(m_config.metaMarginY));
+        m_metaTextMaxY = m_metaTextY = m_metaTextMinY;
+    }
 
     // set up pattern display geometry -- step 1: define possible formats
     struct PDFormat { const char *posFormat, *channelFormat, *sep; };

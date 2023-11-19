@@ -56,7 +56,7 @@ void Application::draw(float dt) {
     // draw pattern display
     if (m_mod) {
         m_renderer.box(m_pdBarStartX, m_pdTextY0, m_pdBarEndX, m_pdTextY0 + m_pdTextSize,
-                       m_config.patternBarBackground, m_config.patternBarBackground,
+                       m_config.patternBarBackground, m_config.patternBarBackground, false,
                        m_pdBarRadius);
         char posText[16], posAttr[16];
         for (int dRow = -m_pdRows;  dRow <= m_pdRows;  ++dRow) {
@@ -78,9 +78,9 @@ void Application::draw(float dt) {
 
     // draw info box
     if (m_infoEndY > 0) {
-        m_renderer.box(0, 0, m_screenSizeX, m_infoEndY, m_config.infoBackground);
+        m_renderer.box(0, 0, m_metaStartX, m_infoEndY, m_config.infoBackground);
         if (m_infoShadowEndY > m_infoEndY) {
-            m_renderer.box(0, m_infoEndY, m_screenSizeX, m_infoShadowEndY, m_config.shadowColor, m_config.shadowColor & 0xFFFFFFu);
+            m_renderer.box(0, m_infoEndY, m_screenSizeX, m_infoShadowEndY, m_config.shadowColor, m_config.shadowColor & 0x00FFFFFFu, false);
         }
         if (!m_filename.empty()) {
             float x = m_renderer.text(float(m_infoKeyX), float(m_infoFilenameY), float(m_infoTextSize), "File", 0, m_config.infoKeyColor);
@@ -100,6 +100,15 @@ void Application::draw(float dt) {
         if (!m_details.empty()) {
             m_renderer.text(float(m_infoKeyX), float(m_infoDetailsY), float(m_infoDetailsSize), m_details.c_str(), 0, m_config.infoDetailsColor);
         }
+    }
+
+    // draw metadata sidebar
+    if (!m_metadata.empty()) {
+        m_renderer.box(m_metaStartX, 0, m_screenSizeX, m_screenSizeY, m_config.metaBackground);
+        if (m_metaShadowStartX < m_metaStartX) {
+            m_renderer.box(m_metaShadowStartX, 0, m_metaStartX, m_screenSizeY, m_config.shadowColor & 0x00FFFFFFu, m_config.shadowColor, true);
+        }
+        m_metadata.draw(m_metaTextX, m_metaTextY);
     }
 
     // draw "no module loaded" screen
@@ -216,6 +225,7 @@ void Application::unloadModule() {
     m_title.clear();
     m_artist.clear();
     m_details.clear();
+    m_metadata.clear();
     m_numChannels = 0;
     m_currentPattern = -1;
     m_patternLength = 0;
@@ -298,7 +308,7 @@ bool Application::loadModule(const char* path) {
     }
     m_mod->set_render_param(openmpt::module::render_param::RENDER_STEREOSEPARATION_PERCENT, m_config.stereoSeparationPercent);
 
-    // get metadata
+    // get info box metadata
     m_artist.assign(m_mod->get_metadata("artist"));
     m_title.assign(m_mod->get_metadata("title"));
     auto addDetail = [&] (const std::string& s) {
@@ -316,9 +326,47 @@ bool Application::loadModule(const char* path) {
     int sec = int(m_mod->get_duration_seconds());
     addDetail(std::to_string(sec / 60) + ":" + std::to_string((sec / 10) % 6) + std::to_string(sec % 10));
 
+    // get sidebar metadata
+    addMetadataGroup(m_mod->get_instrument_names(), "Instrument Names:");
+    addMetadataGroup(m_mod->get_sample_names(), "Sample Names:");
+
     // done!
     m_sys.setWindowTitle((m_filename + " - " + baseWindowTitle).c_str());
     m_numChannels = m_mod->get_num_channels();
     updateLayout();
     return true;
+}
+
+void Application::addMetadataGroup(const std::vector<std::string>& data, const char* title, bool numbering) {
+    int precedingEmptyLine = -1;
+    bool titleSent = false;
+    int lineIndex = 0;
+    auto emitLine = [&] (int index, const char* text) {
+        auto& line = m_metadata.addLine();
+        if (numbering) {
+            char idxS[3];
+            idxS[0] = "0123456789ABCDEF"[(index >> 4) & 15];
+            idxS[1] = "0123456789ABCDEF"[ index       & 15];
+            idxS[2] = '\0';
+            line.addSpan(m_config.metaIndexColor, idxS);
+            line.addSpan(m_config.metaColonColor, ":");
+        }
+        line.addSpan(m_config.metaTextColor, text);
+    };
+    for (const auto& line : data) {
+        if (!line.empty()) {
+            if (title && !titleSent) {
+                m_metadata.addLine(m_config.metaHeadingColor, title).marginTop = 1.f;
+                titleSent = true;
+            }
+            if (precedingEmptyLine >= 0) {
+                emitLine(precedingEmptyLine, "");
+                precedingEmptyLine = -1;
+            }
+            emitLine(lineIndex, line.c_str());
+        } else if (precedingEmptyLine < 0) {
+            precedingEmptyLine = lineIndex;
+        }
+        ++lineIndex;
+    }
 }

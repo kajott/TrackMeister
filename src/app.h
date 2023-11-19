@@ -11,6 +11,7 @@
 
 #include "system.h"
 #include "renderer.h"
+#include "textarea.h"
 #include "config.h"
 
 namespace openmpt {
@@ -30,6 +31,7 @@ class Application {
     std::string m_artist;
     std::string m_title;
     std::string m_details;
+    TextArea m_metadata;
 
     // current position and size information
     int m_currentOrder;
@@ -46,6 +48,7 @@ class Application {
     int m_infoKeyX, m_infoValueX;
     int m_infoFilenameY, m_infoArtistY, m_infoTitleY, m_infoDetailsY;
     int m_metaStartX, m_metaShadowStartX;
+    float m_metaTextX, m_metaTextMinY, m_metaTextMaxY, m_metaTextY;
     int m_pdPosChars, m_pdChannelChars;
     int m_pdTextSize, m_pdTextY0, m_pdTextDY, m_pdRows;
     int m_pdPosX, m_pdChannelX0, m_pdChannelDX;
@@ -53,7 +56,7 @@ class Application {
     int m_pdBarStartX, m_pdBarEndX, m_pdBarRadius;
 
 public:  // interface from SystemInterface
-    explicit inline Application(SystemInterface& sys) : m_sys(sys) {}
+    explicit inline Application(SystemInterface& sys) : m_sys(sys), m_metadata(m_renderer) {}
 
     void init(int argc, char* argv[]);
     void draw(float dt);
@@ -68,9 +71,10 @@ public:  // interface from SystemInterface
 private:  // business logic
     void unloadModule();
     bool loadModule(const char* path);
-    int toPixels(int value);
-    int textWidth(int size, const char* text);
+    int toPixels(int value) const;
+    int textWidth(int size, const char* text) const;
     void updateLayout();
     void drawPatternDisplayCell(float x, float y, const char* text, const char* attr, bool pipe=true);
     static void formatPosition(int order, int pattern, int row, char* text, char* attr, int size);
+    void addMetadataGroup(const std::vector<std::string>& data, const char* title, bool numbering=true);
 };

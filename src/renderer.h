@@ -50,7 +50,7 @@ class TextBoxRenderer {
     Vertex* newVertices(uint8_t mode, float x0, float y0, float x1, float y1);
     Vertex* newVertices(uint8_t mode, float x0, float y0, float x1, float y1, float u0, float v0, float u1, float v1);
 
-    const FontData::Glyph* getGlyph(uint32_t codepoint);
+    const FontData::Glyph* getGlyph(uint32_t codepoint) const;
     static uint32_t nextCodepoint(const char* &utf8string);
     void alignText(float &x, float &y, float size, const char* text, uint8_t align);
 
@@ -65,8 +65,8 @@ public:
     inline int viewportHeight() const { return m_vpHeight; }
 
     void box(int x0, int y0, int x1, int y1,
-             uint32_t colorUpper, uint32_t colorLower,
-             int borderRadius=0,
+             uint32_t colorUpperLeft, uint32_t colorLowerRight,
+             bool horizontalGradient=false, int borderRadius=0,
              float blur=1.0f, float offset=0.0f);
     inline void box(int x0, int y0, int x1, int y1, uint32_t color)
         { box(x0, y0, x1, y1, color, color); }
@@ -79,9 +79,9 @@ public:
                     int shadowOffset=0, float shadowBlur=0.0f, float shadowAlpha=1.0f, int shadowGrow=0);
 
     inline void circle(int x, int y, int r, uint32_t color, float blur=1.0f, float offset=0.0f)
-        { box(x - r, y - r, x + r, y + r, color, color, r, blur, offset); }
+        { box(x - r, y - r, x + r, y + r, color, color, false, r, blur, offset); }
 
-    float textWidth(const char* text);
+    float textWidth(const char* text) const;
     float text(float x, float y, float size, const char* text,
               uint8_t align,
               uint32_t colorUpper, uint32_t colorLower,

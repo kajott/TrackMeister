@@ -292,12 +292,14 @@ TextBoxRenderer::Vertex* TextBoxRenderer::newVertices(uint8_t mode, float x0, fl
     return v;
 }
 
-void TextBoxRenderer::box(int x0, int y0, int x1, int y1, uint32_t colorUpper, uint32_t colorLower, int borderRadius, float blur, float offset) {
+void TextBoxRenderer::box(int x0, int y0, int x1, int y1, uint32_t colorUpperLeft, uint32_t colorLowerRight, bool horizontalGradient, int borderRadius, float blur, float offset) {
     float w = 0.5f * (float(x1) - float(x0));
     float h = 0.5f * (float(y1) - float(y0));
     Vertex* v = newVertices(0, float(x0), float(y0), float(x1), float(y1), -w, -h, w, h);
-    v[0].color = v[1].color = colorUpper;
-    v[2].color = v[3].color = colorLower;
+    v[0].color = colorUpperLeft;
+    v[1].color = horizontalGradient ? colorLowerRight : colorUpperLeft;
+    v[2].color = horizontalGradient ? colorUpperLeft : colorLowerRight;
+    v[3].color = colorLowerRight;
     for (int i = 4;  i;  --i, ++v) {
         v->size[0] = w;  v->size[1] = h;
         v->size[2] = std::min(std::min(w, h), float(borderRadius));  // clamp border radius to half size
@@ -315,7 +317,7 @@ void TextBoxRenderer::outlineBox(int x0, int y0, int x1, int y1, uint32_t colorU
             y0 - cOuter + shadowOffset - shadowGrow,
             x1 + cOuter + shadowOffset + shadowGrow,
             y1 + cOuter + shadowOffset + shadowGrow,
-            shadowColor, shadowColor,
+            shadowColor, shadowColor, false,
             borderRadius + cOuter + shadowGrow,
             shadowBlur + 1.0f, shadowBlur);
     }
@@ -329,7 +331,7 @@ void TextBoxRenderer::outlineBox(int x0, int y0, int x1, int y1, uint32_t colorU
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const FontData::Glyph* TextBoxRenderer::getGlyph(uint32_t codepoint) {
+const FontData::Glyph* TextBoxRenderer::getGlyph(uint32_t codepoint) const {
     if (!codepoint) { return nullptr; }
     if ((codepoint < 32u) || (codepoint == 0xFFFD)) { return &FontData::GlyphData[FontData::FallbackGlyphIndex]; }
     if ((codepoint >= GlyphCacheMin) && (codepoint <= GlyphCacheMax) && m_glyphCache && m_glyphCache[codepoint - GlyphCacheMin])
@@ -369,7 +371,7 @@ uint32_t TextBoxRenderer::nextCodepoint(const char* &utf8string) {
     return cp;
 }
 
-float TextBoxRenderer::textWidth(const char* text) {
+float TextBoxRenderer::textWidth(const char* text) const {
     float w = 0.0f;
     const FontData::Glyph* g;
     while ((g = getGlyph(nextCodepoint(text))) != 0u) { w += g->advance; }

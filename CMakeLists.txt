@@ -227,6 +227,7 @@ add_executable (tmcp
     src/main_sdl2.cpp
     src/app.cpp
     src/app_layout.cpp
+    src/textarea.cpp
     src/renderer.cpp
     font/font_data.cpp
 )
