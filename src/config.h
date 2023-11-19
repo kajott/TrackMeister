@@ -46,10 +46,12 @@ enum class InterpolationMethod {
 };
 
 struct Config {
-    int     sampleRate                = 48000;
-    int     audioBufferSize           = 512;
+    int      sampleRate               = 48000;
+    int      audioBufferSize          = 512;
     InterpolationMethod interpolation = InterpolationMethod::Auto;
-    int     stereoSeparationPercent   = 20;
+    int      stereoSeparationPercent  = 20;
+    float    maxScrollDuration        = 4.f * 60.f;
+    bool     enableAutoScroll         = true;
 
     uint32_t emptyBackground          = makeRGB(.1f, .2f, .3f);
     uint32_t patternBackground        = emptyBackground;

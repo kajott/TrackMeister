@@ -84,7 +84,9 @@ void Application::updateLayout() {
         m_metaTextX = float(m_metaStartX + margin);
         m_metaShadowStartX = m_metaStartX - toPixels(m_config.metaShadowSize);
         m_metaTextMinY = float(toPixels(m_config.metaMarginY));
-        m_metaTextMaxY = m_metaTextY = m_metaTextMinY;
+        m_metaTextMaxY = std::min(m_metaTextMinY, float(m_screenSizeY - margin) - m_metadata.height());
+        Dprintf("metadata box scroll range: %.1f ... %.1f\n", m_metaTextMinY, m_metaTextMaxY);
+        m_metaTextY = m_metaTextTargetY = m_metaTextMinY;
     }
 
     // set up pattern display geometry -- step 1: define possible formats

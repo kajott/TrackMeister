@@ -167,6 +167,9 @@ int main(int argc, char* argv[]) {
                     }
                     app.handleKey(key);
                     break; }
+                case SDL_MOUSEWHEEL:
+                    app.handleMouseWheel(ev.wheel.y);
+                    break;
                 case SDL_DROPFILE:
                     app.handleDropFile(ev.drop.file);
                     SDL_free(ev.drop.file);

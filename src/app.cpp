@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <cctype>
+#include <cmath>
 
 #include <vector>
 #include <map>
@@ -23,6 +24,7 @@
 #include "app.h"
 
 constexpr const char* baseWindowTitle = "Tracked Music Compo Player";
+constexpr float scrollAnimationSpeed = -10.f;
 
 void Application::init(int argc, char* argv[]) {
     m_sys.initVideo(baseWindowTitle);
@@ -35,8 +37,6 @@ void Application::init(int argc, char* argv[]) {
 }
 
 void Application::draw(float dt) {
-    (void)dt;
-
     // latch current position
     if (m_mod) {
         AudioMutexGuard mtx_(m_sys);
@@ -45,6 +45,15 @@ void Application::draw(float dt) {
         if (pat != m_currentPattern) { m_patternLength = m_mod->get_pattern_num_rows(pat); }
         m_currentPattern = pat;
         m_currentRow = m_mod->get_current_row();
+        m_position = float(m_mod->get_position_seconds());
+    }
+
+    // handle animations
+    if (m_metaTextAutoScroll) {
+        setMetadataScroll(m_metaTextMinY + (m_metaTextMaxY - m_metaTextMinY) * m_position / m_duration);
+        m_metaTextY = m_metaTextTargetY;
+    } else {
+        m_metaTextY += (1.0f - std::exp2f(scrollAnimationSpeed * dt)) * (m_metaTextTargetY - m_metaTextY);
     }
 
     // set background color
@@ -122,7 +131,7 @@ void Application::draw(float dt) {
         return;
     }
 
-if (m_mod && m_sys.isPlaying()) { printf("@ %03d.%02X \r", m_mod->get_current_order(), m_mod->get_current_row()); fflush(stdout); }
+if (m_mod && m_sys.isPlaying()) { printf("@ %03d.%02X dt=%.3f\r", m_mod->get_current_order(), m_mod->get_current_row(), dt); fflush(stdout); }
     m_renderer.flush();
 }
 
@@ -212,6 +221,15 @@ void Application::handleResize(int w, int h) {
     glViewport(0, 0, w, h);
     m_renderer.viewportChanged();
     updateLayout();
+}
+
+void Application::handleMouseWheel(int delta) {
+    setMetadataScroll(m_metaTextTargetY + float(delta * 3 * m_metadata.defaultSize));
+    m_metaTextAutoScroll = false;
+}
+
+void Application::setMetadataScroll(float y) {
+    m_metaTextTargetY = std::max(m_metaTextMaxY, std::min(m_metaTextMinY, y));
 }
 
 void Application::unloadModule() {
@@ -366,6 +384,8 @@ bool Application::loadModule(const char* path) {
     // done!
     m_sys.setWindowTitle((m_filename + " - " + baseWindowTitle).c_str());
     m_numChannels = m_mod->get_num_channels();
+    m_duration = std::min(float(m_mod->get_duration_seconds()), m_config.maxScrollDuration);
+    m_metaTextAutoScroll = m_config.enableAutoScroll;
     updateLayout();
     return true;
 }

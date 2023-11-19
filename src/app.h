@@ -32,6 +32,7 @@ class Application {
     std::string m_title;
     std::string m_details;
     TextArea m_metadata;
+    float m_duration;
 
     // current position and size information
     int m_currentOrder;
@@ -39,6 +40,7 @@ class Application {
     int m_currentRow;
     int m_numChannels;
     int m_patternLength;
+    float m_position;
 
     // computed layout information (from updateLayout())
     int m_screenSizeX, m_screenSizeY;
@@ -48,12 +50,16 @@ class Application {
     int m_infoKeyX, m_infoValueX;
     int m_infoFilenameY, m_infoArtistY, m_infoTitleY, m_infoDetailsY;
     int m_metaStartX, m_metaShadowStartX;
-    float m_metaTextX, m_metaTextMinY, m_metaTextMaxY, m_metaTextY;
+    float m_metaTextX, m_metaTextMinY, m_metaTextMaxY;
     int m_pdPosChars, m_pdChannelChars;
     int m_pdTextSize, m_pdTextY0, m_pdTextDY, m_pdRows;
     int m_pdPosX, m_pdChannelX0, m_pdChannelDX;
     float m_pdPipeDX;
     int m_pdBarStartX, m_pdBarEndX, m_pdBarRadius;
+
+    // current view state
+    float m_metaTextY, m_metaTextTargetY;
+    bool m_metaTextAutoScroll = true;
 
 public:  // interface from SystemInterface
     explicit inline Application(SystemInterface& sys) : m_sys(sys), m_metadata(m_renderer) {}
@@ -67,6 +73,7 @@ public:  // interface from SystemInterface
     void handleKey(int key);
     void handleDropFile(const char* path);
     void handleResize(int w, int h);
+    void handleMouseWheel(int delta);
 
 private:  // business logic
     void unloadModule();
@@ -77,4 +84,5 @@ private:  // business logic
     void drawPatternDisplayCell(float x, float y, const char* text, const char* attr, bool pipe=true);
     static void formatPosition(int order, int pattern, int row, char* text, char* attr, int size);
     void addMetadataGroup(TextArea& block, const std::vector<std::string>& data, const char* title, bool numbering=true);
+    void setMetadataScroll(float y);
 };
