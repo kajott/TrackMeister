@@ -26,6 +26,10 @@
 constexpr const char* baseWindowTitle = "Tracked Music Compo Player";
 constexpr float scrollAnimationSpeed = -10.f;
 
+////////////////////////////////////////////////////////////////////////////////
+
+///// init + shutdown
+
 void Application::init(int argc, char* argv[]) {
     m_sys.initVideo(baseWindowTitle,
         #ifdef NDEBUG
@@ -41,6 +45,97 @@ void Application::init(int argc, char* argv[]) {
     updateLayout();
     if (argc > 1) { loadModule(argv[1]); }
 }
+
+void Application::shutdown() {
+    unloadModule();
+    m_renderer.shutdown();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+///// event handlers and related code
+
+bool Application::renderAudio(int16_t* data, int sampleCount, bool stereo, int sampleRate) {
+    if (!m_mod) { return false; }
+    int done;
+    if (stereo) {
+        done = int(m_mod->read_interleaved_stereo(sampleRate, sampleCount, data));
+    } else {
+        done = int(m_mod->read(sampleRate, sampleCount, data));
+    }
+    if (done < sampleCount) {
+        data += stereo ? (done << 1) : done;
+        sampleCount -= done;
+        ::memset(static_cast<void*>(data), 0, stereo ? (sampleCount << 2) : (sampleCount << 1));
+    }
+    return true;
+}
+
+void Application::handleKey(int key) {
+    switch (key) {
+        case 'Q':
+            m_sys.quit();
+            break;
+        case ' ':
+            if (m_mod) { m_sys.togglePause(); }
+            break;
+        case 9:  // Tab
+            cycleBoxVisibility();
+            break;
+        case keyCode("Left"):
+            if (m_mod) {
+                AudioMutexGuard mtx_(m_sys);
+                int dest = m_mod->get_current_order() - 1;
+                Dprintf("seeking to order %d\n", dest);
+                m_mod->set_position_order_row(dest, 0);
+            } break;
+        case keyCode("Right"):
+            if (m_mod) {
+                AudioMutexGuard mtx_(m_sys);
+                int dest = m_mod->get_current_order() + 1;
+                Dprintf("seeking to order %d\n", dest);
+                m_mod->set_position_order_row(dest, 0);
+            } break;
+        default:
+            break;
+    }
+}
+
+void Application::handleDropFile(const char* path) {
+    loadModule(path);
+}
+
+void Application::handleResize(int w, int h) {
+    glViewport(0, 0, w, h);
+    m_renderer.viewportChanged();
+    updateLayout();
+}
+
+void Application::handleMouseWheel(int delta) {
+    setMetadataScroll(m_metaTextTargetY + float(delta * 3 * m_metadata.defaultSize));
+    m_metaTextAutoScroll = false;
+}
+
+void Application::setMetadataScroll(float y) {
+    m_metaTextTargetY = std::max(m_metaTextMaxY, std::min(m_metaTextMinY, y));
+}
+
+void Application::cycleBoxVisibility() {
+    if (m_infoVisible && m_metaVisible) {
+        m_metaVisible = false;
+    } else if (m_infoVisible) {
+        m_infoVisible = false;
+    } else if (m_metaVisible) {
+        if (infoValid()) { m_infoVisible = true; } else { m_metaVisible = false; }
+    } else {
+        if (metaValid()) { m_metaVisible = true; } else { m_infoVisible = infoValid(); }
+    }
+    updateLayout();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+///// drawing
 
 void Application::draw(float dt) {
     // latch current position
@@ -172,88 +267,9 @@ void Application::drawPatternDisplayCell(float x, float y, const char* text, con
     }
 }
 
-void Application::shutdown() {
-    unloadModule();
-    m_renderer.shutdown();
-}
+////////////////////////////////////////////////////////////////////////////////
 
-bool Application::renderAudio(int16_t* data, int sampleCount, bool stereo, int sampleRate) {
-    if (!m_mod) { return false; }
-    int done;
-    if (stereo) {
-        done = int(m_mod->read_interleaved_stereo(sampleRate, sampleCount, data));
-    } else {
-        done = int(m_mod->read(sampleRate, sampleCount, data));
-    }
-    if (done < sampleCount) {
-        data += stereo ? (done << 1) : done;
-        sampleCount -= done;
-        ::memset(static_cast<void*>(data), 0, stereo ? (sampleCount << 2) : (sampleCount << 1));
-    }
-    return true;
-}
-
-void Application::handleKey(int key) {
-    switch (key) {
-        case 'Q':
-            m_sys.quit();
-            break;
-        case ' ':
-            if (m_mod) { m_sys.togglePause(); }
-            break;
-        case 9:  // Tab
-            cycleBoxVisibility();
-            break;
-        case keyCode("Left"):
-            if (m_mod) {
-                AudioMutexGuard mtx_(m_sys);
-                int dest = m_mod->get_current_order() - 1;
-                Dprintf("seeking to order %d\n", dest);
-                m_mod->set_position_order_row(dest, 0);
-            } break;
-        case keyCode("Right"):
-            if (m_mod) {
-                AudioMutexGuard mtx_(m_sys);
-                int dest = m_mod->get_current_order() + 1;
-                Dprintf("seeking to order %d\n", dest);
-                m_mod->set_position_order_row(dest, 0);
-            } break;
-        default:
-            break;
-    }
-}
-
-void Application::handleDropFile(const char* path) {
-    loadModule(path);
-}
-
-void Application::handleResize(int w, int h) {
-    glViewport(0, 0, w, h);
-    m_renderer.viewportChanged();
-    updateLayout();
-}
-
-void Application::handleMouseWheel(int delta) {
-    setMetadataScroll(m_metaTextTargetY + float(delta * 3 * m_metadata.defaultSize));
-    m_metaTextAutoScroll = false;
-}
-
-void Application::setMetadataScroll(float y) {
-    m_metaTextTargetY = std::max(m_metaTextMaxY, std::min(m_metaTextMinY, y));
-}
-
-void Application::cycleBoxVisibility() {
-    if (m_infoVisible && m_metaVisible) {
-        m_metaVisible = false;
-    } else if (m_infoVisible) {
-        m_infoVisible = false;
-    } else if (m_metaVisible) {
-        if (infoValid()) { m_infoVisible = true; } else { m_metaVisible = false; }
-    } else {
-        if (metaValid()) { m_metaVisible = true; } else { m_infoVisible = infoValid(); }
-    }
-    updateLayout();
-}
+///// module loading
 
 void Application::unloadModule() {
     m_sys.pause();
