@@ -73,6 +73,7 @@ void Application::updateLayout() {
         // fix up sizes first
         float textSize = float(toPixels(m_config.metaTextSize));
         float gapHeight = float(toPixels(m_config.metaSectionMargin));
+        m_metadata.defaultSize = textSize;
         for (auto& line : m_metadata.lines) {
             line->size = textSize;
             if (line->marginTop > 0.f) { line->marginTop = gapHeight; }

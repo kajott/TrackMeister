@@ -31,9 +31,9 @@ struct TextLine {
 
 private:
     friend struct TextArea;
-    TextArea& parent;
+    TextArea* parent;
     explicit inline TextLine(TextArea& parent_, float size_, uint32_t defaultColor_, float marginTop_=0.f, float marginBottom_=0.f)
-        : parent(parent_), size(size_), defaultColor(defaultColor_), marginTop(marginTop_), marginBottom(marginBottom_) {}
+        : parent(&parent_), size(size_), defaultColor(defaultColor_), marginTop(marginTop_), marginBottom(marginBottom_) {}
 };
 
 struct TextArea {
@@ -60,6 +60,13 @@ struct TextArea {
     inline void addSpan(const char* text) { addSpan(defaultColor, text); }
     inline void addSpan(uint32_t color, const std::string& text) { addSpan(color, text.c_str()); }
     inline void addSpan(const std::string& text) { addSpan(defaultColor, text.c_str()); }
+
+    void addWrappedLine(float maxWidth, float size, uint32_t color, const char* text);
+    inline void addWrappedLine(float maxWidth, const char* text) { addWrappedLine(maxWidth, defaultSize, defaultColor, text); }
+    inline void addWrappedLine(float maxWidth, float size, uint32_t color, const std::string& text) { addWrappedLine(maxWidth, size, color, text.c_str()); }
+    inline void addWrappedLine(float maxWidth, const std::string& text) { addWrappedLine(maxWidth, defaultSize, defaultColor, text.c_str()); }
+
+    void ingest(TextArea& source);
 
     void clear();
 

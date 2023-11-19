@@ -76,5 +76,5 @@ private:  // business logic
     void updateLayout();
     void drawPatternDisplayCell(float x, float y, const char* text, const char* attr, bool pipe=true);
     static void formatPosition(int order, int pattern, int row, char* text, char* attr, int size);
-    void addMetadataGroup(const std::vector<std::string>& data, const char* title, bool numbering=true);
+    void addMetadataGroup(TextArea& block, const std::vector<std::string>& data, const char* title, bool numbering=true);
 };

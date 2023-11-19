@@ -7,6 +7,7 @@
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
+#include <cctype>
 
 #include <vector>
 #include <map>
@@ -326,9 +327,41 @@ bool Application::loadModule(const char* path) {
     int sec = int(m_mod->get_duration_seconds());
     addDetail(std::to_string(sec / 60) + ":" + std::to_string((sec / 10) % 6) + std::to_string(sec % 10));
 
-    // get sidebar metadata
-    addMetadataGroup(m_mod->get_instrument_names(), "Instrument Names:");
-    addMetadataGroup(m_mod->get_sample_names(), "Sample Names:");
+    // get sidebar metadata: first instrument and sample names into a separate
+    // buffer, and then using this buffer's width to line-wrap the module
+    // message (if any)
+    TextArea meta2(m_renderer);
+    m_metadata.defaultSize = meta2.defaultSize;
+    m_metadata.defaultColor = m_config.metaTextColor;
+    addMetadataGroup(meta2, m_mod->get_instrument_names(), "Instrument Names:");
+    addMetadataGroup(meta2, m_mod->get_sample_names(), "Sample Names:");
+    std::string msgStr(m_mod->get_metadata("message_raw"));
+    if (!msgStr.empty()) {
+        // split string into lines, collapse multiple empty lines into single
+        std::vector<std::string> msgLines;
+        bool precedingEmptyLine = false;
+        size_t start = 0, end;
+        do {
+            end = msgStr.find('\n', start);
+            if (end == std::string::npos) { end = msgStr.size(); }
+            size_t realEnd = end;
+            while ((realEnd > start) && std::isspace(msgStr[realEnd - 1u])) { --realEnd; }
+            if (realEnd > start) {
+                if (precedingEmptyLine) { msgLines.emplace_back(""); }
+                msgLines.emplace_back(msgStr.substr(start, realEnd - start));
+                precedingEmptyLine = false;
+            } else {
+                precedingEmptyLine = true;
+            }
+            start = end + 1u;
+        } while (end != msgStr.size());
+        // add lines to metadata block (with wrapping)
+        float maxWidth = std::max(meta2.width(), m_renderer.textWidth("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx") * meta2.defaultSize);
+        for (const auto& line : msgLines) {
+            m_metadata.addWrappedLine(maxWidth, line);
+        }
+    }
+    m_metadata.ingest(meta2);
 
     // done!
     m_sys.setWindowTitle((m_filename + " - " + baseWindowTitle).c_str());
@@ -337,12 +370,12 @@ bool Application::loadModule(const char* path) {
     return true;
 }
 
-void Application::addMetadataGroup(const std::vector<std::string>& data, const char* title, bool numbering) {
+void Application::addMetadataGroup(TextArea& block, const std::vector<std::string>& data, const char* title, bool numbering) {
     int precedingEmptyLine = -1;
     bool titleSent = false;
     int lineIndex = 0;
     auto emitLine = [&] (int index, const char* text) {
-        auto& line = m_metadata.addLine();
+        auto& line = block.addLine();
         if (numbering) {
             char idxS[3];
             idxS[0] = "0123456789ABCDEF"[(index >> 4) & 15];
@@ -356,7 +389,7 @@ void Application::addMetadataGroup(const std::vector<std::string>& data, const c
     for (const auto& line : data) {
         if (!line.empty()) {
             if (title && !titleSent) {
-                m_metadata.addLine(m_config.metaHeadingColor, title).marginTop = 1.f;
+                block.addLine(m_config.metaHeadingColor, title).marginTop = 1.f;
                 titleSent = true;
             }
             if (precedingEmptyLine >= 0) {
