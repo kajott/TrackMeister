@@ -3,11 +3,16 @@
 
 #pragma once
 
+#define USE_PATTERN_CACHE 1
+
 #include <cstdint>
 #include <cstddef>
 
 #include <vector>
 #include <string>
+#if USE_PATTERN_CACHE
+    #include <unordered_map>
+#endif
 
 #include "system.h"
 #include "renderer.h"
@@ -61,6 +66,15 @@ class Application {
     float m_metaTextY, m_metaTextTargetY;
     bool m_metaTextAutoScroll = true;
     bool m_infoVisible, m_metaVisible;
+
+    // pattern data cache
+    struct CacheItem { char text[16], attr[16]; };
+    #if USE_PATTERN_CACHE
+        using CacheKey = uint32_t;
+        static inline CacheKey makeCacheKey(int pattern, int row, int channel)
+            { return uint32_t((pattern << 20) ^ (row << 10) ^ channel); }
+        std::unordered_map<CacheKey, CacheItem> m_patternCache;
+    #endif
 
 public:  // interface from SystemInterface
     explicit inline Application(SystemInterface& sys) : m_sys(sys), m_metadata(m_renderer) {}

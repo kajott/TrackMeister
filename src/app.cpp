@@ -169,21 +169,38 @@ void Application::draw(float dt) {
         m_renderer.box(m_pdBarStartX, m_pdTextY0, m_pdBarEndX, m_pdTextY0 + m_pdTextSize,
                        m_config.patternBarBackground, m_config.patternBarBackground, false,
                        m_pdBarRadius);
-        char posText[16], posAttr[16];
+        CacheItem tempItem;
         for (int dRow = -m_pdRows;  dRow <= m_pdRows;  ++dRow) {
             int row = dRow + m_currentRow;
             if ((row < 0) || (row >= m_patternLength)) { continue; }
             float alpha = 1.0f - std::pow(std::abs(float(dRow) / float(m_pdRows + 1)), m_config.patternAlphaFalloffShape) * m_config.patternAlphaFalloff;
             float y = float(m_pdTextY0 + dRow * m_pdTextDY);
             if (m_pdPosChars) {
-                formatPosition(m_currentOrder, m_currentPattern, row, posText, posAttr, m_pdPosChars);
-                drawPatternDisplayCell(float(m_pdPosX), y, posText, posAttr, alpha, false);
+                formatPosition(m_currentOrder, m_currentPattern, row, tempItem.text, tempItem.attr, m_pdPosChars);
+                drawPatternDisplayCell(float(m_pdPosX), y, tempItem.text, tempItem.attr, alpha, false);
             }
             for (int ch = 0;  ch < m_numChannels;  ++ch) {
-                drawPatternDisplayCell(float(m_pdChannelX0 + ch * m_pdChannelDX), y,
-                       m_mod->format_pattern_row_channel(m_currentPattern, row, ch, m_pdChannelChars).c_str(),
-                    m_mod->highlight_pattern_row_channel(m_currentPattern, row, ch, m_pdChannelChars).c_str(),
-                    alpha, (m_pdPosChars > 0) || (ch > 0));
+                float x = float(m_pdChannelX0 + ch * m_pdChannelDX);
+                bool pipe = (m_pdPosChars > 0) || (ch > 0);
+                #if USE_PATTERN_CACHE
+                    CacheKey key = makeCacheKey(m_currentPattern, row, ch);
+                    CacheItem *item;
+                    auto entry = m_patternCache.find(key);
+                    if (entry == m_patternCache.end()) {
+                        ::strcpy(tempItem.text,    m_mod->format_pattern_row_channel(m_currentPattern, row, ch, m_pdChannelChars).c_str());
+                        ::strcpy(tempItem.attr, m_mod->highlight_pattern_row_channel(m_currentPattern, row, ch, m_pdChannelChars).c_str());
+                        m_patternCache[key] = tempItem;
+                        item = &tempItem;
+                    } else {
+                        item = &entry->second;
+                    }
+                    drawPatternDisplayCell(x, y, item->text, item->attr, alpha, pipe);
+                #else
+                    drawPatternDisplayCell(x, y,
+                           m_mod->format_pattern_row_channel(m_currentPattern, row, ch, m_pdChannelChars).c_str(),
+                        m_mod->highlight_pattern_row_channel(m_currentPattern, row, ch, m_pdChannelChars).c_str(),
+                        alpha, pipe);
+                #endif
             }
         }
     }

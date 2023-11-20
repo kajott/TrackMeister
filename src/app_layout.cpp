@@ -167,6 +167,9 @@ void Application::updateLayout(bool resetBoxVisibility) {
     m_pdBarEndX = pdXoffset + pdWidth + toPixels(m_config.patternBarPaddingX);
 
     // done!
+    #if USE_PATTERN_CACHE
+        m_patternCache.clear();
+    #endif
     Dprintf("updateLayout(): pdTextSize=%d pdRows=%d\n", m_pdTextSize, m_pdRows);
 }
 
