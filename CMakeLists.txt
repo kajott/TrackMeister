@@ -227,6 +227,8 @@ add_executable (tmcp
     src/main_sdl2.cpp
     src/app.cpp
     src/app_layout.cpp
+    src/config.cpp
+    src/config_data.cpp
     src/textarea.cpp
     src/renderer.cpp
     font/font_data.cpp
@@ -234,6 +236,17 @@ add_executable (tmcp
 add_library (tmcp_external STATIC
     external/glad/src/glad.c
     external/openmpt/include/stb_vorbis/stb_vorbis.c  # only ever gets included as a header in libopenmpt itself
+)
+
+# produce auto-generated files
+add_custom_command (
+    COMMENT         "updating configuration option registry"
+    COMMAND         "${CMAKE_CURRENT_SOURCE_DIR}/src/generate_config_data.py"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/src/config.h"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/src/config_data.cpp"
+    DEPENDS         "${CMAKE_CURRENT_SOURCE_DIR}/src/generate_config_data.py"
+    MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/src/config.h"
+    OUTPUT          "${CMAKE_CURRENT_SOURCE_DIR}/src/config_data.cpp"
 )
 
 # set include directories

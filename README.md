@@ -16,8 +16,11 @@ This application is a player for [tracker music files](https://en.wikipedia.org/
 
 ## Building
 
-- you need a recent CMake (3.15 or later) and a C++17 compatible compiler (GCC 7.1 or later, Clang 6 or later, Microsoft Visual Studio 2019 or later)
-- on non-Windows systems, the development packages for SDL2 need to be installed (e.g. on Debian/Ubuntu: "`apt install libsdl2-dev`")
+- prerequisites:
+  - a C++17 compatible compiler (GCC 7.1 or later, Clang 6 or later, Microsoft Visual Studio 2019 or later)
+  - CMake 3.15 or later
+  - Python 3.8 or later
+  - SDL2 development packages (only required on non-Windows systems; on Windows, the SDL2 SDK will be downloaded automatically during building)
 - make sure you cloned the repository recursively, as it pulls libopenmpt in as a submodule; if you forgot that, run "`git submodule update --init`"
 - building itself is done using standard CMake (e.g. "`cmake -S . -B build && cmake --build build`")
 

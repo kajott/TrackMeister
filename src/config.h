@@ -22,15 +22,22 @@ enum class FilterMethod {
 //! margins etc.) is 1/1000th of the screen or window height, i.e. roughly
 //! in the ballpark of (but *not* identical to!) pixels on a 1080p display.
 //! All sizes will be rounded to full display pixels internally.
+//!
+//! In the INI file, colors are specified in hexadecimal HTML/CSS notation,
+//! e.g. #123abc or #f00 (which is equivalent to #ff0000). An optional fourth
+//! component specifies alpha, with 00 = fully transparent and ff = fully
+//! opaque. For example, #ff000080 is half-transparent red. (This is consistent
+//! with the notation used by e.g. Inkscape.) If alpha is not specified, the
+//! color is assumed to be fully opaque.
+//! In code, all colors are in the format 0xAABBGGRRu.
 struct Config {
-
     bool     fullscreen               = false;        //!< whether to start up in fullscreen mode
     int      windowWidth              = 1920;         //!< initial window width  in non-fullscreen mode, in pixels
     int      windowHeight             = 1080;         //!< initial window height in non-fullscreen mode, in pixels
 
     int      sampleRate               = 48000;        //!< audio sampling rate
     int      audioBufferSize          = 512;          //!< size of the audio buffer, in samples; if there are dropouts, try doubling this value
-    FilterMethod filter       = FilterMethod ::Auto;  //!< resampling filter to be used
+    FilterMethod filter        = FilterMethod::Auto;  //!< audio resampling filter to be used
     int      stereoSeparationPercent  = 20;           //!< amount of stereo separation, in percent (0 = mono, 100 = full stereo, higher = fake surround)
 
     bool     enableAutoScroll         = true;         //!< whether to enable automatic scrolling in the metadata sidebar after loading a module
@@ -92,7 +99,7 @@ struct Config {
     uint32_t patternPosRowColor       = 0x80FFF0FFu;  //!< text color of the row number
     uint32_t patternPosDotColor       = 0x40FFFFFFu;  //!< text color of the colon or dot between the order/pattern/row numbers
     uint32_t patternSepColor          = 0x10FFFFFFu;  //!< text color of the bar ('|') between channels
-    float    patternAlphaFalloff      = 1.0f;         //!< amount of alpha falloff for the outermost rows in the pattern display
+    float    patternAlphaFalloff      = 1.0f;         //!< amount of alpha falloff for the outermost rows in the pattern display; 0.0 = no falloff, 1.0 = falloff to full transparency
     float    patternAlphaFalloffShape = 1.5f;         //!< shape (power) of the alpha falloff in the pattern display; the higher, the more rows will retain a relatively high opacity
 
     inline Config() {}
