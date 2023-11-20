@@ -96,6 +96,7 @@ void TextArea::addWrappedLine(float maxWidth, float size, uint32_t color, const 
     do {
         const char* pos = text;
         const char* safeEnd = nullptr;
+        bool overshoot = false;
         do {
             // search for next place where we could split the line
             while (*pos && !std::isspace(*pos) && (*pos != '-') && (*pos != '/')) { ++pos; }
@@ -106,13 +107,23 @@ void TextArea::addWrappedLine(float maxWidth, float size, uint32_t color, const 
             // check for valid width
             s.assign(text, (end - text));
             float width = renderer.textWidth(s.c_str()) * size;
-            if (!safeEnd || (width <= maxWidth)) { safeEnd = end; }
+            if (!safeEnd || (width <= maxWidth)) { safeEnd = end; overshoot = (width > maxWidth); }
             if (width > maxWidth) { break; }
             // continue
             if (*pos) { ++pos; }
         } while (*pos);
-        // add the relevant part of the line
+        // extract the word(s)
         s.assign(text, (safeEnd - text));
+        // if not even the first word fits, we need to cut that off early
+        if (overshoot) {
+            while ((safeEnd > text) && !s.empty()) {
+                --safeEnd;
+                s.resize(s.size() - 1u);
+                float width = renderer.textWidth(s.c_str()) * size;
+                if (width <= maxWidth) { break; }
+            }
+        }
+        // add the relevant part of the line
         addLine(size, color, s.c_str());
         // continue after the end of the line (skipping initial whitespace)
         text = safeEnd;

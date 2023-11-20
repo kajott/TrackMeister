@@ -405,6 +405,7 @@ bool Application::loadModule(const char* path) {
         // split string into lines, collapse multiple empty lines into single
         std::vector<std::string> msgLines;
         bool precedingEmptyLine = false;
+        bool firstLine = true;
         size_t start = 0, end;
         do {
             end = msgStr.find('\n', start);
@@ -412,9 +413,10 @@ bool Application::loadModule(const char* path) {
             size_t realEnd = end;
             while ((realEnd > start) && std::isspace(msgStr[realEnd - 1u])) { --realEnd; }
             if (realEnd > start) {
-                if (precedingEmptyLine) { msgLines.emplace_back(""); }
+                if (precedingEmptyLine && !firstLine) { msgLines.emplace_back(""); }
                 msgLines.emplace_back(msgStr.substr(start, realEnd - start));
                 precedingEmptyLine = false;
+                firstLine = false;
             } else {
                 precedingEmptyLine = true;
             }
