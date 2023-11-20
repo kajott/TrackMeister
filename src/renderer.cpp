@@ -323,10 +323,10 @@ void TextBoxRenderer::outlineBox(int x0, int y0, int x1, int y1, uint32_t colorU
     }
     if (outlineWidth) {
         box(x0 - cOuter, y0 - cOuter, x1 + cOuter, y1 + cOuter,
-            colorOutline | 0xFF000000u, colorOutline | 0xFF000000u, borderRadius + cOuter);
+            colorOutline | 0xFF000000u, colorOutline | 0xFF000000u, false, borderRadius + cOuter);
     }
     box(x0 + cInner, y0 + cInner, x1 - cInner, y1 - cInner,
-        colorUpper | 0xFF000000u, colorLower | 0xFF000000u, borderRadius - cInner);
+        colorUpper | 0xFF000000u, colorLower | 0xFF000000u, false, borderRadius - cInner);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -439,8 +439,8 @@ int TextBoxRenderer::control(int x, int y, int size, uint8_t vAlign, bool keyboa
         if (cheight <= 0) { return x; }
         float cwidth = float(cheight) * textWidth(control);
         int w = int(std::ceil(cwidth)) + 4 * border;
-        box(x, y, x + w, y + size, textColor, textColor, 2 * border);
-        box(x + border, y + border, x + w - border, y + size - border, backgroundColor, backgroundColor, border);
+        box(x, y, x + w, y + size, textColor, textColor, false, 2 * border);
+        box(x + border, y + border, x + w - border, y + size - border, backgroundColor, backgroundColor, false, border);
         text((float(2 * x + w) - cwidth) * 0.5f, float(y + border), float(cheight), control, 0, textColor);
         x += w;
     } else {
@@ -449,7 +449,7 @@ int TextBoxRenderer::control(int x, int y, int size, uint8_t vAlign, bool keyboa
         float cheight = float(size) * (nextCodepoint(check) ? 0.707f : 1.0f);
         float cwidth = cheight * textWidth(control);
         int w = std::max(size, int(std::ceil(cwidth + float(size) - cheight)));
-        box(x, y, x + w, y + size, textColor, textColor, size);
+        box(x, y, x + w, y + size, textColor, textColor, false, size);
         text((float(2 * x + w) - cwidth) * 0.5f, (float(2 * y + size) - cheight) * 0.5f, float(cheight), control, 0, backgroundColor);
         x += w;
     }

@@ -8,6 +8,8 @@
 
 #include "renderer.h"
 
+struct TextArea;
+
 struct TextSpan {
     uint32_t color;
     std::string text;
@@ -15,6 +17,7 @@ struct TextSpan {
 };
 
 struct TextLine {
+    TextArea* parent;
     float size;
     float marginTop;
     float marginBottom;
@@ -29,18 +32,15 @@ struct TextLine {
     inline void addSpan(uint32_t color, const std::string& text) { addSpan(color, text.c_str()); }
     inline void addSpan(const std::string& text) { addSpan(defaultColor, text.c_str()); }
 
-private:
-    friend struct TextArea;
-    TextArea* parent;
     explicit inline TextLine(TextArea& parent_, float size_, uint32_t defaultColor_, float marginTop_=0.f, float marginBottom_=0.f)
-        : parent(&parent_), size(size_), defaultColor(defaultColor_), marginTop(marginTop_), marginBottom(marginBottom_) {}
+        : parent(&parent_), size(size_), marginTop(marginTop_), marginBottom(marginBottom_), defaultColor(defaultColor_) {}
 };
 
 struct TextArea {
+    TextBoxRenderer& renderer;
     float defaultSize;
     uint32_t defaultColor;
     std::vector<TextLine*> lines;
-    TextBoxRenderer& renderer;
 
     float width() const;
     float height() const;
