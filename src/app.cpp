@@ -437,10 +437,10 @@ bool Application::loadModule(const char* path) {
     return true;
 }
 
-void Application::addMetadataGroup(TextArea& block, const std::vector<std::string>& data, const char* title, bool numbering) {
+void Application::addMetadataGroup(TextArea& block, const std::vector<std::string>& data, const char* title, bool numbering, int indexStart) {
     int precedingEmptyLine = -1;
     bool titleSent = false;
-    int lineIndex = 0;
+    int lineIndex = indexStart;
     auto emitLine = [&] (int index, const char* text) {
         auto& line = block.addLine();
         if (numbering) {

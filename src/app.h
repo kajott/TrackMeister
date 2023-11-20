@@ -85,7 +85,7 @@ private:  // business logic
     void updateLayout(bool resetBoxVisibility=false);
     void drawPatternDisplayCell(float x, float y, const char* text, const char* attr, float alpha=1.0f, bool pipe=true);
     static void formatPosition(int order, int pattern, int row, char* text, char* attr, int size);
-    void addMetadataGroup(TextArea& block, const std::vector<std::string>& data, const char* title, bool numbering=true);
+    void addMetadataGroup(TextArea& block, const std::vector<std::string>& data, const char* title, bool numbering=true, int indexStart=1);
     void setMetadataScroll(float y);
     inline bool infoValid() const { return !m_filename.empty() || !m_title.empty() || !m_artist.empty() || !m_details.empty(); }
     inline bool metaValid() const { return !m_metadata.empty(); }
