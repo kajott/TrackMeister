@@ -244,7 +244,7 @@ void Application::draw(float dt) {
     if (!m_mod) {
         m_renderer.text(
             float(m_screenSizeX >> 1), float((m_infoEndY + m_screenSizeY) >> 1),
-            float(m_emptyTextSize), "Nothing to play.",
+            float(m_emptyTextSize), "No module loaded.",
             Align::Center + Align::Middle, m_config.emptyTextColor);
         m_renderer.flush();
         return;
@@ -344,15 +344,15 @@ bool Application::loadModule(const char* path) {
     AudioMutexGuard mtx_(m_sys);
     std::map<std::string, std::string> ctls;
     ctls["play.at_end"] = "stop";
-    switch (m_config.interpolation) {
-        case InterpolationMethod::Amiga:
+    switch (m_config.filter) {
+        case FilterMethod::Amiga:
             ctls["render.resampler.emulate_amiga"] = "1";
             break;
-        case InterpolationMethod::A500:
+        case FilterMethod::A500:
             ctls["render.resampler.emulate_amiga"] = "1";
             ctls["render.resampler.emulate_amiga_type"] = "a500";
             break;
-        case InterpolationMethod::A1200:
+        case FilterMethod::A1200:
             ctls["render.resampler.emulate_amiga"] = "1";
             ctls["render.resampler.emulate_amiga_type"] = "a1200";
             break;
@@ -375,11 +375,11 @@ bool Application::loadModule(const char* path) {
         return false;
     }
     Dprintf("module loaded successfully.\n");
-    switch (m_config.interpolation) {
-        case InterpolationMethod::None:   m_mod->set_render_param(openmpt::module::render_param::RENDER_INTERPOLATIONFILTER_LENGTH, 1); break;
-        case InterpolationMethod::Linear: m_mod->set_render_param(openmpt::module::render_param::RENDER_INTERPOLATIONFILTER_LENGTH, 2); break;
-        case InterpolationMethod::Cubic:  m_mod->set_render_param(openmpt::module::render_param::RENDER_INTERPOLATIONFILTER_LENGTH, 4); break;
-        case InterpolationMethod::Sinc:   m_mod->set_render_param(openmpt::module::render_param::RENDER_INTERPOLATIONFILTER_LENGTH, 8); break;
+    switch (m_config.filter) {
+        case FilterMethod::None:   m_mod->set_render_param(openmpt::module::render_param::RENDER_INTERPOLATIONFILTER_LENGTH, 1); break;
+        case FilterMethod::Linear: m_mod->set_render_param(openmpt::module::render_param::RENDER_INTERPOLATIONFILTER_LENGTH, 2); break;
+        case FilterMethod::Cubic:  m_mod->set_render_param(openmpt::module::render_param::RENDER_INTERPOLATIONFILTER_LENGTH, 4); break;
+        case FilterMethod::Sinc:   m_mod->set_render_param(openmpt::module::render_param::RENDER_INTERPOLATIONFILTER_LENGTH, 8); break;
         default: break;  // Auto or Amiga -> no need to set anything up
     }
     m_mod->set_render_param(openmpt::module::render_param::RENDER_STEREOSEPARATION_PERCENT, m_config.stereoSeparationPercent);
