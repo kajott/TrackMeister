@@ -82,6 +82,9 @@ void Application::handleKey(int key) {
         case 9:  // Tab
             cycleBoxVisibility();
             break;
+        case 'A':  // toggle autoscroll
+            m_metaTextAutoScroll = !m_metaTextAutoScroll;
+            break;
         case keyCode("Left"):
             if (m_mod) {
                 AudioMutexGuard mtx_(m_sys);
@@ -152,10 +155,8 @@ void Application::draw(float dt) {
     // handle animations
     if (m_metaTextAutoScroll) {
         setMetadataScroll(m_metaTextMinY + (m_metaTextMaxY - m_metaTextMinY) * m_position / m_duration);
-        m_metaTextY = m_metaTextTargetY;
-    } else {
-        m_metaTextY += (1.0f - std::exp2f(scrollAnimationSpeed * dt)) * (m_metaTextTargetY - m_metaTextY);
     }
+    m_metaTextY += (1.0f - std::exp2f(scrollAnimationSpeed * dt)) * (m_metaTextTargetY - m_metaTextY);
 
     // set background color
     uint32_t clearColor = m_mod ? m_config.patternBackground : m_config.emptyBackground;

@@ -36,8 +36,9 @@ The following other controls are available:
 | **Q** or **Alt+F4** | quit the application
 | **Space** | pause / continue playback
 | **Tab** | hide / unhide the info and metadata bars
-| Mouse Wheel | manually scroll through the metadata bar (stops autoscrolling)
 | Cursor **Left** / **Right** | seek backward / forward one order
+| Mouse Wheel | manually scroll through the metadata bar (stops autoscrolling)
+| **A** | stop / resume autoscrolling
 
 > **Note:**
 > The project is WIP at this moment. More key bindings will follow.
