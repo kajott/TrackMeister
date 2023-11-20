@@ -175,10 +175,10 @@ void Application::updateLayout(bool resetBoxVisibility) {
 
 void Application::formatPosition(int order, int pattern, int row, char* text, char* attr, int size) {
     auto makeNum = [&] (int num, char a, char sep) {
-        if  (size >= 3) { *text++ = char((num / 100) % 10) + '0';  *attr += a;  --size; }
-        if  (size >= 2) { *text++ = char((num /  10) % 10) + '0';  *attr += a;  --size; }
-        if  (size >= 1) { *text++ = char( num        % 10) + '0';  *attr += a;  --size; }
-        if ((size >= 1) && sep) { *text++ = sep;                 *attr += ':';  --size; }
+        if  (size >= 3) { *text++ = char((num / 100) % 10) + '0';  *attr++ = a;  --size; }
+        if  (size >= 2) { *text++ = char((num /  10) % 10) + '0';  *attr++ = a;  --size; }
+        if  (size >= 1) { *text++ = char( num        % 10) + '0';  *attr++ = a;  --size; }
+        if ((size >= 1) && sep) { *text++ = sep;                 *attr++ = ':';  --size; }
     };
     if (size >= 7) { makeNum(order,   'O', ':'); }
     if (size >= 7) { makeNum(pattern, 'P', '.'); }
