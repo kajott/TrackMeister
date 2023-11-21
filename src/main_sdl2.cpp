@@ -13,6 +13,7 @@
 #include <glad/glad.h>
 
 #include "system.h"
+#include "util.h"
 #include "app.h"
 
 struct SystemInterfacePrivateData {

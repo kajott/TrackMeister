@@ -6,11 +6,8 @@
 #include <cstdint>
 
 #ifndef NDEBUG
-    #include <cstdio>
-    #define Dprintf printf
     #define DEFAULT_FULLSCREEN false
 #else
-    #define Dprintf(...) do{}while(0)
     #define DEFAULT_FULLSCREEN true
 #endif
 

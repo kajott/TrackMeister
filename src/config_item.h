@@ -18,9 +18,9 @@ struct EnumItem {
 struct ConfigParserContext {
     std::string filename;
     int lineno;
-    void invalid(const char* what, const char* s);
+    void error(const char* msg, const char* s);
     inline bool checkParseResult(bool result, const char* s) {
-        if (!result) { invalid("value", s); }
+        if (!result) { error("invalid value", s); }
         return result;
     }
 };

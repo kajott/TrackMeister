@@ -30,8 +30,10 @@ class Application {
     Config m_config;
     openmpt::module* m_mod = nullptr;
     std::vector<std::byte> m_mod_data;
+    std::string m_mainIniFile;
 
     // metadata
+    std::string m_fullpath;
     std::string m_filename;
     std::string m_artist;
     std::string m_title;

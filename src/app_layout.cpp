@@ -8,9 +8,10 @@
 
 #include <libopenmpt/libopenmpt.hpp>
 
-#include "system.h"
+#include "util.h"
 #include "config.h"
 #include "renderer.h"
+#include "textarea.h"
 #include "app.h"
 
 int Application::textWidth(int size, const char* text) const {

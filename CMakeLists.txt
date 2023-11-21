@@ -230,6 +230,7 @@ add_executable (tmcp
     src/config.cpp
     src/config_data.cpp
     src/textarea.cpp
+    src/pathutil.cpp
     src/renderer.cpp
     font/font_data.cpp
 )

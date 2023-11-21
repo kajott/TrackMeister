@@ -1,14 +1,12 @@
 // SPDX-FileCopyrightText: 2023 Martin J. Fiedler <keyj@emphy.de>
 // SPDX-License-Identifier: MIT
 
-#include <cctype>
-
 #include <vector>
 #include <string>
 #include <algorithm>
 
 #include "renderer.h"
-
+#include "util.h"
 #include "textarea.h"
 
 void TextArea::clear() {
@@ -99,10 +97,10 @@ void TextArea::addWrappedLine(float maxWidth, float size, uint32_t color, const 
         bool overshoot = false;
         do {
             // search for next place where we could split the line
-            while (*pos && !std::isspace(*pos) && (*pos != '-') && (*pos != '/')) { ++pos; }
+            while (*pos && !isSpace(*pos) && (*pos != '-') && (*pos != '/')) { ++pos; }
             // trim trailing whitespace (but keep dash or slash!)
             const char *end = pos;
-            while (*end && (end > text) && std::isspace(end[-1])) { --end; }
+            while (*end && (end > text) && isSpace(end[-1])) { --end; }
             if (*end && ((*end == '-') || (*end == '/'))) { ++end; }
             // check for valid width
             s.assign(text, (end - text));
@@ -127,6 +125,6 @@ void TextArea::addWrappedLine(float maxWidth, float size, uint32_t color, const 
         addLine(size, color, s.c_str());
         // continue after the end of the line (skipping initial whitespace)
         text = safeEnd;
-        while (*text && std::isspace(*text)) { ++text; }
+        while (*text && isSpace(*text)) { ++text; }
     } while (*text);
 }

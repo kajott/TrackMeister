@@ -7,7 +7,6 @@
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
-#include <cctype>
 #include <cmath>
 
 #include <vector>
@@ -20,7 +19,10 @@
 
 #include "system.h"
 #include "renderer.h"
+#include "textarea.h"
 #include "config.h"
+#include "pathutil.h"
+#include "util.h"
 #include "app.h"
 
 constexpr const char* baseWindowTitle = "Tracked Music Compo Player";
@@ -42,8 +44,10 @@ void Application::init(int argc, char* argv[]) {
     if (!m_renderer.init()) {
         m_sys.fatalError("initialization failed", "could not initialize text box renderer");
     }
-    updateLayout();
-    if (argc > 1) { loadModule(argv[1]); }
+    m_mainIniFile.assign(argv[0]);
+    PathUtil::dirnameInplace(m_mainIniFile);
+    PathUtil::joinInplace(m_mainIniFile, "tmcp.ini");
+    loadModule((argc > 1) ? argv[1] : nullptr);
 }
 
 void Application::shutdown() {
@@ -95,6 +99,9 @@ void Application::handleKey(int key, bool ctrl, bool shift, bool alt) {
                     toast("saving tmcp_default.ini failed");
                 }
             }
+            break;
+        case 0xF5:
+            loadModule(m_fullpath.c_str());
             break;
         case keyCode("Left"):
             if (m_mod) {
@@ -325,6 +332,7 @@ void Application::unloadModule() {
         m_mod = nullptr;
         m_mod_data.clear();
     }
+    m_fullpath.clear();
     m_filename.clear();
     m_title.clear();
     m_artist.clear();
@@ -339,15 +347,19 @@ void Application::unloadModule() {
 }
 
 bool Application::loadModule(const char* path) {
+    // unload module, but reload configuration
     unloadModule();
-    if (!path || !path[0]) { return false; }
+    m_config.reset();
+    m_config.load(m_mainIniFile.c_str(), m_filename.c_str());
+    if (!path || !path[0]) { updateLayout(true); return false; }
 
     // set filename metadata
-    const char* fn = path;
-    for (const char* s = path;  *s;  ++s) {
-        if ((*s == '/') || (*s == '\\')) { fn = &s[1]; }
-    }
-    m_filename.assign(fn);
+    m_fullpath.assign(path);
+    m_filename.assign(PathUtil::basename(m_fullpath));
+
+    // load configuration files
+    m_config.load(PathUtil::join(PathUtil::dirname(m_fullpath), "tmcp.ini").c_str(), m_filename.c_str());
+    m_config.load((PathUtil::stripExt(m_fullpath) + ".tmcp").c_str(), m_filename.c_str());
 
     // load file into memory
     Dprintf("loading module: %s\n", path);
@@ -457,7 +469,7 @@ bool Application::loadModule(const char* path) {
             end = msgStr.find('\n', start);
             if (end == std::string::npos) { end = msgStr.size(); }
             size_t realEnd = end;
-            while ((realEnd > start) && std::isspace(msgStr[realEnd - 1u])) { --realEnd; }
+            while ((realEnd > start) && isSpace(msgStr[realEnd - 1u])) { --realEnd; }
             if (realEnd > start) {
                 if (precedingEmptyLine && !firstLine) { msgLines.emplace_back(""); }
                 msgLines.emplace_back(msgStr.substr(start, realEnd - start));
