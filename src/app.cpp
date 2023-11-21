@@ -89,7 +89,11 @@ void Application::handleKey(int key, bool ctrl, bool shift, bool alt) {
         case 'S':  // save config
             if (ctrl && shift) {
                 Config defaultConfig;
-                defaultConfig.save("tmcp_default.ini");
+                if (defaultConfig.save("tmcp_default.ini")) {
+                    toast("saved tmcp_default.ini");
+                } else {
+                    toast("saving tmcp_default.ini failed");
+                }
             }
             break;
         case keyCode("Left"):
@@ -141,6 +145,12 @@ void Application::cycleBoxVisibility() {
         if (metaValid()) { m_metaVisible = true; } else { m_infoVisible = infoValid(); }
     }
     updateLayout();
+}
+
+void Application::toast(const char *msg) {
+    Dprintf("TOAST: %s\n", msg);
+    m_toastMessage.assign(msg);
+    m_toastAlpha = 1.0f;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -254,8 +264,19 @@ void Application::draw(float dt) {
             float(m_screenSizeX >> 1), float((m_infoEndY + m_screenSizeY) >> 1),
             float(m_emptyTextSize), "No module loaded.",
             Align::Center + Align::Middle, m_config.emptyTextColor);
-        m_renderer.flush();
-        return;
+    }
+
+    // draw toast message
+    if (!m_toastMessage.empty() && (m_toastAlpha > 0.0f)) {
+        int cx = m_screenSizeX >> 1;
+        int w = (int(std::ceil(m_renderer.textWidth(m_toastMessage.c_str()) * float(m_toastTextSize))) >> 1) + m_toastDX;
+        uint32_t color = m_renderer.extraAlpha(m_config.toastBackgroundColor, m_toastAlpha);
+        m_renderer.box(cx - w, m_toastY - m_toastDY, cx + w, m_toastY + m_toastDY, color, color, false, m_toastDY);
+        m_renderer.text(float(cx), float(m_toastY), float(m_toastTextSize),
+                        m_toastMessage.c_str(), Align::Center + Align::Middle,
+                        m_renderer.extraAlpha(m_config.toastTextColor, m_toastAlpha));
+        m_toastAlpha -= dt / m_config.toastDuration;
+        if (m_toastAlpha <= 0.0f) { m_toastMessage.clear(); }
     }
 
     // done

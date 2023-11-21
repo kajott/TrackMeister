@@ -166,6 +166,12 @@ void Application::updateLayout(bool resetBoxVisibility) {
     m_pdBarStartX = pdXoffset - toPixels(m_config.patternBarPaddingX);
     m_pdBarEndX = pdXoffset + pdWidth + toPixels(m_config.patternBarPaddingX);
 
+    // set up toast geometry
+    m_toastTextSize = toPixels(m_config.toastTextSize);
+    m_toastY = toPixels(m_config.toastPositionY);
+    m_toastDY = ((m_toastTextSize + 1) >> 1) + toPixels(m_config.toastMarginY);
+    m_toastDX = m_toastDY + toPixels(m_config.toastMarginX);
+
     // done!
     #if USE_PATTERN_CACHE
         m_patternCache.clear();

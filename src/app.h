@@ -61,6 +61,7 @@ class Application {
     int m_pdPosX, m_pdChannelX0, m_pdChannelDX;
     float m_pdPipeDX;
     int m_pdBarStartX, m_pdBarEndX, m_pdBarRadius;
+    int m_toastTextSize, m_toastY, m_toastDX, m_toastDY;
 
     // current view state
     float m_metaTextY, m_metaTextTargetY;
@@ -75,6 +76,10 @@ class Application {
             { return uint32_t((pattern << 20) ^ (row << 10) ^ channel); }
         std::unordered_map<CacheKey, CacheItem> m_patternCache;
     #endif
+
+    // toast message
+    std::string m_toastMessage;
+    float m_toastAlpha;
 
 public:  // interface from SystemInterface
     explicit inline Application(SystemInterface& sys) : m_sys(sys), m_metadata(m_renderer) {}
@@ -103,4 +108,6 @@ private:  // business logic
     void setMetadataScroll(float y);
     inline bool infoValid() const { return !m_filename.empty() || !m_title.empty() || !m_artist.empty() || !m_details.empty(); }
     inline bool metaValid() const { return !m_metadata.empty(); }
+    void toast(const char* msg);
+    inline void toast(const std::string& msg) { toast(msg.c_str()); }
 };

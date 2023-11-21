@@ -333,6 +333,41 @@ const ConfigItem g_ConfigItems[] = { {
         "shape (power) of the alpha falloff in the pattern display; the higher, the more rows will retain a relatively high opacity",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatFloat(cfg.patternAlphaFalloffShape); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseFloat(cfg.patternAlphaFalloffShape, s), s); }
+    }, {
+        true, "toast text size            ",
+        "text size of a \"toast\" status message",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.toastTextSize); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.toastTextSize, s), s); }
+    }, {
+        false, "toast margin X             ",
+        "left and right margin inside a \"toast\" status message (not including the rounded borders)",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.toastMarginX); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.toastMarginX, s), s); }
+    }, {
+        false, "toast margin Y             ",
+        "top and bottom margin inside a \"toast\" status message",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.toastMarginY); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.toastMarginY, s), s); }
+    }, {
+        false, "toast position Y           ",
+        "vertical position of a \"toast\" status message, relative to the top of the display",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.toastPositionY); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.toastPositionY, s), s); }
+    }, {
+        false, "toast background color     ",
+        "background color of a \"toast\" status message",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.toastBackgroundColor); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.toastBackgroundColor, s), s); }
+    }, {
+        false, "toast text color           ",
+        "text color of a \"toast\" status message",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.toastTextColor); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.toastTextColor, s), s); }
+    }, {
+        false, "toast duration             ",
+        "time a \"toast\" status message shall be visible until it's completely faded out",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatFloat(cfg.toastDuration); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseFloat(cfg.toastDuration, s), s); }
     },
     { false, nullptr, nullptr, nullptr, nullptr }
 };

@@ -102,6 +102,14 @@ struct Config {
     float    patternAlphaFalloff      = 1.0f;         //!< amount of alpha falloff for the outermost rows in the pattern display; 0.0 = no falloff, 1.0 = falloff to full transparency
     float    patternAlphaFalloffShape = 1.5f;         //!< shape (power) of the alpha falloff in the pattern display; the higher, the more rows will retain a relatively high opacity
 
+    int      toastTextSize            = 24;           //!< text size of a "toast" status message
+    int      toastMarginX             = 0;            //!< left and right margin inside a "toast" status message (not including the rounded borders)
+    int      toastMarginY             = 6;            //!< top and bottom margin inside a "toast" status message
+    int      toastPositionY           = 800;          //!< vertical position of a "toast" status message, relative to the top of the display
+    uint32_t toastBackgroundColor     = 0xFF404040u;  //!< background color of a "toast" status message
+    uint32_t toastTextColor           = 0xFFFFFFFFu;  //!< text color of a "toast" status message
+    float    toastDuration            = 2.0f;         //!< time a "toast" status message shall be visible until it's completely faded out
+
     inline Config() {}
     bool save(const char* filename);
 };
