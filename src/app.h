@@ -85,7 +85,7 @@ public:  // interface from SystemInterface
 
     bool renderAudio(int16_t* data, int sampleCount, bool stereo, int sampleRate);
 
-    void handleKey(int key);
+    void handleKey(int key, bool ctrl, bool shift, bool alt);
     void handleDropFile(const char* path);
     void handleResize(int w, int h);
     void handleMouseWheel(int delta);

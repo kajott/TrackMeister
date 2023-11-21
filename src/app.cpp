@@ -71,7 +71,8 @@ bool Application::renderAudio(int16_t* data, int sampleCount, bool stereo, int s
     return true;
 }
 
-void Application::handleKey(int key) {
+void Application::handleKey(int key, bool ctrl, bool shift, bool alt) {
+    (void)ctrl, (void)shift, (void)alt;
     switch (key) {
         case 'Q':
             m_sys.quit();

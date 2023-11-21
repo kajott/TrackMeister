@@ -165,7 +165,8 @@ int main(int argc, char* argv[]) {
                             if ((key >= 'a') && (key <= 'z')) { key -= 32; }
                             else if ((key >= SDLK_F1) && (key <= SDLK_F12)) { key = key - SDLK_F1 + 0xF1; }
                     }
-                    app.handleKey(key);
+                    auto mods = SDL_GetModState();
+                    app.handleKey(key, !!(mods & KMOD_CTRL), !!(mods & KMOD_SHIFT), !!(mods & KMOD_ALT));
                     break; }
                 case SDL_MOUSEWHEEL:
                     app.handleMouseWheel(ev.wheel.y);
