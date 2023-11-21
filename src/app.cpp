@@ -72,7 +72,7 @@ bool Application::renderAudio(int16_t* data, int sampleCount, bool stereo, int s
 }
 
 void Application::handleKey(int key, bool ctrl, bool shift, bool alt) {
-    (void)ctrl, (void)shift, (void)alt;
+    (void)alt;
     switch (key) {
         case 'Q':
             m_sys.quit();
@@ -85,6 +85,12 @@ void Application::handleKey(int key, bool ctrl, bool shift, bool alt) {
             break;
         case 'A':  // toggle autoscroll
             m_metaTextAutoScroll = !m_metaTextAutoScroll;
+            break;
+        case 'S':  // save config
+            if (ctrl && shift) {
+                Config defaultConfig;
+                defaultConfig.save("tmcp_default.ini");
+            }
             break;
         case keyCode("Left"):
             if (m_mod) {

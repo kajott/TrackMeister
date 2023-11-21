@@ -6,3 +6,4 @@ build*
 tmcp
 tmcp_debug
 external/SDL2-*
+tmcp_default.ini

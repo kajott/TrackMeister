@@ -29,8 +29,8 @@ struct ConfigItem {
     bool newGroup;
     const char* name;
     const char* description;
-    std::function<std::string(const Config&)> getter;
-    std::function<void(ConfigParserContext&, Config&, const char*)> setter;
+    std::function<std::string(const Config& cfg)> getter;
+    std::function<void(ConfigParserContext& ctx, Config& cfg, const char* s)> setter;
 
     static bool parseBool(bool &value, const char* s);
     static std::string formatBool(bool value);
@@ -45,3 +45,4 @@ struct ConfigItem {
 };
 
 extern const ConfigItem g_ConfigItems[];
+extern const char* g_DefaultConfigFileIntro;

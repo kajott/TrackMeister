@@ -19,312 +19,312 @@ static const EnumItem e_FilterMethod[] = {
 };
 
 const ConfigItem g_ConfigItems[] = { {
-        true, "fullscreen",
-        "whether to start up in fullscreen mode",
+        true, "fullscreen                 ",
+        "whether to run in fullscreen mode",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.fullscreen); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.fullscreen, s), s); }
     }, {
-        false, "window width",
+        false, "window width               ",
         "initial window width  in non-fullscreen mode, in pixels",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.windowWidth); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.windowWidth, s), s); }
     }, {
-        false, "window height",
+        false, "window height              ",
         "initial window height in non-fullscreen mode, in pixels",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.windowHeight); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.windowHeight, s), s); }
     }, {
-        true, "sample rate",
+        true, "sample rate                ",
         "audio sampling rate",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.sampleRate); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.sampleRate, s), s); }
     }, {
-        false, "audio buffer size",
+        false, "audio buffer size          ",
         "size of the audio buffer, in samples; if there are dropouts, try doubling this value",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.audioBufferSize); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.audioBufferSize, s), s); }
     }, {
-        false, "filter",
-        "resampling filter to be used [possible values: 'None', 'Linear', 'Cubic', 'Sinc', 'Amiga', 'A500', 'A1200', 'Auto']",
+        false, "filter                     ",
+        "audio resampling filter to be used [possible values: 'None', 'Linear', 'Cubic', 'Sinc', 'Amiga', 'A500', 'A1200', 'Auto']",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatEnum(static_cast<int>(cfg.filter), e_FilterMethod); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { int value; if (ctx.checkParseResult(ConfigItem::parseEnum(value, s, e_FilterMethod), s)) { cfg.filter = static_cast<FilterMethod>(value); } }
     }, {
-        false, "stereo separation percent",
+        false, "stereo separation percent  ",
         "amount of stereo separation, in percent (0 = mono, 100 = full stereo, higher = fake surround)",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.stereoSeparationPercent); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.stereoSeparationPercent, s), s); }
     }, {
-        true, "enable auto scroll",
+        true, "enable auto scroll         ",
         "whether to enable automatic scrolling in the metadata sidebar after loading a module",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.enableAutoScroll); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.enableAutoScroll, s), s); }
     }, {
-        false, "max scroll duration",
+        false, "max scroll duration        ",
         "maximum duration after which automatic metadata scrolling reaches the end; if the module is shorter than that, the module's duration will be used instead",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatFloat(cfg.maxScrollDuration); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseFloat(cfg.maxScrollDuration, s), s); }
     }, {
-        true, "empty background",
+        true, "empty background           ",
         "background color of \"no module loaded\" screen",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.emptyBackground); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.emptyBackground, s), s); }
     }, {
-        false, "pattern background",
+        false, "pattern background         ",
         "background color of pattern display",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.patternBackground); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.patternBackground, s), s); }
     }, {
-        false, "info background",
+        false, "info background            ",
         "background color of the top information bar",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.infoBackground); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.infoBackground, s), s); }
     }, {
-        false, "meta background",
+        false, "meta background            ",
         "background color of the metadata sidebar",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.metaBackground); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.metaBackground, s), s); }
     }, {
-        false, "shadow color",
+        false, "shadow color               ",
         "color of the info and metadata bar's shadows",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.shadowColor); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.shadowColor, s), s); }
     }, {
-        true, "empty text size",
+        true, "empty text size            ",
         "size of the \"no module loaded\" text",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.emptyTextSize); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.emptyTextSize, s), s); }
     }, {
-        false, "empty text color",
+        false, "empty text color           ",
         "color of the \"no module loaded\" text",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.emptyTextColor); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.emptyTextColor, s), s); }
     }, {
-        true, "info enabled",
+        true, "info enabled               ",
         "whether to enable the top information bar by default after loading a module",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.infoEnabled); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.infoEnabled, s), s); }
     }, {
-        false, "info margin X",
+        false, "info margin X              ",
         "left margin inside the info bar",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.infoMarginX); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.infoMarginX, s), s); }
     }, {
-        false, "info margin Y",
+        false, "info margin Y              ",
         "upper and lower margin inside the info bar",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.infoMarginY); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.infoMarginY, s), s); }
     }, {
-        false, "info text size",
+        false, "info text size             ",
         "text size of the filename, title and artist lines",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.infoTextSize); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.infoTextSize, s), s); }
     }, {
-        false, "info details text size",
+        false, "info details text size     ",
         "text size of the technical details line",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.infoDetailsTextSize); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.infoDetailsTextSize, s), s); }
     }, {
-        false, "info line spacing",
+        false, "info line spacing          ",
         "extra space between the info bar's lines",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.infoLineSpacing); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.infoLineSpacing, s), s); }
     }, {
-        false, "info key color",
+        false, "info key color             ",
         "color of the \"File\", \"Artist\" and \"Title\" headings",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.infoKeyColor); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.infoKeyColor, s), s); }
     }, {
-        false, "info colon color",
+        false, "info colon color           ",
         "color of the colon following the headings",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.infoColonColor); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.infoColonColor, s), s); }
     }, {
-        false, "info value color",
+        false, "info value color           ",
         "color of the file, artist and title texts",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.infoValueColor); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.infoValueColor, s), s); }
     }, {
-        false, "info details color",
+        false, "info details color         ",
         "color of the technical details line",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.infoDetailsColor); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.infoDetailsColor, s), s); }
     }, {
-        false, "info shadow size",
+        false, "info shadow size           ",
         "width of the shadow below the info bar",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.infoShadowSize); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.infoShadowSize, s), s); }
     }, {
-        true, "meta enabled",
+        true, "meta enabled               ",
         "whether to enable the metadata sidebar by default after loading a module",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.metaEnabled); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.metaEnabled, s), s); }
     }, {
-        false, "meta show message",
+        false, "meta show message          ",
         "whether the metadata sidebar shall include the module message section",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.metaShowMessage); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.metaShowMessage, s), s); }
     }, {
-        false, "meta show instrument names",
+        false, "meta show instrument names ",
         "whether the metadata sidebar shall include the instrument names section",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.metaShowInstrumentNames); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.metaShowInstrumentNames, s), s); }
     }, {
-        false, "meta show sample names",
+        false, "meta show sample names     ",
         "whether the metadata sidebar shall include the sample names section",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.metaShowSampleNames); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.metaShowSampleNames, s), s); }
     }, {
-        false, "meta margin X",
+        false, "meta margin X              ",
         "left and right margin inside the metadata sidebar",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.metaMarginX); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.metaMarginX, s), s); }
     }, {
-        false, "meta margin Y",
+        false, "meta margin Y              ",
         "upper and lower margin inside the metadata sidebar",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.metaMarginY); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.metaMarginY, s), s); }
     }, {
-        false, "meta text size",
+        false, "meta text size             ",
         "text size in the metadata sidebar",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.metaTextSize); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.metaTextSize, s), s); }
     }, {
-        false, "meta section margin",
+        false, "meta section margin        ",
         "vertical gap between sections in the metadata sidebar",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.metaSectionMargin); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.metaSectionMargin, s), s); }
     }, {
-        false, "meta heading color",
+        false, "meta heading color         ",
         "color of a section heading in the metadata sidebar",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.metaHeadingColor); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.metaHeadingColor, s), s); }
     }, {
-        false, "meta text color",
+        false, "meta text color            ",
         "color of normal text in the metadata sidebar",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.metaTextColor); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.metaTextColor, s), s); }
     }, {
-        false, "meta index color",
+        false, "meta index color           ",
         "color of the instrument/sample numbers in the metadata sidebar",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.metaIndexColor); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.metaIndexColor, s), s); }
     }, {
-        false, "meta colon color",
+        false, "meta colon color           ",
         "color of the colon between instrument/sample number and name in the metadata sidebar",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.metaColonColor); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.metaColonColor, s), s); }
     }, {
-        false, "meta shadow size",
+        false, "meta shadow size           ",
         "width of the shadow left to the the metadata sidebar",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.metaShadowSize); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.metaShadowSize, s), s); }
     }, {
-        true, "pattern text size",
+        true, "pattern text size          ",
         "desired size of the pattern display text",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.patternTextSize); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.patternTextSize, s), s); }
     }, {
-        false, "pattern min text size",
+        false, "pattern min text size      ",
         "minimum allowed size of the pattern display text (if the pattern still doesn't fit with this, some channels won't be visible)",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.patternMinTextSize); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.patternMinTextSize, s), s); }
     }, {
-        false, "pattern line spacing",
+        false, "pattern line spacing       ",
         "extra vertical gap between rows in the pattern display",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.patternLineSpacing); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.patternLineSpacing, s), s); }
     }, {
-        false, "pattern margin X",
+        false, "pattern margin X           ",
         "left and right margin inside the pattern display",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.patternMarginX); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.patternMarginX, s), s); }
     }, {
-        false, "pattern bar padding X",
+        false, "pattern bar padding X      ",
         "extra left and right padding of the current row bar in the pattern display",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.patternBarPaddingX); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.patternBarPaddingX, s), s); }
     }, {
-        false, "pattern bar border percent",
+        false, "pattern bar border percent ",
         "border radius of the current row bar, in percent of the text size",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.patternBarBorderPercent); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.patternBarBorderPercent, s), s); }
     }, {
-        false, "pattern bar background",
+        false, "pattern bar background     ",
         "fill color of the current row bar",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.patternBarBackground); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.patternBarBackground, s), s); }
     }, {
-        false, "pattern text color",
+        false, "pattern text color         ",
         "color of normal text in the pattern display (not used, as everything in the pattern display is covered by the following highlighting colors)",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.patternTextColor); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.patternTextColor, s), s); }
     }, {
-        false, "pattern dot color",
+        false, "pattern dot color          ",
         "text color of the dots indicating unset notes/instruments/effects etc.",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.patternDotColor); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.patternDotColor, s), s); }
     }, {
-        false, "pattern note color",
+        false, "pattern note color         ",
         "text color of normal notes (e.g. \"G#4\")",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.patternNoteColor); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.patternNoteColor, s), s); }
     }, {
-        false, "pattern special color",
+        false, "pattern special color      ",
         "text color of special notes (e.g. \"===\")",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.patternSpecialColor); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.patternSpecialColor, s), s); }
     }, {
-        false, "pattern instrument color",
+        false, "pattern instrument color   ",
         "text color of the instrument/sample index column",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.patternInstrumentColor); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.patternInstrumentColor, s), s); }
     }, {
-        false, "pattern vol effect color",
+        false, "pattern vol effect color   ",
         "text color of the volume effect column (e.g. the 'v' before the volume)",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.patternVolEffectColor); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.patternVolEffectColor, s), s); }
     }, {
-        false, "pattern vol param color",
+        false, "pattern vol param color    ",
         "text color of the volume effect parameter column",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.patternVolParamColor); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.patternVolParamColor, s), s); }
     }, {
-        false, "pattern effect color",
+        false, "pattern effect color       ",
         "text color of the effect type column",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.patternEffectColor); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.patternEffectColor, s), s); }
     }, {
-        false, "pattern effect param color",
+        false, "pattern effect param color ",
         "text color of the effect parameter column",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.patternEffectParamColor); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.patternEffectParamColor, s), s); }
     }, {
-        false, "pattern pos order color",
+        false, "pattern pos order color    ",
         "text color of the order number",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.patternPosOrderColor); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.patternPosOrderColor, s), s); }
     }, {
-        false, "pattern pos pattern color",
+        false, "pattern pos pattern color  ",
         "text color of the pattern number",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.patternPosPatternColor); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.patternPosPatternColor, s), s); }
     }, {
-        false, "pattern pos row color",
+        false, "pattern pos row color      ",
         "text color of the row number",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.patternPosRowColor); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.patternPosRowColor, s), s); }
     }, {
-        false, "pattern pos dot color",
+        false, "pattern pos dot color      ",
         "text color of the colon or dot between the order/pattern/row numbers",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.patternPosDotColor); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.patternPosDotColor, s), s); }
     }, {
-        false, "pattern sep color",
+        false, "pattern sep color          ",
         "text color of the bar ('|') between channels",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.patternSepColor); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.patternSepColor, s), s); }
     }, {
-        false, "pattern alpha falloff",
+        false, "pattern alpha falloff      ",
         "amount of alpha falloff for the outermost rows in the pattern display; 0.0 = no falloff, 1.0 = falloff to full transparency",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatFloat(cfg.patternAlphaFalloff); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseFloat(cfg.patternAlphaFalloff, s), s); }
@@ -336,3 +336,22 @@ const ConfigItem g_ConfigItems[] = { {
     },
     { false, nullptr, nullptr, nullptr, nullptr }
 };
+
+const char* g_DefaultConfigFileIntro =
+    "; Edit and save this file as \"tmcp.ini\" in the program directory\n"
+    "; to customize TMCP appearance and behavior.\n"
+    "\n"
+    "[TMCP]\n"
+    "; TMCP default configuration.\n"
+    "; \n"
+    "; Unless explicitly noted otherwise, the unit for all lengths (text sizes,\n"
+    "; margins etc.) is 1/1000th of the screen or window height, i.e. roughly\n"
+    "; in the ballpark of (but *not* identical to!) pixels on a 1080p display.\n"
+    "; All sizes will be rounded to full display pixels internally.\n"
+    "; \n"
+    "; In the INI file, colors are specified in hexadecimal RGB HTML/CSS notation,\n"
+    "; e.g. #123abc or #f00 (which is equivalent to #ff0000). An optional fourth\n"
+    "; component specifies alpha, with 00 = fully transparent and ff = fully\n"
+    "; opaque. For example, #ff000080 is half-transparent red. (This is consistent\n"
+    "; with the notation used e.g. by Inkscape.) If alpha is not specified, the\n"
+    "; color is assumed to be fully opaque.\n";

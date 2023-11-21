@@ -1,8 +1,11 @@
 // SPDX-FileCopyrightText: 2023 Martin J. Fiedler <keyj@emphy.de>
 // SPDX-License-Identifier: MIT
 
+#define _CRT_SECURE_NO_WARNINGS  // disable nonsense MSVC warnings
+
 #include <cstdint>
 #include <cstdlib>
+#include <cstring>
 #include <cstdio>
 
 #include <string>
@@ -84,7 +87,9 @@ bool ConfigItem::parseFloat(float &value, const char* s) {
 }
 
 std::string ConfigItem::formatFloat(float value) {
-    return std::to_string(value);
+    char buffer[32];
+    ::snprintf(buffer, 32, "%.3f", value);
+    return buffer;
 }
 
 bool ConfigItem::parseEnum(int &value, const char* s, const EnumItem* items) {
@@ -148,3 +153,15 @@ std::string ConfigItem::formatColor(uint32_t value) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+bool Config::save(const char* filename) {
+    FILE* f = fopen(filename, "w");
+    if (!f) { return false; }
+    bool res = (fwrite(g_DefaultConfigFileIntro, std::strlen(g_DefaultConfigFileIntro), 1, f) == 1);
+    for (const ConfigItem *item = g_ConfigItems;  item->name;  ++item) {
+        if (item->newGroup) { fprintf(f, "\n"); }
+        fprintf(f, "%s = %-10s ; %s\n", item->name, item->getter(*this).c_str(), item->description);
+    }
+    fclose(f);
+    return res;
+}

@@ -23,15 +23,15 @@ enum class FilterMethod {
 //! in the ballpark of (but *not* identical to!) pixels on a 1080p display.
 //! All sizes will be rounded to full display pixels internally.
 //!
-//! In the INI file, colors are specified in hexadecimal HTML/CSS notation,
+//! In the INI file, colors are specified in hexadecimal RGB HTML/CSS notation,
 //! e.g. #123abc or #f00 (which is equivalent to #ff0000). An optional fourth
 //! component specifies alpha, with 00 = fully transparent and ff = fully
 //! opaque. For example, #ff000080 is half-transparent red. (This is consistent
-//! with the notation used by e.g. Inkscape.) If alpha is not specified, the
+//! with the notation used e.g. by Inkscape.) If alpha is not specified, the
 //! color is assumed to be fully opaque.
 //! In code, all colors are in the format 0xAABBGGRRu.
 struct Config {
-    bool     fullscreen               = false;        //!< whether to start up in fullscreen mode
+    bool     fullscreen               = false;        //!< whether to run in fullscreen mode
     int      windowWidth              = 1920;         //!< initial window width  in non-fullscreen mode, in pixels
     int      windowHeight             = 1080;         //!< initial window height in non-fullscreen mode, in pixels
 
@@ -103,4 +103,5 @@ struct Config {
     float    patternAlphaFalloffShape = 1.5f;         //!< shape (power) of the alpha falloff in the pattern display; the higher, the more rows will retain a relatively high opacity
 
     inline Config() {}
+    bool save(const char* filename);
 };

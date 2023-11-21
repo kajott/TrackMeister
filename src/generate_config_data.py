@@ -3,6 +3,10 @@ import io
 import re
 import sys
 
+def camelCase_to_space_case(x):
+    words = ''.join(((' ' + c.lower()) if c.isupper() else c) for c in x).split()
+    return ' '.join((word.upper() if (len(word) < 2) else word) for word in words)
+
 if __name__ == "__main__":
     try:
         _, infile, outfile = sys.argv
@@ -14,13 +18,33 @@ if __name__ == "__main__":
 
     enums = {}
     fields = []
+    intro = [
+        '; Edit and save this file as "tmcp.ini" in the program directory',
+        '; to customize TMCP appearance and behavior.',
+        '',
+        '[TMCP]'
+    ]
+    name_maxlen = 0
 
     with open(infile, 'r') as f:
         in_enum, in_config = None, False
         lineno = 0
+        comment = []
         for line in f:
             lineno += 1
             line = line.strip()
+
+            # empty line -> clear comment block
+            if not line:
+                comment = []
+
+            # comment
+            m = re.match(r'//!\s?(.*)', line)
+            if m:
+                c = m.group(1)
+                if not c.lower().startswith("in code,"):
+                    comment.append('; ' + c)
+                continue
 
             # start of enum
             m = re.match(r'enum class (\w+) {', line)
@@ -39,6 +63,7 @@ if __name__ == "__main__":
             if line.startswith('struct Config {'):
                 in_config = True
                 new_section = True
+                intro += comment
                 continue
 
             # empty line inside config structure
@@ -49,7 +74,7 @@ if __name__ == "__main__":
             # config item
             m = in_config and re.match(r'''
                 (?P<type>   \w+) \s*
-                (?P<name>   \w+) \s*
+                (?P<field>  \w+) \s*
                 =                \s*
                 (?P<default> .*?) ;
                 \s* //!< \s*
@@ -57,10 +82,13 @@ if __name__ == "__main__":
             ''', line, flags=re.X)
             if m:
                 type = m.group('type')
+                field = m.group('field')
+                name = camelCase_to_space_case(field)
+                name_maxlen = max(name_maxlen, len(name))
                 if not(type in {'bool', 'int', 'float', 'uint32_t'}) and not(type in enums):
                     print(f"{infile}:{lineno}: invalid type '{type}'", file=sys.stderr)
                 else:
-                    fields.append((new_section, type, m.group('name'), m.group('comment').strip()))
+                    fields.append((new_section, type, field, name, m.group('comment').strip()))
                 new_section = False
 
             # end of struct or enum
@@ -79,28 +107,24 @@ if __name__ == "__main__":
         # write string<->enum mapping tables
         for enum, items in sorted(enums.items()):
             f.write(f'\nstatic const EnumItem e_{enum}[] = {{\n')
-            maxlen = max(map(len, items))
+            item_maxlen = max(map(len, items))
             for item in items:
-                f.write('    { "' + (item + '",').ljust(maxlen + 2) + f' static_cast<int>({enum}::' + (item + ')').ljust(maxlen + 1) + ' },\n')
+                f.write('    { "' + (item + '",').ljust(item_maxlen + 2) + f' static_cast<int>({enum}::' + (item + ')').ljust(item_maxlen + 1) + ' },\n')
             f.write('    { nullptr, 0 }\n};\n')
 
         # write main config item table
         f.write('\nconst ConfigItem g_ConfigItems[] = { {\n')
         first = True
-        for new_section, type, field, desc in fields:
+        for new_section, type, field, name, desc in fields:
             if first: first = False
             else: f.write('    }, {\n')
-
-            # convert name from camelCase into "space case"
-            name = ''.join(((' ' + c.lower()) if c.isupper() else c) for c in field).split()
-            name = ' '.join((word.upper() if (len(word) < 2) else word) for word in name)
 
             # add possible values to description
             if type in enums:
                 desc += " [possible values: " + ", ".join(f"'{e}'" for e in enums[type]) + "]"
 
             # write name and description
-            f.write(f'        {repr(new_section).lower()}, "{name}",\n')
+            f.write(f'        {repr(new_section).lower()}, "{name.ljust(name_maxlen)}",\n')
             desc = desc.replace('"', '\\"')
             f.write(f'        "{desc}",\n')
 
@@ -114,6 +138,13 @@ if __name__ == "__main__":
                 f.write(f'        [] (ConfigParserContext& ctx, Config& cfg, const char* s) {{ ctx.checkParseResult(ConfigItem::parse{type}(cfg.{field}, s), s); }}\n')
 
         f.write('    },\n    { false, nullptr, nullptr, nullptr, nullptr }\n};\n')
+
+        f.write('\nconst char* g_DefaultConfigFileIntro =\n')
+        first = True
+        for line in intro:
+            f.write((not(first) and '"\n' or '') + '    "' + line.replace('"', '\\"') + '\\n')
+            first = False
+        f.write('";\n')
 
         data = f.getvalue()
 
