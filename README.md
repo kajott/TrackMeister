@@ -42,6 +42,7 @@ The following other controls are available:
 | Cursor **Left** / **Right** | seek backward / forward one order
 | Mouse Wheel | manually scroll through the metadata bar (stops autoscrolling)
 | **A** | stop / resume autoscrolling
+| **V** | show the TMCP and libopenmpt version numbers
 
 > **Note:**
 > The project is WIP at this moment. More key bindings will follow.

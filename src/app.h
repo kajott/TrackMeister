@@ -112,4 +112,5 @@ private:  // business logic
     inline bool metaValid() const { return !m_metadata.empty(); }
     void toast(const char* msg);
     inline void toast(const std::string& msg) { toast(msg.c_str()); }
+    void toastVersion();
 };

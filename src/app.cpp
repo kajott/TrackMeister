@@ -24,6 +24,7 @@
 #include "pathutil.h"
 #include "util.h"
 #include "app.h"
+#include "version.h"
 
 constexpr const char* baseWindowTitle = "Tracked Music Compo Player";
 constexpr float scrollAnimationSpeed = -10.f;
@@ -48,6 +49,7 @@ void Application::init(int argc, char* argv[]) {
     PathUtil::dirnameInplace(m_mainIniFile);
     PathUtil::joinInplace(m_mainIniFile, "tmcp.ini");
     loadModule((argc > 1) ? argv[1] : nullptr);
+    if (m_fullpath.empty()) { toastVersion(); }
 }
 
 void Application::shutdown() {
@@ -99,6 +101,9 @@ void Application::handleKey(int key, bool ctrl, bool shift, bool alt) {
                     toast("saving tmcp_default.ini failed");
                 }
             }
+            break;
+        case 'V':  // show version
+            toastVersion();
             break;
         case 0xF5:
             loadModule(m_fullpath.c_str());
@@ -158,6 +163,33 @@ void Application::toast(const char *msg) {
     Dprintf("TOAST: %s\n", msg);
     m_toastMessage.assign(msg);
     m_toastAlpha = 1.0f;
+}
+
+void Application::toastVersion() {
+    std::string ver;
+    ver.reserve(128);
+    ver.assign(g_ProductName);
+    ver.append(" ");
+    ver.append(g_ProductVersion);
+    ver.append(" / libopenmpt ");
+    ver.append(openmpt::string::get("library_version"));
+    #define STRINGIFY2(x) #x
+    #define STRINGIFY(x) STRINGIFY2(x)
+    #if defined(__clang__)
+        ver.append(" / Clang " STRINGIFY(__clang_major__) "." STRINGIFY(__clang_minor__));
+    #elif defined(_MSC_VER)
+        ver.append(" / MSVC " STRINGIFY(_MSC_VER));
+    #elif defined(__GNUC__)
+        ver.append(" / GCC " STRINGIFY(__GNUC__) "." STRINGIFY(__GNUC_MINOR__));
+    #else
+        ver.append(" /");
+    #endif
+    #ifdef NDEBUG
+        ver.append(" Release");
+    #else
+        ver.append(" Debug");
+    #endif
+    toast(ver);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
