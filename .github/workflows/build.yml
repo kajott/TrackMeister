@@ -1,0 +1,41 @@
+name: Automated Builds
+on: [push]
+jobs:
+  win32-build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Configure
+        run: cmake -S . -B build
+      - name: Build
+        run: cmake --build build --config Release
+      - name: Archive Win32 Package
+        uses: actions/upload-artifact@v3
+        with:
+          name: release_win32
+          path: |
+            tmcp.exe
+            tmcp.ini
+  linux-build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install Prerequisites
+        run: |
+          sudo apt -y update
+          sudo apt -y install cmake ninja-build libsdl2-dev
+      - name: Configure
+        run: cmake -S . -B build -D CMAKE_BUILD_TYPE=Release -G Ninja
+      - name: Build
+        run: cmake --build build
+      - name: Archive Linux Packages
+        uses: actions/upload-artifact@v3
+        with:
+          name: release_linux
+          path: |
+            tmcp
+            tmcp.ini

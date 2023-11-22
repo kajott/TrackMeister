@@ -1,3 +1,4 @@
+!.github
 _build*
 build*
 *.exe
