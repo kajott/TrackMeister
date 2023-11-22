@@ -466,7 +466,7 @@ bool Application::loadModule(const char* path) {
         case FilterMethod::Sinc:   m_mod->set_render_param(openmpt::module::render_param::RENDER_INTERPOLATIONFILTER_LENGTH, 8); break;
         default: break;  // Auto or Amiga -> no need to set anything up
     }
-    m_mod->set_render_param(openmpt::module::render_param::RENDER_STEREOSEPARATION_PERCENT, m_config.stereoSeparationPercent);
+    m_mod->set_render_param(openmpt::module::render_param::RENDER_STEREOSEPARATION_PERCENT, m_config.stereoSeparation);
 
     // get info box metadata
     m_artist.assign(m_mod->get_metadata("artist"));

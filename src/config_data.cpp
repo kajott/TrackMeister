@@ -49,10 +49,10 @@ const ConfigItem g_ConfigItems[] = { {
         [] (const Config& cfg) -> std::string { return ConfigItem::formatEnum(static_cast<int>(cfg.filter), e_FilterMethod); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { int value; if (ctx.checkParseResult(ConfigItem::parseEnum(value, s, e_FilterMethod), s)) { cfg.filter = static_cast<FilterMethod>(value); } }
     }, {
-        false, "stereo separation percent  ",
+        false, "stereo separation          ",
         "amount of stereo separation, in percent (0 = mono, 100 = full stereo, higher = fake surround)",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.stereoSeparationPercent); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.stereoSeparationPercent, s), s); }
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.stereoSeparation); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.stereoSeparation, s), s); }
     }, {
         true, "enable auto scroll         ",
         "whether to enable automatic scrolling in the metadata sidebar after loading a module",

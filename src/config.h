@@ -38,7 +38,7 @@ struct Config {
     int      sampleRate               = 48000;        //!< audio sampling rate
     int      audioBufferSize          = 512;          //!< size of the audio buffer, in samples; if there are dropouts, try doubling this value
     FilterMethod filter        = FilterMethod::Auto;  //!< audio resampling filter to be used
-    int      stereoSeparationPercent  = 100;          //!< amount of stereo separation, in percent (0 = mono, 100 = full stereo, higher = fake surround)
+    int      stereoSeparation         = 50;           //!< amount of stereo separation, in percent (0 = mono, 100 = full stereo, higher = fake surround)
 
     bool     enableAutoScroll         = true;         //!< whether to enable automatic scrolling in the metadata sidebar after loading a module
     float    maxScrollDuration        = 4.f * 60.f;   //!< maximum duration after which automatic metadata scrolling reaches the end; if the module is shorter than that, the module's duration will be used instead
