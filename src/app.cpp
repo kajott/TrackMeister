@@ -34,6 +34,13 @@ constexpr float scrollAnimationSpeed = -10.f;
 ///// init + shutdown
 
 void Application::init(int argc, char* argv[]) {
+    // load initial configuration (required for video and audio parameters)
+    m_mainIniFile.assign(argv[0]);
+    PathUtil::dirnameInplace(m_mainIniFile);
+    PathUtil::joinInplace(m_mainIniFile, "tmcp.ini");
+    m_config.load(m_mainIniFile.c_str(), m_filename.c_str());
+
+    // initialize everything
     m_sys.initVideo(baseWindowTitle,
         #ifdef NDEBUG
             m_config.fullscreen,
@@ -45,9 +52,8 @@ void Application::init(int argc, char* argv[]) {
     if (!m_renderer.init()) {
         m_sys.fatalError("initialization failed", "could not initialize text box renderer");
     }
-    m_mainIniFile.assign(argv[0]);
-    PathUtil::dirnameInplace(m_mainIniFile);
-    PathUtil::joinInplace(m_mainIniFile, "tmcp.ini");
+
+    // load module from command line
     loadModule((argc > 1) ? argv[1] : nullptr);
     if (m_fullpath.empty()) { toastVersion(); }
 }
@@ -375,23 +381,28 @@ void Application::unloadModule() {
     m_patternLength = 0;
     m_sys.setWindowTitle(baseWindowTitle);
     updateLayout(true);
-    Dprintf("module unloaded, playback paused\n");
+    Dprintf("module unloaded\n");
 }
 
 bool Application::loadModule(const char* path) {
-    // unload module, but reload configuration
+    // unload module
     unloadModule();
-    m_config.reset();
-    m_config.load(m_mainIniFile.c_str(), m_filename.c_str());
-    if (!path || !path[0]) { updateLayout(true); return false; }
 
     // set filename metadata
-    m_fullpath.assign(path);
+    if (path) { m_fullpath.assign(path); }
     m_filename.assign(PathUtil::basename(m_fullpath));
 
     // load configuration files
+    m_config.reset();
+    m_config.load(m_mainIniFile.c_str(), m_filename.c_str());
     m_config.load(PathUtil::join(PathUtil::dirname(m_fullpath), "tmcp.ini").c_str(), m_filename.c_str());
     m_config.load((PathUtil::stripExt(m_fullpath) + ".tmcp").c_str(), m_filename.c_str());
+
+    // stop here if there's no file to load
+    if (m_fullpath.empty()) {
+        updateLayout(true);
+        return false;
+    }
 
     // load file into memory
     Dprintf("loading module: %s\n", path);

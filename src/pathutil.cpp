@@ -6,6 +6,7 @@
 #include <string>
 #include <algorithm>
 
+#include "util.h"
 #include "pathutil.h"
 
 namespace PathUtil {
@@ -67,6 +68,22 @@ void joinInplace(std::string& a, const std::string& b) {
     a.reserve(a.size() + b.size() + 1u);
     if (!isPathSep(a[a.size() - 1u])) { a.append(1, pathSep); }
     a.append(b);
+}
+
+bool matchFilename(const std::string& pattern, const std::string& filename) {
+    if (pattern.empty() || filename.empty()) { return false; }
+    size_t patternPos = 0, filenamePos = 0;
+    while ((patternPos < pattern.size()) && (filenamePos < filename.size())) {
+        char pc = pattern[patternPos++];
+        if (pc == '*') {  // wildcard -> jump to end of filename
+            size_t d = pattern.size() - patternPos;  // distance to end of pattern
+            if (d > filename.size()) { return false; }  // pattern tail is longer than the entire filename
+            size_t p = filename.size() - d;  // new filename position
+            if (p < patternPos) { return false; }  // head and tail overlap
+            filenamePos = p;
+        } else if (toLower(pc) != toLower(filename[filenamePos++])) { return false; }
+    }
+    return (patternPos == pattern.size()) && (filenamePos == filename.size());
 }
 
 }  // namespace PathUtil

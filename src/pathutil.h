@@ -63,4 +63,11 @@ inline std::string stripExt(const std::string& filename)
 inline void stripExtInplace(std::string& filename)
     { filename.resize(extSepPos(filename)); }
 
+//! match a filename against a pattern
+//! \note Caveats:
+//! <br> - always case-insensitive
+//! <br> - only works properly for filenames, not full paths
+//! <br> - only supports one '*' wildcard; no '?', no multiple wildcards!
+bool matchFilename(const std::string& pattern, const std::string& filename);
+
 }  // namespace PathUtil
