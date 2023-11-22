@@ -27,11 +27,7 @@ bool stringEqualEx(const char* sA, const char* sB) {
     while (*sA && *sB) {
         while (*sA && isIgnored(*sA)) { ++sA; }
         while (*sB && isIgnored(*sB)) { ++sB; }
-        char cA = *sA++;
-        char cB = *sB++;
-        if ((cA >= 'a') && (cA <= 'z')) { cA -= 32; }
-        if ((cB >= 'a') && (cB <= 'z')) { cB -= 32; }
-        if (cA != cB) { return false; }
+        if (toLower(*sA++) != toLower(*sB++)) { return false; }
     }
     while (*sA && isIgnored(*sA)) { ++sA; }
     while (*sB && isIgnored(*sB)) { ++sB; }
