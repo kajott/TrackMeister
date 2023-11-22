@@ -86,13 +86,13 @@ bool Application::renderAudio(int16_t* data, int sampleCount, bool stereo, int s
 void Application::handleKey(int key, bool ctrl, bool shift, bool alt) {
     (void)alt;
     switch (key) {
-        case 'Q':
+        case 'Q':  // quit immediately
             m_sys.quit();
             break;
-        case ' ':
+        case ' ':  // [Space] pause/play
             if (m_mod) { m_sys.togglePause(); }
             break;
-        case 9:  // Tab
+        case 9:  // [Tab]
             cycleBoxVisibility();
             break;
         case 'A':  // toggle autoscroll
@@ -111,17 +111,20 @@ void Application::handleKey(int key, bool ctrl, bool shift, bool alt) {
         case 'V':  // show version
             toastVersion();
             break;
-        case 0xF5:
+        case 0xF5:  // [F5] reload module
             loadModule(m_fullpath.c_str());
             break;
-        case keyCode("Left"):
+        case 0xFB:  // [F11] toggle fullscreen
+            m_sys.toggleFullscreen();
+            break;
+        case keyCode("Left"):  // previous pattern
             if (m_mod) {
                 AudioMutexGuard mtx_(m_sys);
                 int dest = m_mod->get_current_order() - 1;
                 Dprintf("seeking to order %d\n", dest);
                 m_mod->set_position_order_row(dest, 0);
             } break;
-        case keyCode("Right"):
+        case keyCode("Right"):  // next pattern
             if (m_mod) {
                 AudioMutexGuard mtx_(m_sys);
                 int dest = m_mod->get_current_order() + 1;

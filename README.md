@@ -43,6 +43,7 @@ The following other controls are available:
 | Mouse Wheel | manually scroll through the metadata bar (stops autoscrolling)
 | **A** | stop / resume autoscrolling
 | **V** | show the TMCP and libopenmpt version numbers
+| **F11** | toggle fullscreen mode
 
 > **Note:**
 > The project is WIP at this moment. More key bindings will follow.

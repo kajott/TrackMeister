@@ -24,6 +24,7 @@ struct SystemInterfacePrivateData {
     int sampleRate = 0;
     bool stereo = false;
     bool paused = false;
+    bool fullscreen = false;
 };
 
 [[noreturn]] void SystemInterface::fatalError(const char *what, const char *how) {
@@ -53,6 +54,7 @@ void SystemInterface::initVideo(const char* title, bool fullscreen, int windowWi
     if (!m_priv->win) {
         fatalError("could not create window", SDL_GetError());
     }
+    m_priv->fullscreen = fullscreen;
 
     m_priv->ctx = SDL_GL_CreateContext(m_priv->win);
     if (!m_priv->ctx) {
@@ -128,6 +130,12 @@ bool SystemInterface::setPaused(bool paused) {
 
 void SystemInterface::setWindowTitle(const char* title) {
     SDL_SetWindowTitle(m_priv->win, title);
+}
+
+void SystemInterface::toggleFullscreen() {
+    m_priv->fullscreen = !m_priv->fullscreen;
+    SDL_SetWindowFullscreen(m_priv->win, m_priv->fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
+    SDL_ShowCursor(m_priv->fullscreen ? SDL_DISABLE : SDL_ENABLE);
 }
 
 int main(int argc, char* argv[]) {

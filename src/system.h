@@ -47,6 +47,7 @@ public:
     inline bool active() { return m_active; }
 
     void setWindowTitle(const char* title);
+    void toggleFullscreen();
 };
 
 class AudioMutexGuard {
