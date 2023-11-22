@@ -20,6 +20,9 @@ inline constexpr bool isPathSep(char c)
 //! determine index of last path separator in 'path' (or 0 if none found)
 size_t pathSepPos(const std::string& path);
 
+//! determine index of the first character of the filename in 'path'
+size_t filenameStartPos(const std::string& path);
+
 //! determine index of the extension separator in 'path' (or path length if none found)
 size_t extSepPos(const std::string& path);
 
@@ -36,11 +39,11 @@ inline void dirnameInplace(std::string& path)
 
 //! determine filename part of a path
 inline std::string basename(const std::string& path)
-    { return path.substr(pathSepPos(path)); }
+    { return path.substr(filenameStartPos(path)); }
 
 //! determine filename part of a path (modify path in-place)
 inline void basenameInplace(std::string& path)
-    { path.erase(0, pathSepPos(path)); }
+    { path.erase(0, filenameStartPos(path)); }
 
 //! join two paths
 std::string join(const std::string& a, const std::string& b);

@@ -4,6 +4,7 @@
 #include <cstddef>
 
 #include <string>
+#include <algorithm>
 
 #include "pathutil.h"
 
@@ -21,6 +22,14 @@ size_t pathSepPos(const std::string& path) {
         if (isPathSep(path[i])) { res = i; }
     }
     return res;
+}
+
+size_t filenameStartPos(const std::string& path) {
+    size_t res = 0u;
+    for (size_t i = 0u;  i < path.size();  ++i) {
+        if (isPathSep(path[i])) { res = i + 1u; }
+    }
+    return std::min(res, path.size());
 }
 
 size_t extSepPos(const std::string& path) {
