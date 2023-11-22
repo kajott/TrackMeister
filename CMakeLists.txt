@@ -270,6 +270,7 @@ endif ()
 if (WIN32)
     target_sources (tmcp PRIVATE
         src/utf8.manifest
+        src/icon.rc
     )
     if (CMAKE_BUILD_TYPE STREQUAL "Release")
         set_target_properties (tmcp PROPERTIES WIN32_EXECUTABLE ON)
