@@ -26,7 +26,7 @@ This application is a player for [tracker music files](https://en.wikipedia.org/
 
 ## Usage
 
-Just drag a module file onto the executable or into the window once the player has already been started.
+Just drag a module file onto the executable, or into the window once the player has already been started.
 
 Playback is always paused after loading a module; this is by design. Press the **Space** key to start playback.
 
@@ -43,7 +43,57 @@ The following other controls are available:
 | Mouse Wheel | manually scroll through the metadata bar (stops autoscrolling)
 | **A** | stop / resume autoscrolling
 | **V** | show the TMCP and libopenmpt version numbers
+| **F5** | reload the current module and the application's configuration
 | **F11** | toggle fullscreen mode
+| **Ctrl+Shift+S** | save `tmcp_default.ini` (see below)
 
-> **Note:**
-> The project is WIP at this moment. More key bindings will follow.
+
+## Configuration
+
+TMCP can be configured using configuration files with an INI-like syntax.
+
+The following aspects can be configured:
+- display colors and font sizes (but **not** the font itself; that's "baked into" the program)
+- windowed/fullscreen mode and window size (*)
+- audio sample rate and buffer size (*)
+- audio interpolation filter
+- amount of stereo separation
+
+All items can be changed at runtime when loading a new module or pressing the **F5** key, _except_ those marked with an asterisk (*); these are only evaluated once on startup.
+
+The following locations are searched for configuration files:
+- `tmcp.ini` in the program's directory (i.e. directly next to `tmcp.exe`)
+- `tmcp.ini` in the currently opened module file's directory
+- a file with the same name as the currently opened module file, but with `.tmcp` as a suffix; for example, for `foo.mod`, the configuration file will be `foo.tmcp`
+
+The configuration files can contain multiple sections, delimited by lines containing the section name in square brackets, `[like so]`. The following sections are evaluated, and all other sections are ignored:
+- the unnamed section at the beginning of the file
+- the `[TMCP]` section
+- sections that match the current module's file name, e.g. `[foo*.mod]`;
+  the following rules apply for those:
+  - only the filename is matched, no directory names
+  - matching is case-insensitive
+  - exactly one '`*`' may be used as a wildcard (no '`?`'s, no multiple '`*`'s)
+
+All other lines contain key-value pairs of the form "`key = value`" or "`key: value`". Spaces, dashes (`-`) and underscores (`_`) in key names are ignored. All parts of a line following a semicolon (`;`) are ignored. It's allowed to put comments at the end of key/value lines.
+
+To get a list of all possible settings, along with documentation and the default values for each setting, run TMCP and press **Ctrl+Shift+S**. This will generate a file `tmcp_default.ini` in the current directory (usually the program directory) that also be used as a template for an individual configuration.
+
+All sizes (font sizes, margins etc.) are specified in 1/1000s of the display width, so they are more or less resolution-independent. Colors are specified in HTML/CSS-style hexadecimal RGB notation, but with optional alpha, i.e. in the form `#rrggbb`, `#rrggbbaa`, `#rgb` or `#rgba`.
+
+Here's an example for a useful INI file:
+
+    [TMCP]
+    ; generic options, specified in classic INI syntax
+
+    ; we want a decent filter and full stereo for most module formats
+    filter=auto
+    stereoSeparation=100
+
+    [*.mod]
+        ; this section is only active for MOD format file, which tend to be
+        ; written on or for the Amiga, hence we want a suitable filter
+        ; emulation and way less stereo separation;
+        ; also, we're specifying this in CSS-like syntax, because we can:
+        filter: auto;
+        stereo-separation: 100;
