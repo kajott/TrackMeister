@@ -55,6 +55,9 @@ void joinInplace(std::string& a, const std::string& b);
 inline std::string getExt(const std::string& filename)
     { return filename.substr(std::min(filename.size(), extSepPos(filename) + 1u)); }
 
+//! get file extension as a FourCC (converted to all-lowercase)
+uint32_t getExtFourCC(const std::string& filename);
+
 //! remove extension from a filename
 inline std::string stripExt(const std::string& filename)
     { return filename.substr(0, extSepPos(filename)); }

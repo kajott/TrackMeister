@@ -42,6 +42,16 @@ size_t extSepPos(const std::string& path) {
     return res;
 }
 
+uint32_t getExtFourCC(const std::string& filename) {
+    size_t pos = extSepPos(filename);
+    if ((pos < filename.size()) && (filename[pos] == '.')) { ++pos; }
+    uint32_t code = 0u;
+    for (int bit = 0;  (bit < 32) && (pos < filename.size());  bit += 8) {
+        code |= uint32_t(toLower(filename[pos++])) << bit;
+    }
+    return code;
+}
+
 bool isAbsPath(const std::string& path) {
     if (!path.empty() && isPathSep(path[0])) { return true; }
     #ifdef _WIN32

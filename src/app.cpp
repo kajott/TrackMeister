@@ -117,14 +117,14 @@ void Application::handleKey(int key, bool ctrl, bool shift, bool alt) {
         case 0xFB:  // [F11] toggle fullscreen
             m_sys.toggleFullscreen();
             break;
-        case keyCode("Left"):  // previous pattern
+        case makeFourCC("Left"):  // previous pattern
             if (m_mod) {
                 AudioMutexGuard mtx_(m_sys);
                 int dest = m_mod->get_current_order() - 1;
                 Dprintf("seeking to order %d\n", dest);
                 m_mod->set_position_order_row(dest, 0);
             } break;
-        case keyCode("Right"):  // next pattern
+        case makeFourCC("Right"):  // next pattern
             if (m_mod) {
                 AudioMutexGuard mtx_(m_sys);
                 int dest = m_mod->get_current_order() + 1;

@@ -15,13 +15,6 @@
 
 struct SystemInterfacePrivateData;
 
-constexpr inline int keyCode(const char* s) {
-    return             int(s[0])        |
-        (!s[1] ? 0 : ((int(s[1]) <<  8) |
-        (!s[2] ? 0 : ((int(s[2]) << 16) |
-        (!s[3] ? 0 :  (int(s[3]) << 24))))));
-}
-
 class SystemInterface {
     SystemInterfacePrivateData* m_priv;
     bool m_active = true;

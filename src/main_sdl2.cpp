@@ -158,18 +158,18 @@ int main(int argc, char* argv[]) {
         while (SDL_PollEvent(&ev)) {
             switch (ev.type) {
                 case SDL_KEYDOWN: {
-                    int key = ev.key.keysym.sym;
+                    uint32_t key = uint32_t(ev.key.keysym.sym);
                     switch (key) {
-                        case SDLK_LEFT:      key = keyCode("Left");  break;
-                        case SDLK_RIGHT:     key = keyCode("Right"); break;
-                        case SDLK_UP:        key = keyCode("Up");    break;
-                        case SDLK_DOWN:      key = keyCode("Down");  break;
-                        case SDLK_PAGEUP:    key = keyCode("PgUp");  break;
-                        case SDLK_PAGEDOWN:  key = keyCode("PgDn");  break;
-                        case SDLK_HOME:      key = keyCode("Home");  break;
-                        case SDLK_END:       key = keyCode("End");   break;
-                        case SDLK_INSERT:    key = keyCode("Ins");   break;
-                        case SDLK_DELETE:    key = keyCode("Del");   break;
+                        case SDLK_LEFT:     key = makeFourCC("Left");  break;
+                        case SDLK_RIGHT:    key = makeFourCC("Right"); break;
+                        case SDLK_UP:       key = makeFourCC("Up");    break;
+                        case SDLK_DOWN:     key = makeFourCC("Down");  break;
+                        case SDLK_PAGEUP:   key = makeFourCC("PgUp");  break;
+                        case SDLK_PAGEDOWN: key = makeFourCC("PgDn");  break;
+                        case SDLK_HOME:     key = makeFourCC("Home");  break;
+                        case SDLK_END:      key = makeFourCC("End");   break;
+                        case SDLK_INSERT:   key = makeFourCC("Ins");   break;
+                        case SDLK_DELETE:   key = makeFourCC("Del");   break;
                         default:
                             if ((key >= 'a') && (key <= 'z')) { key -= 32; }
                             else if ((key >= SDLK_F1) && (key <= SDLK_F12)) { key = key - SDLK_F1 + 0xF1; }

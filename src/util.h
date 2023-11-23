@@ -10,6 +10,14 @@
     #define Dprintf(...) do{}while(0)
 #endif
 
+//! create a FourCC from a string
+constexpr inline uint32_t makeFourCC(const char* s) {
+    return  !s ? 0u : ( uint32_t(s[0])        |
+        (!s[1] ? 0u : ((uint32_t(s[1]) <<  8) |
+        (!s[2] ? 0u : ((uint32_t(s[2]) << 16) |
+                       (uint32_t(s[3]) << 24))))));
+}
+
 //! clone of std::isspace() that's guaranteed to not choke on 8-bit input
 constexpr inline bool isSpace(char c)
     { return (c == ' ') || (c == '\t') || (c == '\r') || (c == '\n'); }
