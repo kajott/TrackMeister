@@ -29,6 +29,24 @@
 constexpr const char* baseWindowTitle = "Tracked Music Compo Player";
 constexpr float scrollAnimationSpeed = -10.f;
 
+const uint32_t playableExts[] = {
+    // source: https://lib.openmpt.org/libopenmpt/faq/#how-do-i-use-xmp-openmpt-in-xmplay-for-file-types-which-are-natively-supported-by-xmplay
+    makeFourCC("mod"),  makeFourCC("s3m"),  makeFourCC("xm"),   makeFourCC("it"),
+    makeFourCC("mptm"), makeFourCC("667"),  makeFourCC("669"),  makeFourCC("c67"),
+    makeFourCC("amf"),  makeFourCC("ams"),  makeFourCC("dbm"),  makeFourCC("digi"),
+    makeFourCC("dmf"),  makeFourCC("dsm"),  makeFourCC("dsym"), makeFourCC("dtm"),
+    makeFourCC("far"),  makeFourCC("fmt"),  makeFourCC("imf"),  makeFourCC("ice"),
+    makeFourCC("j2b"),  makeFourCC("m15"),  makeFourCC("mdl"),  makeFourCC("med"),
+    makeFourCC("mms"),  makeFourCC("mt2"),  makeFourCC("mtm"),  makeFourCC("mus"),
+    makeFourCC("nst"),  makeFourCC("okt"),  makeFourCC("plm"),  makeFourCC("psm"),
+    makeFourCC("pt36"), makeFourCC("ptm"),  makeFourCC("sfx"),  makeFourCC("sfx2"),
+    makeFourCC("st26"), makeFourCC("stk"),  makeFourCC("stm"),  makeFourCC("stx"),
+    makeFourCC("stp"),  makeFourCC("gtk"),  makeFourCC("gt2"),  makeFourCC("ult"),
+    makeFourCC("wow"),  makeFourCC("xmf"),  makeFourCC("gdm"),  makeFourCC("mo3"),
+    makeFourCC("oxm"),  makeFourCC("umx"),  makeFourCC("xpk"),  makeFourCC("ppm"),
+    makeFourCC("mmcmp"),makeFourCC("symmod"), 0
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 
 ///// init + shutdown
@@ -131,6 +149,28 @@ void Application::handleKey(int key, bool ctrl, bool shift, bool alt) {
                 Dprintf("seeking to order %d\n", dest);
                 m_mod->set_position_order_row(dest, 0);
             } break;
+        case makeFourCC("PgUp"): {  // previous module
+            std::string newPath(PathUtil::findSibling(m_fullpath, false, playableExts));
+            if (!newPath.empty()) { loadModule(newPath.c_str()); }
+            break; }
+        case makeFourCC("PgDn"): {  // next module
+            std::string newPath(PathUtil::findSibling(m_fullpath, true, playableExts));
+            if (!newPath.empty()) { loadModule(newPath.c_str()); }
+            break; }
+        case makeFourCC("Home"):  // first module in directory
+            if (ctrl) {
+                std::string temp(PathUtil::dirname(m_fullpath));
+                temp.append("/\x01");
+                std::string newPath(PathUtil::findSibling(temp, true, playableExts));
+                if (!newPath.empty()) { loadModule(newPath.c_str()); }
+            }   break;
+        case makeFourCC("End"):  // last module in directory
+            if (ctrl) {
+                std::string temp(PathUtil::dirname(m_fullpath));
+                temp.append("/\xff");
+                std::string newPath(PathUtil::findSibling(temp, false, playableExts));
+                if (!newPath.empty()) { loadModule(newPath.c_str()); }
+            }   break;
         default:
             break;
     }

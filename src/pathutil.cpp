@@ -13,8 +13,15 @@ namespace PathUtil {
 
 #ifdef _WIN32
     const char pathSep = '\\';
+    #define WIN32_LEAN_AND_MEAN
+    #define NOMINMAX
+    #include <windows.h>
 #else
     const char pathSep = '/';
+    #include <sys/types.h>
+    #include <sys/stat.h>
+    #include <unistd.h>
+    #include <dirent.h>
 #endif
 
 size_t pathSepPos(const std::string& path) {
@@ -42,14 +49,20 @@ size_t extSepPos(const std::string& path) {
     return res;
 }
 
-uint32_t getExtFourCC(const std::string& filename) {
-    size_t pos = extSepPos(filename);
-    if ((pos < filename.size()) && (filename[pos] == '.')) { ++pos; }
-    uint32_t code = 0u;
-    for (int bit = 0;  (bit < 32) && (pos < filename.size());  bit += 8) {
-        code |= uint32_t(toLower(filename[pos++])) << bit;
+uint32_t getExtFourCC(const char* filename) {
+    if (!filename) { return 0u; }
+    const char* ext = nullptr;
+    while (*filename) {
+        if (isPathSep(*filename)) { ext = nullptr; }
+        if (*filename == '.') { ext = &filename[1]; }
+        ++filename;
     }
-    return code;
+    if (!ext) { return 0u; }
+    uint32_t fourCC = 0u;
+    for (int bit = 0;  (bit < 32) && *ext;  bit += 8) {
+        fourCC |= uint32_t(toLower(*ext++)) << bit;
+    }
+    return fourCC;
 }
 
 bool isAbsPath(const std::string& path) {
@@ -94,6 +107,83 @@ bool matchFilename(const std::string& pattern, const std::string& filename) {
         } else if (toLower(pc) != toLower(filename[filenamePos++])) { return false; }
     }
     return (patternPos == pattern.size()) && (filenamePos == filename.size());
+}
+
+std::string findSibling(const std::string& path, bool next, const uint32_t* exts) {
+    // prepare directory and base name
+    std::string dir(dirname(path));
+    if (dir.empty()) { dir.assign("."); }
+    std::string ref(basename(path));
+    std::string best;
+    const char* curr;
+
+    // start directory enumeration loop
+    #ifdef _WIN32
+        std::string searchPath(dir);
+        searchPath.append("\\*.*");
+        WIN32_FIND_DATAA fd;
+        HANDLE hFind = FindFirstFileA(searchPath.c_str(), &fd);
+        if (hFind == INVALID_HANDLE_VALUE) { return ""; }
+        do {
+            curr = fd.cFileName;
+    #else
+        DIR* dd = opendir(dir.c_str());
+        if (!dd) { return ""; }
+        struct dirent *entry;
+        while ((entry = readdir(dd))) {
+            curr = entry->d_name;
+    #endif
+
+            // check entry (1): ignore dot files
+            if (!curr[0] || (curr[0] == '.')) { continue; }
+
+            // check entry (2): match extensions
+            if (exts) {
+                uint32_t ext = getExtFourCC(curr);
+                const uint32_t* checkExt;
+                for (checkExt = exts;  *checkExt && (*checkExt != ext);  ++checkExt);
+                if (!*checkExt) { continue; }
+            }
+
+            // check entry (3): compare to see where it slots in
+            auto cmp = [] (const char* check, const std::string& sRef, int ifRefEmpty=0) {
+                if (sRef.empty()) { return ifRefEmpty; }
+                const char* ref = sRef.c_str();
+                while (*check && *ref) {
+                    int d = int(uint8_t(toLower(*check++))) - int(uint8_t(toLower(*ref++)));
+                    if (d) { return d; }
+                }
+                return int(uint8_t(toLower(*check))) - int(uint8_t(toLower(*ref)));
+            };
+            if ((next && ((cmp(curr, ref) <= 0) || (cmp(curr, best, -1) > 0)))
+            || (!next && ((cmp(curr, ref) >= 0) || (cmp(curr, best, +1) < 0))))
+                { continue; }
+
+            // check entry (4): confirm that it's a file, not a directory
+            #ifdef _WIN32
+                if (fd.dwFileAttributes & (FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_DIRECTORY)) { continue; }
+            #else
+                std::string temp(join(dir, curr));
+                struct stat st;
+                if (stat(temp.c_str(), &st) < 0) { continue; }
+                if (!S_ISREG(st.st_mode)) { continue; }
+            #endif
+
+            // all checks passed -> this is the new best match
+            best.assign(curr);
+
+    // end directory enumeration loop
+    #ifdef _WIN32
+        } while (FindNextFileA(hFind, &fd));
+        FindClose(hFind);
+    #else
+        }  // while (readdir)
+        closedir(dd);
+    #endif
+
+    // return final path
+    if (best.empty()) { return ""; }
+    return join(dir, best);
 }
 
 }  // namespace PathUtil

@@ -40,12 +40,18 @@ The following other controls are available:
 | **Space** | pause / continue playback
 | **Tab** | hide / unhide the info and metadata bars
 | Cursor **Left** / **Right** | seek backward / forward one order
+| **Page Up** | load previous module in the directory
+| **Page Down** | load next module in the directory
+| **Ctrl+Home** | load first module in the directory
+| **Ctrl+End** | load last module in the directory
 | Mouse Wheel | manually scroll through the metadata bar (stops autoscrolling)
 | **A** | stop / resume autoscrolling
 | **V** | show the TMCP and libopenmpt version numbers
 | **F5** | reload the current module and the application's configuration
 | **F11** | toggle fullscreen mode
 | **Ctrl+Shift+S** | save `tmcp_default.ini` (see below)
+
+For directory navigation, "previous" and "next" refer to case-insensitive lexicographical ordering.
 
 
 ## Configuration

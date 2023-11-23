@@ -1,7 +1,6 @@
 ## Suggested Features
 
 - large entry number display
-- navigation between sibling files inside directories
 - full file browser
 - VU meters or waveform display(s)
 - channel name display

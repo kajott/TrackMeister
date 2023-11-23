@@ -56,7 +56,11 @@ inline std::string getExt(const std::string& filename)
     { return filename.substr(std::min(filename.size(), extSepPos(filename) + 1u)); }
 
 //! get file extension as a FourCC (converted to all-lowercase)
-uint32_t getExtFourCC(const std::string& filename);
+uint32_t getExtFourCC(const char* filename);
+
+//! get file extension as a FourCC (converted to all-lowercase)
+inline uint32_t getExtFourCC(const std::string& filename)
+    { return getExtFourCC(filename.c_str()); }
 
 //! remove extension from a filename
 inline std::string stripExt(const std::string& filename)
@@ -72,5 +76,13 @@ inline void stripExtInplace(std::string& filename)
 //! <br> - only works properly for filenames, not full paths
 //! <br> - only supports one '*' wildcard; no '?', no multiple wildcards!
 bool matchFilename(const std::string& pattern, const std::string& filename);
+
+//! find a sibling file in the same directory
+//! \param path  full path of the reference file
+//! \param next  false = find previous file in lexicographical order; <br>
+//!              true  = find next file <br> (matching is case-insensitive)
+//! \param exts  optional zero-terminated list of valid extension code FourCCs
+//!              (must be lowercase, and without the dot)
+std::string findSibling(const std::string& path, bool next, const uint32_t* exts=nullptr);
 
 }  // namespace PathUtil
