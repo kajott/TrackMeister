@@ -446,7 +446,7 @@ bool Application::loadModule(const char* path) {
 
     // stop here if there's no file to load
     auto fail = [&] (const std::string& msg) -> bool {
-        Dprintf("loadModule() fail: %s\n", msg.c_str());
+        if (!msg.empty()) { Dprintf("loadModule() fail: %s\n", msg.c_str()); }
         m_details.assign(msg);
         updateLayout(true);
         return false;

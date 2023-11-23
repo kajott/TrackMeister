@@ -116,7 +116,7 @@ bool isDir(const char* path) {
         return !!(attr & FILE_ATTRIBUTE_DIRECTORY);
     #else
         struct stat st;
-        if (stat(temp.c_str(), &st) < 0) { return false; }
+        if (stat(path, &st) < 0) { return false; }
         return !!S_ISDIR(st.st_mode);
     #endif
 }
