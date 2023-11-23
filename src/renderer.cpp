@@ -156,15 +156,15 @@ bool TextBoxRenderer::init() {
     glAttachShader(m_prog, vs);
     glAttachShader(m_prog, fs);
     glLinkProgram(m_prog);
-    glGetProgramiv(fs, GL_LINK_STATUS, &res);
+    glGetProgramiv(m_prog, GL_LINK_STATUS, &res);
     if (res != GL_TRUE) {
         m_error = "Shader Program linking failed";
         #ifndef NDEBUG
             printf("%s.\n", m_error);
-            glGetProgramiv(fs, GL_INFO_LOG_LENGTH, &res);
+            glGetProgramiv(m_prog, GL_INFO_LOG_LENGTH, &res);
             char* msg = new(std::nothrow) char[res];
             if (msg) {
-                glGetProgramInfoLog(fs, res, nullptr, msg);
+                glGetProgramInfoLog(m_prog, res, nullptr, msg);
                 ::puts(msg);
                 delete[] msg;
             }
@@ -236,9 +236,12 @@ void TextBoxRenderer::viewportChanged() {
 }
 
 void TextBoxRenderer::flush() {
-    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-    glUnmapBuffer(GL_ARRAY_BUFFER);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    if (m_vertices) {
+        glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+        glUnmapBuffer(GL_ARRAY_BUFFER);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        m_vertices = nullptr;
+    }
 
     glBindTexture(GL_TEXTURE_2D, m_tex);
     glBindVertexArray(m_vao);

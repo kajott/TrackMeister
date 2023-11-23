@@ -36,6 +36,44 @@ struct SystemInterfacePrivateData {
     std::exit(1);
 }
 
+#ifndef NDEBUG
+    void APIENTRY glDebugProc(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
+        const char *sSource, *sType, *sSev;  (void)id, (void)length, (void)userParam;
+        if (severity == GL_DEBUG_SEVERITY_NOTIFICATION) {
+            return;  // ignore these, they are *far* too verbose on some drivers
+        }
+        switch (source) {
+            case GL_DEBUG_SOURCE_API:               sSource = "API  "; break;
+            case GL_DEBUG_SOURCE_WINDOW_SYSTEM:     sSource = "Win  "; break;
+            case GL_DEBUG_SOURCE_SHADER_COMPILER:   sSource = "GLSL "; break;
+            case GL_DEBUG_SOURCE_THIRD_PARTY:       sSource = "Aux  "; break;
+            case GL_DEBUG_SOURCE_APPLICATION:       sSource = "App  "; break;
+            case GL_DEBUG_SOURCE_OTHER:             sSource = "Other"; break;
+            default:                                sSource = "?????"; break;
+        }
+        switch (type) {
+            case GL_DEBUG_TYPE_ERROR:               sType = "Error "; break;
+            case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: sType = "Deprec"; break;
+            case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  sType = "Undef "; break;
+            case GL_DEBUG_TYPE_PORTABILITY:         sType = "Port  "; break;
+            case GL_DEBUG_TYPE_PERFORMANCE:         sType = "Perf  "; break;
+            case GL_DEBUG_TYPE_MARKER:              sType = "Marker"; break;
+            case GL_DEBUG_TYPE_PUSH_GROUP:          sType = "PushG "; break;
+            case GL_DEBUG_TYPE_POP_GROUP:           sType = "PopG  "; break;
+            case GL_DEBUG_TYPE_OTHER:               sType = "Other "; break;
+            default:                                sType = "??????"; break;
+        }
+        switch (severity) {
+            case GL_DEBUG_SEVERITY_HIGH:            sSev = "High"; break;
+            case GL_DEBUG_SEVERITY_MEDIUM:          sSev = "Med "; break;
+            case GL_DEBUG_SEVERITY_LOW:             sSev = "Low "; break;
+            case GL_DEBUG_SEVERITY_NOTIFICATION:    sSev = "Note"; break;
+            default:                                sSev = "????"; break;
+        }
+        fprintf(stderr, "[GL Debug] %s | %s | %s | %s\n", sSource, sType, sSev, message);
+    }
+#endif
+
 void SystemInterface::initVideo(const char* title, bool fullscreen, int windowWidth, int windowHeight) {
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE,            0);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE,          0);
@@ -70,6 +108,8 @@ void SystemInterface::initVideo(const char* title, bool fullscreen, int windowWi
         printf("OpenGL renderer: %s\n", glGetString(GL_RENDERER));
         printf("OpenGL version:  %s\n", glGetString(GL_VERSION));
         printf("GLSL   version:  %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
+        glDebugMessageCallback(glDebugProc, nullptr);
+        glEnable(GL_DEBUG_OUTPUT);
     #endif
 
     if (fullscreen) { SDL_ShowCursor(SDL_DISABLE); }
