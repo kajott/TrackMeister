@@ -109,11 +109,24 @@ bool matchFilename(const std::string& pattern, const std::string& filename) {
     return (patternPos == pattern.size()) && (filenamePos == filename.size());
 }
 
+bool isDir(const char* path) {
+    #ifdef _WIN32
+        DWORD attr = GetFileAttributesA(path);
+        if (attr == INVALID_FILE_ATTRIBUTES) { return false; }
+        return !!(attr & FILE_ATTRIBUTE_DIRECTORY);
+    #else
+        struct stat st;
+        if (stat(temp.c_str(), &st) < 0) { return false; }
+        return !!S_ISDIR(st.st_mode);
+    #endif
+}
+
 std::string findSibling(const std::string& path, bool next, const uint32_t* exts) {
     // prepare directory and base name
     std::string dir(dirname(path));
     if (dir.empty()) { dir.assign("."); }
     std::string ref(basename(path));
+    if (ref.empty() && !next) { ref.assign("\xff"); }
     std::string best;
     const char* curr;
 
@@ -147,7 +160,7 @@ std::string findSibling(const std::string& path, bool next, const uint32_t* exts
 
             // check entry (3): compare to see where it slots in
             auto cmp = [] (const char* check, const std::string& sRef, int ifRefEmpty=0) {
-                if (sRef.empty()) { return ifRefEmpty; }
+                if (sRef.empty() && ifRefEmpty) { return ifRefEmpty; }
                 const char* ref = sRef.c_str();
                 while (*check && *ref) {
                     int d = int(uint8_t(toLower(*check++))) - int(uint8_t(toLower(*ref++)));

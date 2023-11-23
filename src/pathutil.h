@@ -77,10 +77,18 @@ inline void stripExtInplace(std::string& filename)
 //! <br> - only supports one '*' wildcard; no '?', no multiple wildcards!
 bool matchFilename(const std::string& pattern, const std::string& filename);
 
+//! check whether a path refers to a directory
+bool isDir(const char* path);
+//! check whether a path refers to a directory
+inline bool isDir(const std::string& path)
+    { return isDir(path.c_str()); }
+
 //! find a sibling file in the same directory
-//! \param path  full path of the reference file
-//! \param next  false = find previous file in lexicographical order; <br>
-//!              true  = find next file <br> (matching is case-insensitive)
+//! \param path  full path of the reference file; <br>
+//!              if the path ends with a path separator,
+//!              the first/last file in the directory is searched instead
+//! \param next  false = find previous/last file in lexicographical order; <br>
+//!              true  = find next/first file <br> (matching is case-insensitive)
 //! \param exts  optional zero-terminated list of valid extension code FourCCs
 //!              (must be lowercase, and without the dot)
 std::string findSibling(const std::string& path, bool next, const uint32_t* exts=nullptr);

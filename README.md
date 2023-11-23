@@ -26,7 +26,7 @@ This application is a player for [tracker music files](https://en.wikipedia.org/
 
 ## Usage
 
-Just drag a module file onto the executable, or into the window once the player has already been started.
+Just drag a module file onto the executable, or into the window once the player has already been started. If a directory is opened this way, the first playable file therein is loaded. Note that this is *not* recursive; TMCP won't play entire directory hierarchies.
 
 Playback is always paused after loading a module; this is by design. Press the **Space** key to start playback.
 

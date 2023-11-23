@@ -159,16 +159,12 @@ void Application::handleKey(int key, bool ctrl, bool shift, bool alt) {
             break; }
         case makeFourCC("Home"):  // first module in directory
             if (ctrl) {
-                std::string temp(PathUtil::dirname(m_fullpath));
-                temp.append("/\x01");
-                std::string newPath(PathUtil::findSibling(temp, true, playableExts));
+                std::string newPath(PathUtil::findSibling(PathUtil::dirname(m_fullpath) + "/", true, playableExts));
                 if (!newPath.empty()) { loadModule(newPath.c_str()); }
             }   break;
         case makeFourCC("End"):  // last module in directory
             if (ctrl) {
-                std::string temp(PathUtil::dirname(m_fullpath));
-                temp.append("/\xff");
-                std::string newPath(PathUtil::findSibling(temp, false, playableExts));
+                std::string newPath(PathUtil::findSibling(PathUtil::dirname(m_fullpath) + "/", false, playableExts));
                 if (!newPath.empty()) { loadModule(newPath.c_str()); }
             }   break;
         default:
@@ -433,6 +429,13 @@ bool Application::loadModule(const char* path) {
 
     // set filename metadata
     if (path) { m_fullpath.assign(path); }
+    bool dirFail = false;
+    if (!m_fullpath.empty() && PathUtil::isDir(m_fullpath)) {
+        // directory opened -> try to open first file *inside* the directory instead
+        std::string newPath(PathUtil::findSibling(m_fullpath + "/", true, playableExts));
+        if (newPath.empty()) { dirFail = true; }
+        else { m_fullpath.assign(newPath); }
+    }
     m_filename.assign(PathUtil::basename(m_fullpath));
 
     // load configuration files
@@ -448,11 +451,12 @@ bool Application::loadModule(const char* path) {
         updateLayout(true);
         return false;
     };
+    if (dirFail) { return fail("directory doesn't contain playable files"); }
     if (m_fullpath.empty()) { return fail(""); }
 
     // load file into memory
-    Dprintf("loading module: %s\n", path);
-    FILE *f = fopen(path, "rb");
+    Dprintf("loading module: %s\n", m_fullpath.c_str());
+    FILE *f = fopen(m_fullpath.c_str(), "rb");
     if (!f) { return fail("could not open file"); }
     // fopen() may still succeed on directories, giving us a broken file
     // descriptor with erratic behavior; try to detect this as best as we can
