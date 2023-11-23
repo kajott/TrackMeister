@@ -402,29 +402,27 @@ bool Application::loadModule(const char* path) {
     m_config.load((PathUtil::stripExt(m_fullpath) + ".tmcp").c_str(), m_filename.c_str());
 
     // stop here if there's no file to load
-    if (m_fullpath.empty()) {
+    auto fail = [&] (const std::string& msg) -> bool {
+        Dprintf("loadModule() fail: %s\n", msg.c_str());
+        m_details.assign(msg);
         updateLayout(true);
         return false;
-    }
+    };
+    if (m_fullpath.empty()) { return fail(""); }
 
     // load file into memory
     Dprintf("loading module: %s\n", path);
     FILE *f = fopen(path, "rb");
-    if (!f) {
-        Dprintf("could not open module file.\n");
-        m_details.assign("could not open file");
-        updateLayout(true);
-        return false;
-    }
-    fseek(f, 0, SEEK_END);
-    m_mod_data.resize(ftell(f));
+    if (!f) { return fail("could not open file"); }
+    // fopen() may still succeed on directories, giving us a broken file
+    // descriptor with erratic behavior; try to detect this as best as we can
+    if (fseek(f, 0, SEEK_END) != 0) { fclose(f); return fail("invalid file"); }
+    size_t size = size_t(ftell(f));
+    if (size >= (size_t(-1) >> 1)) { fclose(f); return fail("invalid file"); }
+    if (size >= (64u << 20)) { fclose(f); return fail("file too large"); }  // 64 MiB ought to be enough for everybody
+    m_mod_data.resize(size);
     fseek(f, 0, SEEK_SET);
-    if (fread(m_mod_data.data(), 1, m_mod_data.size(), f) != m_mod_data.size()) {
-        Dprintf("could not read module file.\n");
-        m_details.assign("could not read file");
-        updateLayout(true);
-        return false;
-    }
+    if (fread(m_mod_data.data(), 1, size, f) != size) { fclose(f); return fail("could not read file"); }
     fclose(f);
 
     // load and setup OpenMPT instance
@@ -448,19 +446,9 @@ bool Application::loadModule(const char* path) {
     try {
         m_mod = new openmpt::module(m_mod_data, std::clog, ctls);
     } catch (openmpt::exception& e) {
-        Dprintf("exception caught from OpenMPT: %s\n", e.what());
-        m_details.assign(std::string("invalid module - ") + e.what());
-        delete m_mod;
-        m_mod = nullptr;
-        updateLayout(true);
-        return false;
+        return fail(std::string("invalid module - ") + e.what());
     }
-    if (!m_mod) {
-        Dprintf("module loading failed.\n");
-        m_details.assign("invalid module data");
-        updateLayout(true);
-        return false;
-    }
+    if (!m_mod) { return fail("invalid module data"); }
     Dprintf("module loaded successfully.\n");
     switch (m_config.filter) {
         case FilterMethod::None:   m_mod->set_render_param(openmpt::module::render_param::RENDER_INTERPOLATIONFILTER_LENGTH, 1); break;
