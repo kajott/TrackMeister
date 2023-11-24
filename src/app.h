@@ -30,6 +30,7 @@ class Application {
     Config m_config;
     openmpt::module* m_mod = nullptr;
     std::vector<std::byte> m_mod_data;
+    std::vector<uint32_t> m_playableExts;
     std::string m_mainIniFile;
 
     // metadata
