@@ -150,9 +150,10 @@ void Application::handleKey(int key, bool ctrl, bool shift, bool alt) {
         case 'F':  // start fade-out
             fadeOut();
             break;
-        case 0xF5:  // [F5] reload module
-            loadModule(m_fullpath.c_str());
-            break;
+        case 0xF5: {  // [F5] reload module
+            std::string savePath(m_fullpath);
+            loadModule(savePath.c_str());
+            break; }
         case 0xFB:  // [F11] toggle fullscreen
             m_sys.toggleFullscreen();
             break;
