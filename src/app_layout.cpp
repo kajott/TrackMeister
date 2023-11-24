@@ -122,6 +122,7 @@ void Application::updateLayout(bool resetBoxVisibility) {
         m_pdPosChars = int(strlen(fmt.posFormat));
         m_pdChannelChars = int(strlen(fmt.channelFormat));
         int gapWidth = textWidth(m_pdTextSize, fmt.sep);
+        m_pdNoteWidth = textWidth(m_pdTextSize, "G#0");
         m_pdTextY0 = (m_infoEndY + m_screenSizeY - m_pdTextSize) >> 1;
         m_pdTextDY = m_pdTextSize + toPixels(m_config.patternLineSpacing);
         m_pdRows = (m_pdTextY0 - m_infoEndY + m_pdTextSize - 1) / m_pdTextSize;
@@ -166,6 +167,7 @@ void Application::updateLayout(bool resetBoxVisibility) {
     m_pdChannelX0 += pdXoffset;
     m_pdBarStartX = pdXoffset - toPixels(m_config.patternBarPaddingX);
     m_pdBarEndX = pdXoffset + pdWidth + toPixels(m_config.patternBarPaddingX);
+    m_vuHeight = float(toPixels(m_config.vuHeight));
 
     // set up toast geometry
     m_toastTextSize = toPixels(m_config.toastTextSize);

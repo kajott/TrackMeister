@@ -102,6 +102,11 @@ struct Config {
     float    patternAlphaFalloff      = 1.0f;         //!< amount of alpha falloff for the outermost rows in the pattern display; 0.0 = no falloff, 1.0 = falloff to full transparency
     float    patternAlphaFalloffShape = 1.5f;         //!< shape (power) of the alpha falloff in the pattern display; the higher, the more rows will retain a relatively high opacity
 
+    bool     vuEnabled                = true;         //!< whether to enable the fake VU meters by default after loading a module
+    int      vuHeight                 = 200;          //!< height of the fake VU meters
+    uint32_t vuUpperColor             = 0x10FF80FFu;  //!< color of upper end of the fake VU meters
+    uint32_t vuLowerColor             = 0x50FF00FFu;  //!< color of lower end of the fake VU meters
+
     int      toastTextSize            = 24;           //!< text size of a "toast" status message
     int      toastMarginX             = 0;            //!< left and right margin inside a "toast" status message (not including the rounded borders)
     int      toastMarginY             = 6;            //!< top and bottom margin inside a "toast" status message

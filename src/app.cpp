@@ -99,8 +99,11 @@ void Application::handleKey(int key, bool ctrl, bool shift, bool alt) {
         case ' ':  // [Space] pause/play
             if (m_mod) { m_sys.togglePause(); }
             break;
-        case 9:  // [Tab]
+        case '\t':  // [Tab] show/hide info
             cycleBoxVisibility();
+            break;
+        case '\r':  // [Enter] show/hide fake VU meters
+            m_vuVisible = !m_vuVisible;
             break;
         case 'A':  // toggle autoscroll
             m_metaTextAutoScroll = !m_metaTextAutoScroll;
@@ -254,6 +257,20 @@ void Application::draw(float dt) {
                  float((clearColor >>  8) & 0xFF) * float(1.f/255.f),
                  float((clearColor >> 16) & 0xFF) * float(1.f/255.f), 1.f);
     glClear(GL_COLOR_BUFFER_BIT);
+
+    // draw VU meters
+    if (m_mod && m_vuVisible && (m_vuHeight > 0.0f) && ((m_config.vuLowerColor | m_config.vuUpperColor) & 0xFF000000u)) {
+        for (int ch = 0;  ch < m_numChannels;  ++ch) {
+            int x = m_pdChannelX0 + ch * m_pdChannelDX;
+            float vu = std::min(1.0f, m_mod->get_current_channel_vu_mono(ch));
+            if (vu > 0.0f) {
+                m_renderer.box(x, m_pdTextY0 - int(vu * m_vuHeight + 0.5f),
+                               x + m_pdNoteWidth, m_pdTextY0,
+                               m_config.vuUpperColor,
+                               m_config.vuLowerColor);
+            }
+        }
+    }
 
     // draw pattern display
     if (m_mod) {
@@ -560,6 +577,9 @@ bool Application::loadModule(const char* path) {
     m_numChannels = m_mod->get_num_channels();
     m_duration = std::min(float(m_mod->get_duration_seconds()), m_config.maxScrollDuration);
     m_metaTextAutoScroll = m_config.enableAutoScroll;
+    m_infoVisible = m_config.infoEnabled;
+    m_metaVisible = m_config.metaEnabled;
+    m_vuVisible = m_config.vuEnabled;
     updateLayout(true);
     return true;
 }

@@ -334,6 +334,26 @@ const ConfigItem g_ConfigItems[] = { {
         [] (const Config& cfg) -> std::string { return ConfigItem::formatFloat(cfg.patternAlphaFalloffShape); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseFloat(cfg.patternAlphaFalloffShape, s), s); }
     }, {
+        true, "vu enabled                 ",
+        "whether to enable the fake VU meters by default after loading a module",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.vuEnabled); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.vuEnabled, s), s); }
+    }, {
+        false, "vu height                  ",
+        "height of the fake VU meters",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.vuHeight); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.vuHeight, s), s); }
+    }, {
+        false, "vu upper color             ",
+        "color of upper end of the fake VU meters",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.vuUpperColor); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.vuUpperColor, s), s); }
+    }, {
+        false, "vu lower color             ",
+        "color of lower end of the fake VU meters",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.vuLowerColor); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.vuLowerColor, s), s); }
+    }, {
         true, "toast text size            ",
         "text size of a \"toast\" status message",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.toastTextSize); },

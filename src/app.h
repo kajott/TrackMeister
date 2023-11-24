@@ -62,14 +62,15 @@ class Application {
     int m_pdPosChars, m_pdChannelChars;
     int m_pdTextSize, m_pdTextY0, m_pdTextDY, m_pdRows;
     int m_pdPosX, m_pdChannelX0, m_pdChannelDX;
-    float m_pdPipeDX;
+    float m_pdPipeDX, m_pdNoteWidth;
     int m_pdBarStartX, m_pdBarEndX, m_pdBarRadius;
     int m_toastTextSize, m_toastY, m_toastDX, m_toastDY;
+    float m_vuHeight;
 
     // current view state
     float m_metaTextY, m_metaTextTargetY;
     bool m_metaTextAutoScroll = true;
-    bool m_infoVisible, m_metaVisible;
+    bool m_infoVisible, m_metaVisible, m_vuVisible;
 
     // pattern data cache
     struct CacheItem { char text[16], attr[16]; };
