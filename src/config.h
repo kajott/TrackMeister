@@ -43,6 +43,7 @@ struct Config {
     bool     autoScrollEnabled        = true;         //!< whether to enable automatic scrolling in the metadata sidebar after loading a module
     float    maxScrollDuration        = 4.f * 60.f;   //!< maximum duration after which automatic metadata scrolling reaches the end, in seconds; if the module is shorter than that, the module's duration will be used instead
     float    fadeDuration             = 10.f;         //!< duration of a fade-out, in seconds
+    float    autoFadeOutAt            = 0.0f;         //!< number of seconds after which the song shall be faded out automatically (0 = no auto-fade)
 
     uint32_t emptyBackground          = 0xFF503010u;  //!< background color of "no module loaded" screen
     uint32_t patternBackground        = 0xFF503010u;  //!< background color of pattern display

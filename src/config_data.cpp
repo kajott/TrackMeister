@@ -69,6 +69,11 @@ const ConfigItem g_ConfigItems[] = { {
         [] (const Config& cfg) -> std::string { return ConfigItem::formatFloat(cfg.fadeDuration); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseFloat(cfg.fadeDuration, s), s); }
     }, {
+        false, "auto fade out at           ",
+        "number of seconds after which the song shall be faded out automatically (0 = no auto-fade)",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatFloat(cfg.autoFadeOutAt); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseFloat(cfg.autoFadeOutAt, s), s); }
+    }, {
         true, "empty background           ",
         "background color of \"no module loaded\" screen",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.emptyBackground); },

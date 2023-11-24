@@ -8,9 +8,10 @@ This application is a player for [tracker music files](https://en.wikipedia.org/
 - based on [libopenmpt](https://lib.openmpt.org/libopenmpt/), a very well-regarded library for module file playback
 - plays all common formats: MOD, XM, IT, S3M, and a dozen others
 - fullscreen interface based on OpenGL
-- metadata display (title, artist, technical info, module comment, intstrument and sample names)
+- metadata display (title, artist, technical info, module comment, intstrument and sample names) with smooth scrolling
 - pattern display for visualization, including channel names (if present in the module file)
 - fake VU meters (based on note velocity and channel, not the actual audio samples)
+- smooth fade out (triggered manually, or after a specific time)
 - cross-platform (tested on Windows and Linux)
 - single executable; no extra DLLs/`.so`s needed
 - open source (MIT license)

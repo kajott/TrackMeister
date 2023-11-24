@@ -77,6 +77,7 @@ class Application {
     bool m_infoVisible, m_metaVisible, m_namesVisible, m_vuVisible;
     bool m_fadeActive = false;
     int m_fadeGain, m_fadeRate;
+    bool m_autoFadeInitiated = false;
 
     // pattern data cache
     struct CacheItem { char text[16], attr[16]; };

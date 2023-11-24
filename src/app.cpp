@@ -280,6 +280,12 @@ void Application::draw(float dt) {
         }
     }
 
+    // start auto-fading, if applicable
+    if ((m_config.autoFadeOutAt > 0.0f) && !m_autoFadeInitiated && (m_position > m_config.autoFadeOutAt)) {
+        fadeOut();
+        m_autoFadeInitiated = true;
+    }
+
     // handle animations
     if (m_metaTextAutoScroll) {
         setMetadataScroll(m_metaTextMinY + (m_metaTextMaxY - m_metaTextMinY) * m_position / m_duration);
@@ -473,6 +479,7 @@ void Application::unloadModule() {
     m_numChannels = 0;
     m_currentPattern = -1;
     m_patternLength = 0;
+    m_autoFadeInitiated = true;
     m_sys.setWindowTitle(baseWindowTitle);
     updateLayout(true);
     Dprintf("module unloaded\n");
@@ -645,6 +652,7 @@ bool Application::loadModule(const char* path) {
     m_namesVisible = m_config.channelNamesEnabled && namesValid();
     m_vuVisible    = m_config.vuEnabled;
     m_fadeActive   = false;
+    m_autoFadeInitiated = false;
     updateLayout(true);
     return true;
 }
