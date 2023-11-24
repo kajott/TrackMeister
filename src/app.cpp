@@ -663,12 +663,7 @@ bool Application::loadModule(const char* path) {
     m_sys.setWindowTitle((PathUtil::basename(m_fullpath) + " - " + baseWindowTitle).c_str());
     m_duration = std::min(float(m_mod->get_duration_seconds()), m_config.maxScrollDuration);
     m_metaTextAutoScroll = m_config.autoScrollEnabled;
-    m_infoVisible  = m_config.infoEnabled && infoValid();
-    m_metaVisible  = m_config.metaEnabled && metaValid();
-    m_namesVisible = m_config.channelNamesEnabled && namesValid();
-    m_vuVisible    = m_config.vuEnabled;
-    m_fadeActive   = false;
-    m_autoFadeInitiated = false;
+    m_fadeActive = m_autoFadeInitiated = false;
     updateLayout(true);
     return true;
 }

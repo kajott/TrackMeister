@@ -30,13 +30,16 @@ void Application::updateLayout(bool resetBoxVisibility) {
     m_screenSizeX = m_renderer.viewportWidth();
     m_screenSizeY = m_renderer.viewportHeight();
 
-    // set info/metadata box visibility flags
+    // set UI element visibility flags
     if (resetBoxVisibility) {
-        m_infoVisible = m_config.infoEnabled && infoValid();
-        m_metaVisible = m_config.metaEnabled && metaValid();
+        m_infoVisible  = m_config.infoEnabled && infoValid();
+        m_metaVisible  = m_config.metaEnabled && metaValid();
+        m_namesVisible = m_config.channelNamesEnabled && namesValid();
+        m_vuVisible    = m_config.vuEnabled;
     } else {
-        m_infoVisible = m_infoVisible && infoValid();
-        m_metaVisible = m_metaVisible && metaValid();
+        m_infoVisible  = m_infoVisible  && infoValid();
+        m_metaVisible  = m_metaVisible  && metaValid();
+        m_namesVisible = m_namesVisible && namesValid();
     }
 
     // set up "no module loaded" screen geometry
@@ -120,7 +123,8 @@ void Application::updateLayout(bool resetBoxVisibility) {
         m_metaTextMinY = float(toPixels(m_config.metaMarginY));
         m_metaTextMaxY = std::min(m_metaTextMinY, float(m_screenSizeY - margin) - m_metadata.height());
         Dprintf("metadata box scroll range: %.1f ... %.1f\n", m_metaTextMinY, m_metaTextMaxY);
-        m_metaTextY = m_metaTextTargetY = m_metaTextMinY;
+        m_metaTextTargetY = m_metaTextMinY;
+        if (resetBoxVisibility) { m_metaTextY = m_metaTextTargetY; }
     }
 
     // set up pattern display geometry -- step 1: define possible formats

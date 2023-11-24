@@ -1,6 +1,5 @@
 ## Suggested Features
 
-- large entry number display
 - full file browser
 - more advanced auto-scrolling (up and down with defined minimum speed?)
 - optional pixel font (with antialiased blocky filtering instead of MSDF)
