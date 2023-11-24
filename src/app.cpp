@@ -89,8 +89,9 @@ bool Application::renderAudio(int16_t* data, int sampleCount, bool stereo, int s
     }
     if (m_fadeActive) {
         remain = stereo ? (sampleCount << 1) : sampleCount;
+        int gain16b = m_fadeGain >> 15;
         while (remain--) {
-            *data = (*data * (m_fadeGain >> 15) + 32767) >> 16;
+            *data = int16_t((int(*data) * gain16b + 32767) >> 16);
             ++data;
             m_fadeGain = std::max(0, m_fadeGain - m_fadeRate);
         }

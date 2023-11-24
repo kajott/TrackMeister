@@ -63,7 +63,8 @@ class Application {
     int m_pdPosChars, m_pdChannelChars;
     int m_pdTextSize, m_pdTextY0, m_pdTextDY, m_pdRows;
     int m_pdPosX, m_pdChannelX0, m_pdChannelDX;
-    float m_pdPipeDX, m_pdNoteWidth;
+    float m_pdPipeDX;
+    int m_pdNoteWidth;
     int m_pdBarStartX, m_pdBarEndX, m_pdBarRadius;
     int m_toastTextSize, m_toastY, m_toastDX, m_toastDY;
     float m_vuHeight;
