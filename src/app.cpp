@@ -48,7 +48,7 @@ void Application::init(int argc, char* argv[]) {
             false,
         #endif
         m_config.windowWidth, m_config.windowHeight);
-    m_sys.initAudio(true, m_config.sampleRate, m_config.audioBufferSize);
+    m_sampleRate = m_sys.initAudio(true, m_config.sampleRate, m_config.audioBufferSize);
     if (!m_renderer.init()) {
         m_sys.fatalError("initialization failed", "could not initialize text box renderer");
     }
@@ -76,7 +76,7 @@ void Application::shutdown() {
 
 bool Application::renderAudio(int16_t* data, int sampleCount, bool stereo, int sampleRate) {
     if (!m_mod) { return false; }
-    int done;
+    int done, remain;
     if (stereo) {
         done = int(m_mod->read_interleaved_stereo(sampleRate, sampleCount, data));
     } else {
@@ -84,10 +84,32 @@ bool Application::renderAudio(int16_t* data, int sampleCount, bool stereo, int s
     }
     if (done < sampleCount) {
         data += stereo ? (done << 1) : done;
-        sampleCount -= done;
-        ::memset(static_cast<void*>(data), 0, stereo ? (sampleCount << 2) : (sampleCount << 1));
+        remain = sampleCount - done;
+        ::memset(static_cast<void*>(data), 0, stereo ? (remain << 2) : (remain << 1));
+    }
+    if (m_fadeActive) {
+        remain = stereo ? (sampleCount << 1) : sampleCount;
+        while (remain--) {
+            *data = (*data * (m_fadeGain >> 15) + 32767) >> 16;
+            ++data;
+            m_fadeGain = std::max(0, m_fadeGain - m_fadeRate);
+        }
     }
     return true;
+}
+
+void Application::fadeOut() {
+    if (!m_mod) { return; }
+    if (m_fadeActive) {
+        m_sys.pause();
+        m_fadeActive = false;
+        return;
+    }
+    AudioMutexGuard mtx_(m_sys);
+    m_fadeGain = 0x7FFFFFFF;
+    m_fadeRate = int(double(m_fadeGain) / (double(m_sampleRate) * 2.0 * double(m_config.fadeDuration)) + 0.5);
+    Dprintf("fadeOut(): fade rate = %d\n", m_fadeRate);
+    m_fadeActive = true;
 }
 
 void Application::handleKey(int key, bool ctrl, bool shift, bool alt) {
@@ -97,7 +119,7 @@ void Application::handleKey(int key, bool ctrl, bool shift, bool alt) {
             m_sys.quit();
             break;
         case ' ':  // [Space] pause/play
-            if (m_mod) { m_sys.togglePause(); }
+            if (m_mod) { m_fadeActive = false; m_sys.togglePause(); }
             break;
         case '\t':  // [Tab] show/hide info
             cycleBoxVisibility();
@@ -120,6 +142,9 @@ void Application::handleKey(int key, bool ctrl, bool shift, bool alt) {
             break;
         case 'V':  // show version
             toastVersion();
+            break;
+        case 'F':  // start fade-out
+            fadeOut();
             break;
         case 0xF5:  // [F5] reload module
             loadModule(m_fullpath.c_str());
@@ -234,6 +259,8 @@ void Application::toastVersion() {
 ///// drawing
 
 void Application::draw(float dt) {
+    float fadeAlpha = 1.0f;
+
     // latch current position
     if (m_mod) {
         AudioMutexGuard mtx_(m_sys);
@@ -243,6 +270,9 @@ void Application::draw(float dt) {
         m_currentPattern = pat;
         m_currentRow = m_mod->get_current_row();
         m_position = float(m_mod->get_position_seconds());
+        if (m_fadeActive) {
+            fadeAlpha = float(float(m_fadeGain) / float(0x7FFFFFFF));
+        }
     }
 
     // handle animations
@@ -262,7 +292,7 @@ void Application::draw(float dt) {
     if (m_mod && m_vuVisible && (m_vuHeight > 0.0f) && ((m_config.vuLowerColor | m_config.vuUpperColor) & 0xFF000000u)) {
         for (int ch = 0;  ch < m_numChannels;  ++ch) {
             int x = m_pdChannelX0 + ch * m_pdChannelDX;
-            float vu = std::min(1.0f, m_mod->get_current_channel_vu_mono(ch));
+            float vu = std::min(1.0f, m_mod->get_current_channel_vu_mono(ch)) * fadeAlpha;
             if (vu > 0.0f) {
                 m_renderer.box(x, m_pdTextY0 - int(vu * m_vuHeight + 0.5f),
                                x + m_pdNoteWidth, m_pdTextY0,
@@ -274,14 +304,14 @@ void Application::draw(float dt) {
 
     // draw pattern display
     if (m_mod) {
+        uint32_t barColor = m_renderer.extraAlpha(m_config.patternBarBackground, fadeAlpha);
         m_renderer.box(m_pdBarStartX, m_pdTextY0, m_pdBarEndX, m_pdTextY0 + m_pdTextSize,
-                       m_config.patternBarBackground, m_config.patternBarBackground, false,
-                       m_pdBarRadius);
+                       barColor, barColor, false, m_pdBarRadius);
         CacheItem tempItem;
         for (int dRow = -m_pdRows;  dRow <= m_pdRows;  ++dRow) {
             int row = dRow + m_currentRow;
             if ((row < 0) || (row >= m_patternLength)) { continue; }
-            float alpha = 1.0f - std::pow(std::abs(float(dRow) / float(m_pdRows + 1)), m_config.patternAlphaFalloffShape) * m_config.patternAlphaFalloff;
+            float alpha = fadeAlpha * (1.0f - std::pow(std::abs(float(dRow) / float(m_pdRows + 1)), m_config.patternAlphaFalloffShape) * m_config.patternAlphaFalloff);
             float y = float(m_pdTextY0 + dRow * m_pdTextDY);
             if (m_pdPosChars) {
                 formatPosition(m_currentOrder, m_currentPattern, row, tempItem.text, tempItem.attr, m_pdPosChars);
@@ -580,6 +610,7 @@ bool Application::loadModule(const char* path) {
     m_infoVisible = m_config.infoEnabled;
     m_metaVisible = m_config.metaEnabled;
     m_vuVisible = m_config.vuEnabled;
+    m_fadeActive = false;
     updateLayout(true);
     return true;
 }

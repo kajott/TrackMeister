@@ -46,6 +46,7 @@ The following other controls are available:
 | **Ctrl+End** | load last module in the directory
 | Mouse Wheel | manually scroll through the metadata bar (stops autoscrolling)
 | **A** | stop / resume autoscrolling
+| **F** | slowly fade out the song
 | **V** | show the TMCP and libopenmpt version numbers
 | **F5** | reload the current module and the application's configuration
 | **F11** | toggle fullscreen mode

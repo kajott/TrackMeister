@@ -60,9 +60,14 @@ const ConfigItem g_ConfigItems[] = { {
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.enableAutoScroll, s), s); }
     }, {
         false, "max scroll duration        ",
-        "maximum duration after which automatic metadata scrolling reaches the end; if the module is shorter than that, the module's duration will be used instead",
+        "maximum duration after which automatic metadata scrolling reaches the end, in seconds; if the module is shorter than that, the module's duration will be used instead",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatFloat(cfg.maxScrollDuration); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseFloat(cfg.maxScrollDuration, s), s); }
+    }, {
+        false, "fade duration              ",
+        "duration of a fade-out, in seconds",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatFloat(cfg.fadeDuration); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseFloat(cfg.fadeDuration, s), s); }
     }, {
         true, "empty background           ",
         "background color of \"no module loaded\" screen",

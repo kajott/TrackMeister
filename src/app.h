@@ -28,6 +28,7 @@ class Application {
     SystemInterface& m_sys;
     TextBoxRenderer m_renderer;
     Config m_config;
+    int m_sampleRate;
     openmpt::module* m_mod = nullptr;
     std::vector<std::byte> m_mod_data;
     std::vector<uint32_t> m_playableExts;
@@ -67,10 +68,12 @@ class Application {
     int m_toastTextSize, m_toastY, m_toastDX, m_toastDY;
     float m_vuHeight;
 
-    // current view state
+    // current view/playback state
     float m_metaTextY, m_metaTextTargetY;
     bool m_metaTextAutoScroll = true;
     bool m_infoVisible, m_metaVisible, m_vuVisible;
+    bool m_fadeActive = false;
+    int m_fadeGain, m_fadeRate;
 
     // pattern data cache
     struct CacheItem { char text[16], attr[16]; };
@@ -115,4 +118,5 @@ private:  // business logic
     void toast(const char* msg);
     inline void toast(const std::string& msg) { toast(msg.c_str()); }
     void toastVersion();
+    void fadeOut();
 };
