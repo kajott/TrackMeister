@@ -293,7 +293,7 @@ void Application::draw(float dt) {
     glClear(GL_COLOR_BUFFER_BIT);
 
     // draw VU meters
-    if (m_mod && m_vuVisible && (m_vuHeight > 0.0f) && ((m_config.vuLowerColor | m_config.vuUpperColor) & 0xFF000000u)) {
+    if (m_mod && m_vuVisible && m_sys.isPlaying() && (m_vuHeight > 0.0f) && ((m_config.vuLowerColor | m_config.vuUpperColor) & 0xFF000000u)) {
         for (int ch = 0;  ch < m_numChannels;  ++ch) {
             int x = m_pdChannelX0 + ch * m_pdChannelDX;
             float vu = std::min(1.0f, m_mod->get_current_channel_vu_mono(ch)) * fadeAlpha;
