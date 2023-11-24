@@ -128,6 +128,9 @@ void Application::handleKey(int key, bool ctrl, bool shift, bool alt) {
         case '\r':  // [Enter] show/hide fake VU meters
             m_vuVisible = !m_vuVisible;
             break;
+        case 'N':  // [N] show/hide channel names
+            m_namesVisible = !m_namesVisible && namesValid();
+            break;
         case 'A':  // toggle autoscroll
             m_metaTextAutoScroll = !m_metaTextAutoScroll;
             break;
@@ -344,6 +347,19 @@ void Application::draw(float dt) {
         }
     }
 
+    // draw channel names
+    if (m_namesVisible && namesValid()) {
+        for (int ch = 0;  ch < m_numChannels;  ++ch) {
+            if (m_channelNames[ch].empty()) { continue; }
+            int x = m_pdChannelX0 + ch * m_pdChannelDX;
+            m_renderer.box(x, m_channelNameBarStartY, x + m_pdChannelWidth, m_screenSizeY,
+                           m_config.channelNameUpperColor, m_config.channelNameLowerColor);
+            m_renderer.text(float(x) + m_channelNameOffsetX, float(m_channelNameTextY), float(m_pdTextSize),
+                            m_channelNames[ch].substr(0, m_pdChannelChars).c_str(), Align::Center,
+                            m_config.channelNameTextColor);
+        }
+    }
+
     // draw info box
     if (m_infoVisible) {
         m_renderer.box(0, 0, m_metaStartX, m_infoEndY, m_config.infoBackground);
@@ -452,6 +468,7 @@ void Application::unloadModule() {
     m_artist.clear();
     m_details.clear();
     m_metadata.clear();
+    m_channelNames.clear();
     m_numChannels = 0;
     m_currentPattern = -1;
     m_patternLength = 0;
@@ -603,15 +620,30 @@ bool Application::loadModule(const char* path) {
     }
     m_metadata.ingest(meta2);
 
+    // get channel names
+    m_numChannels = m_mod->get_num_channels();
+    int ch = 0;
+    bool anyNameValid = false;
+    for (const auto& name : m_mod->get_channel_names()) {
+        if (!name.empty()) { anyNameValid = true; }
+        m_channelNames.push_back(name);
+        if (++ch >= m_numChannels) { break; }
+    }
+    if (anyNameValid) {
+        while (int(m_channelNames.size()) < m_numChannels) { m_channelNames.push_back(""); }
+    } else {
+        m_channelNames.clear();
+    }
+
     // done!
     m_sys.setWindowTitle((m_filename + " - " + baseWindowTitle).c_str());
-    m_numChannels = m_mod->get_num_channels();
     m_duration = std::min(float(m_mod->get_duration_seconds()), m_config.maxScrollDuration);
-    m_metaTextAutoScroll = m_config.enableAutoScroll;
-    m_infoVisible = m_config.infoEnabled;
-    m_metaVisible = m_config.metaEnabled;
-    m_vuVisible = m_config.vuEnabled;
-    m_fadeActive = false;
+    m_metaTextAutoScroll = m_config.autoScrollEnabled;
+    m_infoVisible  = m_config.infoEnabled && infoValid();
+    m_metaVisible  = m_config.metaEnabled && metaValid();
+    m_namesVisible = m_config.channelNamesEnabled && namesValid();
+    m_vuVisible    = m_config.vuEnabled;
+    m_fadeActive   = false;
     updateLayout(true);
     return true;
 }

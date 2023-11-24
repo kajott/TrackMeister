@@ -40,7 +40,7 @@ struct Config {
     FilterMethod filter        = FilterMethod::Auto;  //!< audio resampling filter to be used
     int      stereoSeparation         = 50;           //!< amount of stereo separation, in percent (0 = mono, 100 = full stereo, higher = fake surround)
 
-    bool     enableAutoScroll         = true;         //!< whether to enable automatic scrolling in the metadata sidebar after loading a module
+    bool     autoScrollEnabled        = true;         //!< whether to enable automatic scrolling in the metadata sidebar after loading a module
     float    maxScrollDuration        = 4.f * 60.f;   //!< maximum duration after which automatic metadata scrolling reaches the end, in seconds; if the module is shorter than that, the module's duration will be used instead
     float    fadeDuration             = 10.f;         //!< duration of a fade-out, in seconds
 
@@ -103,10 +103,16 @@ struct Config {
     float    patternAlphaFalloff      = 1.0f;         //!< amount of alpha falloff for the outermost rows in the pattern display; 0.0 = no falloff, 1.0 = falloff to full transparency
     float    patternAlphaFalloffShape = 1.5f;         //!< shape (power) of the alpha falloff in the pattern display; the higher, the more rows will retain a relatively high opacity
 
+    bool     channelNamesEnabled      = true;         //!< whether to enable the channel name displays by default after loading a module
+    int      channelNamePaddingY      = 0;            //!< extra vertical padding in the channel name boxes
+    uint32_t channelNameUpperColor    = 0x00000000u;  //!< color of the upper end of the channel name boxes
+    uint32_t channelNameLowerColor    = 0xFF000000u;  //!< color of the lower end of the channel name boxes
+    uint32_t channelNameTextColor     = 0xFFC0FF40u;  //!< channel name text color
+
     bool     vuEnabled                = true;         //!< whether to enable the fake VU meters by default after loading a module
     int      vuHeight                 = 200;          //!< height of the fake VU meters
-    uint32_t vuUpperColor             = 0x10FF80FFu;  //!< color of upper end of the fake VU meters
-    uint32_t vuLowerColor             = 0x50FF00FFu;  //!< color of lower end of the fake VU meters
+    uint32_t vuUpperColor             = 0x10FF80FFu;  //!< color of the upper end of the fake VU meters
+    uint32_t vuLowerColor             = 0x50FF00FFu;  //!< color of the lower end of the fake VU meters
 
     int      toastTextSize            = 24;           //!< text size of a "toast" status message
     int      toastMarginX             = 0;            //!< left and right margin inside a "toast" status message (not including the rounded borders)

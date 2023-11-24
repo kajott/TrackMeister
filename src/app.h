@@ -40,6 +40,7 @@ class Application {
     std::string m_artist;
     std::string m_title;
     std::string m_details;
+    std::vector<std::string> m_channelNames;
     TextArea m_metadata;
     float m_duration;
 
@@ -64,15 +65,16 @@ class Application {
     int m_pdTextSize, m_pdTextY0, m_pdTextDY, m_pdRows;
     int m_pdPosX, m_pdChannelX0, m_pdChannelDX;
     float m_pdPipeDX;
-    int m_pdNoteWidth;
+    int m_pdNoteWidth, m_pdChannelWidth;
     int m_pdBarStartX, m_pdBarEndX, m_pdBarRadius;
     int m_toastTextSize, m_toastY, m_toastDX, m_toastDY;
-    float m_vuHeight;
+    int m_channelNameBarStartY, m_channelNameTextY;
+    float m_channelNameOffsetX, m_vuHeight;
 
     // current view/playback state
     float m_metaTextY, m_metaTextTargetY;
     bool m_metaTextAutoScroll = true;
-    bool m_infoVisible, m_metaVisible, m_vuVisible;
+    bool m_infoVisible, m_metaVisible, m_namesVisible, m_vuVisible;
     bool m_fadeActive = false;
     int m_fadeGain, m_fadeRate;
 
@@ -114,8 +116,9 @@ private:  // business logic
     static void formatPosition(int order, int pattern, int row, char* text, char* attr, int size);
     void addMetadataGroup(TextArea& block, const std::vector<std::string>& data, const char* title, bool numbering=true, int indexStart=1);
     void setMetadataScroll(float y);
-    inline bool infoValid() const { return !m_filename.empty() || !m_title.empty() || !m_artist.empty() || !m_details.empty(); }
-    inline bool metaValid() const { return !m_metadata.empty(); }
+    inline bool infoValid()  const { return !m_filename.empty() || !m_title.empty() || !m_artist.empty() || !m_details.empty(); }
+    inline bool metaValid()  const { return !m_metadata.empty(); }
+    inline bool namesValid() const { return !m_channelNames.empty(); }
     void toast(const char* msg);
     inline void toast(const std::string& msg) { toast(msg.c_str()); }
     void toastVersion();

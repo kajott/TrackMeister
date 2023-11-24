@@ -127,7 +127,8 @@ void Application::updateLayout(bool resetBoxVisibility) {
         m_pdTextDY = m_pdTextSize + toPixels(m_config.patternLineSpacing);
         m_pdRows = (m_pdTextY0 - m_infoEndY + m_pdTextSize - 1) / m_pdTextSize;
         m_pdChannelX0 = m_pdPosChars ? (textWidth(m_pdTextSize, fmt.posFormat) + gapWidth) : 0;
-        m_pdChannelDX = textWidth(m_pdTextSize, fmt.channelFormat) + gapWidth;
+        m_pdChannelWidth = textWidth(m_pdTextSize, fmt.channelFormat);
+        m_pdChannelDX = m_pdChannelWidth + gapWidth;
         m_pdPipeDX = 0.5f * float(m_pdTextSize) * (m_renderer.textWidth(fmt.sep) + m_renderer.textWidth("|"));
         m_pdBarRadius = (m_pdTextSize * m_config.patternBarBorderPercent) / 100;
         return m_pdChannelX0 + m_numChannels * m_pdChannelDX - gapWidth;
@@ -167,6 +168,12 @@ void Application::updateLayout(bool resetBoxVisibility) {
     m_pdChannelX0 += pdXoffset;
     m_pdBarStartX = pdXoffset - toPixels(m_config.patternBarPaddingX);
     m_pdBarEndX = pdXoffset + pdWidth + toPixels(m_config.patternBarPaddingX);
+
+    // set up channel name and VU meter geometry
+    int cnGap = toPixels(m_config.channelNamePaddingY);
+    m_channelNameTextY = m_screenSizeY - m_pdTextSize - cnGap;
+    m_channelNameBarStartY = m_channelNameTextY - cnGap;
+    m_channelNameOffsetX = float(m_pdChannelWidth) * 0.5f;
     m_vuHeight = float(toPixels(m_config.vuHeight));
 
     // set up toast geometry

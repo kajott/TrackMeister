@@ -54,10 +54,10 @@ const ConfigItem g_ConfigItems[] = { {
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.stereoSeparation); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.stereoSeparation, s), s); }
     }, {
-        true, "enable auto scroll         ",
+        true, "auto scroll enabled        ",
         "whether to enable automatic scrolling in the metadata sidebar after loading a module",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.enableAutoScroll); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.enableAutoScroll, s), s); }
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.autoScrollEnabled); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.autoScrollEnabled, s), s); }
     }, {
         false, "max scroll duration        ",
         "maximum duration after which automatic metadata scrolling reaches the end, in seconds; if the module is shorter than that, the module's duration will be used instead",
@@ -339,6 +339,31 @@ const ConfigItem g_ConfigItems[] = { {
         [] (const Config& cfg) -> std::string { return ConfigItem::formatFloat(cfg.patternAlphaFalloffShape); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseFloat(cfg.patternAlphaFalloffShape, s), s); }
     }, {
+        true, "channel names enabled      ",
+        "whether to enable the channel name displays by default after loading a module",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.channelNamesEnabled); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.channelNamesEnabled, s), s); }
+    }, {
+        false, "channel name padding Y     ",
+        "extra vertical padding in the channel name boxes",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.channelNamePaddingY); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.channelNamePaddingY, s), s); }
+    }, {
+        false, "channel name upper color   ",
+        "color of the upper end of the channel name boxes",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.channelNameUpperColor); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.channelNameUpperColor, s), s); }
+    }, {
+        false, "channel name lower color   ",
+        "color of the lower end of the channel name boxes",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.channelNameLowerColor); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.channelNameLowerColor, s), s); }
+    }, {
+        false, "channel name text color    ",
+        "channel name text color",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.channelNameTextColor); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.channelNameTextColor, s), s); }
+    }, {
         true, "vu enabled                 ",
         "whether to enable the fake VU meters by default after loading a module",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.vuEnabled); },
@@ -350,12 +375,12 @@ const ConfigItem g_ConfigItems[] = { {
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.vuHeight, s), s); }
     }, {
         false, "vu upper color             ",
-        "color of upper end of the fake VU meters",
+        "color of the upper end of the fake VU meters",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.vuUpperColor); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.vuUpperColor, s), s); }
     }, {
         false, "vu lower color             ",
-        "color of lower end of the fake VU meters",
+        "color of the lower end of the fake VU meters",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.vuLowerColor); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.vuLowerColor, s), s); }
     }, {
