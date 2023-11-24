@@ -54,7 +54,12 @@ const ConfigItem g_ConfigItems[] = { {
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.stereoSeparation); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.stereoSeparation, s), s); }
     }, {
-        true, "track number enabled       ",
+        true, "auto play                  ",
+        "automatically start playing when loading a module; you may want to turn this off for actual competitions",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.autoPlay); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.autoPlay, s), s); }
+    }, {
+        false, "track number enabled       ",
         "whether to extract and display the track number from the filename; used if the filename starts with two digits followed by a dash (-), underscore (_) or space",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.trackNumberEnabled); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.trackNumberEnabled, s), s); }

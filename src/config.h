@@ -40,6 +40,7 @@ struct Config {
     FilterMethod filter        = FilterMethod::Auto;  //!< audio resampling filter to be used
     int      stereoSeparation         = 50;           //!< amount of stereo separation, in percent (0 = mono, 100 = full stereo, higher = fake surround)
 
+    bool     autoPlay                 = true;         //!< automatically start playing when loading a module; you may want to turn this off for actual competitions
     bool     trackNumberEnabled       = true;         //!< whether to extract and display the track number from the filename; used if the filename starts with two digits followed by a dash (-), underscore (_) or space
     bool     autoScrollEnabled        = true;         //!< whether to enable automatic scrolling in the metadata sidebar after loading a module
     float    maxScrollDuration        = 4.f * 60.f;   //!< maximum duration after which automatic metadata scrolling reaches the end, in seconds; if the module is shorter than that, the module's duration will be used instead

@@ -665,6 +665,7 @@ bool Application::loadModule(const char* path) {
     m_metaTextAutoScroll = m_config.autoScrollEnabled;
     m_fadeActive = m_autoFadeInitiated = false;
     updateLayout(true);
+    if (m_config.autoPlay) { m_sys.play(); }
     return true;
 }
 

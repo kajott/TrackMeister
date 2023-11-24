@@ -30,8 +30,6 @@ This application is a player for [tracker music files](https://en.wikipedia.org/
 
 Just drag a module file onto the executable, or into the window once the player has already been started. If a directory is opened this way, the first playable file therein is loaded. Note that this is *not* recursive; TMCP won't play entire directory hierarchies.
 
-Playback is always paused after loading a module; this is by design. Press the **Space** key to start playback.
-
 The screen is split into three parts: The pattern display, the info bar at the top (containing basic information about the module format as well as filename, title and artist), and the metadata bar at the right (with the free-text module message, instrument and sample names). If the content doesn't fit in the metadata bar, it slowly scrolls down during playback, so it reaches the bottom end at the end of the track or after four minutes, whatever comes first.
 
 If a module's filename starts with exactly two decimal digits, followed by a space, dash (`-`) or undersore (`_`), the digits will be removed from the filename display and shown as a "track number" in a much larger font in the info bar instead. This can be used to curate playlists by simply prefixing each filename with `01_`, `02_` and so on.
@@ -92,7 +90,9 @@ All other lines contain key-value pairs of the form "`key = value`" or "`key: va
 
 To get a list of all possible settings, along with documentation and the default values for each setting, run TMCP and press **Ctrl+Shift+S**. This will generate a file `tmcp_default.ini` in the current directory (usually the program directory) that also be used as a template for an individual configuration.
 
-All sizes (font sizes, margins etc.) are specified in 1/1000s of the display width, so they are more or less resolution-independent. Colors are specified in HTML/CSS-style hexadecimal RGB notation, but with optional alpha, i.e. in the form `#rrggbb`, `#rrggbbaa`, `#rgb` or `#rgba`.
+All sizes (font sizes, margins etc.) are specified in 1/1000s of the display width, so they are more or less resolution-independent. <br>
+Boolean values can use any of the `1`/`0`, `false`/`true`, `yes`/`no` or `enabled`/`disabled` nomenclatures. <br>
+Colors are specified in HTML/CSS-style hexadecimal RGB notation, but with optional alpha, i.e. in the form `#rrggbb`, `#rrggbbaa`, `#rgb` or `#rgba`.
 
 Here's an example for a useful INI file:
 
@@ -102,6 +102,11 @@ Here's an example for a useful INI file:
     ; we want a decent filter and full stereo for most module formats
     filter=auto
     stereoSeparation=100
+
+    ; when hosting an actual competition, we want to start playback manually
+    autoplay=disabled
+    ; and we want fullscreen too!
+    fullscreen=yes
 
     [*.mod]
         ; this section is only active for MOD format file, which tend to be
