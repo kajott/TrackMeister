@@ -37,6 +37,7 @@ class Application {
     // metadata
     std::string m_fullpath;
     std::string m_filename;
+    char m_track[3] = {0,0,0};
     std::string m_artist;
     std::string m_title;
     std::string m_details;
@@ -55,8 +56,9 @@ class Application {
     // computed layout information (from updateLayout())
     int m_screenSizeX, m_screenSizeY;
     int m_emptyTextSize;
-    int m_infoTextSize, m_infoDetailsSize;
+    int m_trackTextSize, m_infoTextSize, m_infoDetailsSize;
     int m_infoEndY, m_infoShadowEndY;
+    float m_trackX, m_trackY;
     int m_infoKeyX, m_infoValueX;
     int m_infoFilenameY, m_infoArtistY, m_infoTitleY, m_infoDetailsY;
     int m_metaStartX, m_metaShadowStartX;
@@ -117,6 +119,7 @@ private:  // business logic
     static void formatPosition(int order, int pattern, int row, char* text, char* attr, int size);
     void addMetadataGroup(TextArea& block, const std::vector<std::string>& data, const char* title, bool numbering=true, int indexStart=1);
     void setMetadataScroll(float y);
+    inline bool trackValid() const { return (m_track[0] != '\0'); }
     inline bool infoValid()  const { return !m_filename.empty() || !m_title.empty() || !m_artist.empty() || !m_details.empty(); }
     inline bool metaValid()  const { return !m_metadata.empty(); }
     inline bool namesValid() const { return !m_channelNames.empty(); }

@@ -14,6 +14,10 @@
 #include "textarea.h"
 #include "app.h"
 
+constexpr float FontBaselinePos  = 0.820f;  //!< relative vertical position of the font's baseline
+constexpr float FontNumberHeight = 0.595f;  //!< relative height of a number in the font
+constexpr float FontNumberUpperPos = FontBaselinePos - FontNumberHeight;  //!< relative vertical position of the top end of a number
+
 int Application::textWidth(int size, const char* text) const {
     return int(std::ceil(m_renderer.textWidth(text) * float(size)));
 }
@@ -46,25 +50,27 @@ void Application::updateLayout(bool resetBoxVisibility) {
         // layout info box
         m_infoTextSize = toPixels(m_config.infoTextSize);
         m_infoDetailsSize = toPixels(m_config.infoDetailsTextSize);
-        m_infoKeyX = m_infoValueX = toPixels(m_config.infoMarginX);
+        m_infoKeyX = toPixels(m_config.infoMarginX);
+        m_trackX = float(m_infoKeyX);
+        m_infoValueX = 0;
         int lineSpacing = toPixels(m_config.infoLineSpacing);
         m_infoEndY = toPixels(m_config.infoMarginY) - lineSpacing;
         if (!m_filename.empty()) {
             m_infoEndY += lineSpacing;
             m_infoFilenameY = m_infoEndY;
-            m_infoValueX = std::max(m_infoValueX, m_infoKeyX + textWidth(m_infoTextSize, "File: "));
+            m_infoValueX = std::max(m_infoValueX, toPixels(m_config.infoKeyPaddingX) + textWidth(m_infoTextSize, "File:"));
             m_infoEndY += m_infoTextSize;
         }
         if (!m_artist.empty()) {
             m_infoEndY += lineSpacing;
             m_infoArtistY = m_infoEndY;
-            m_infoValueX = std::max(m_infoValueX, m_infoKeyX + textWidth(m_infoTextSize, "Artist: "));
+            m_infoValueX = std::max(m_infoValueX, toPixels(m_config.infoKeyPaddingX) + textWidth(m_infoTextSize, "Artist:"));
             m_infoEndY += m_infoTextSize;
         }
         if (!m_title.empty()) {
             m_infoEndY += lineSpacing;
             m_infoTitleY = m_infoEndY;
-            m_infoValueX = std::max(m_infoValueX, m_infoKeyX + textWidth(m_infoTextSize, "Title: "));
+            m_infoValueX = std::max(m_infoValueX, toPixels(m_config.infoKeyPaddingX) + textWidth(m_infoTextSize, "Title:"));
             m_infoEndY += m_infoTextSize;
         }
         if (!m_details.empty()) {
@@ -72,7 +78,25 @@ void Application::updateLayout(bool resetBoxVisibility) {
             m_infoDetailsY = m_infoEndY;
             m_infoEndY += m_infoDetailsSize;
         }
-        m_infoEndY += lineSpacing + toPixels(m_config.infoMarginY);
+        m_infoEndY += lineSpacing;
+        m_trackTextSize = toPixels(m_config.infoTrackTextSize);
+        // for the track number, geometry is quite complicated; we try to align
+        // the top of the number with the top of the other text, requiring some
+        // font metrics and a bit of math
+        m_trackY = float(toPixels(m_config.infoMarginY))         // indicated top position
+                 + float(m_infoTextSize)  * FontNumberUpperPos   // where the top of the normal lines ends up at
+                 - float(m_trackTextSize) * FontNumberUpperPos;  // where we need to put the top
+        if (trackValid()) {
+            m_infoKeyX += textWidth(m_trackTextSize, m_track) + toPixels(m_config.infoTrackPaddingX);
+            // for the bottom end of the track number, do some font metrics magic again
+            m_infoEndY = std::max(m_infoEndY, int(
+                  m_trackY                                     // upper edge of text box
+                + float(m_trackTextSize) * FontBaselinePos     // end of track number text
+                + float(m_infoTextSize)  * FontNumberUpperPos  // extra margin for visual equalization
+                + 0.5f  /* rounding */ ));
+        }
+        m_infoValueX += m_infoKeyX;
+        m_infoEndY += toPixels(m_config.infoMarginY);
         m_infoShadowEndY = m_infoEndY + m_config.infoShadowSize;
     }
 

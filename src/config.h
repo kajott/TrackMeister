@@ -40,6 +40,7 @@ struct Config {
     FilterMethod filter        = FilterMethod::Auto;  //!< audio resampling filter to be used
     int      stereoSeparation         = 50;           //!< amount of stereo separation, in percent (0 = mono, 100 = full stereo, higher = fake surround)
 
+    bool     trackNumberEnabled       = true;         //!< whether to extract and display the track number from the filename; used if the filename starts with two digits followed by a dash (-), underscore (_) or space
     bool     autoScrollEnabled        = true;         //!< whether to enable automatic scrolling in the metadata sidebar after loading a module
     float    maxScrollDuration        = 4.f * 60.f;   //!< maximum duration after which automatic metadata scrolling reaches the end, in seconds; if the module is shorter than that, the module's duration will be used instead
     float    fadeDuration             = 10.f;         //!< duration of a fade-out, in seconds
@@ -55,13 +56,17 @@ struct Config {
     uint32_t emptyTextColor           = 0x80FFFFFFu;  //!< color of the "no module loaded" text
 
     bool     infoEnabled              = true;         //!< whether to enable the top information bar by default after loading a module
-    int      infoMarginX              = 16;           //!< left margin inside the info bar
+    int      infoMarginX              = 16;           //!< outer left margin inside the info bar
     int      infoMarginY              = 8;            //!< upper and lower margin inside the info bar
+    int      infoTrackTextSize        = 190;          //!< text size of the track number
     int      infoTextSize             = 48;           //!< text size of the filename, title and artist lines
     int      infoDetailsTextSize      = 24;           //!< text size of the technical details line
     int      infoLineSpacing          = 4;            //!< extra space between the info bar's lines
-    uint32_t infoKeyColor             = 0xFF00FFFFu;  //!< color of the "File", "Artist" and "Title" headings
-    uint32_t infoColonColor           = 0x80FFFFFFu;  //!< color of the colon following the headings
+    int      infoTrackPaddingX        = 24;           //!< horitontal space between the track number and the other information in the info bar
+    int      infoKeyPaddingX          = 8;            //!< horizontal space between the "File", "Artist" and "Title" heading and the content text
+    uint32_t infoTrackColor           = 0xFF00C0FFu;  //!< color of the track number
+    uint32_t infoKeyColor             = 0xC000FFFFu;  //!< color of the "File", "Artist" and "Title" headings
+    uint32_t infoColonColor           = 0x40FFFFFFu;  //!< color of the colon following the headings
     uint32_t infoValueColor           = 0xFFFFFFFFu;  //!< color of the file, artist and title texts
     uint32_t infoDetailsColor         = 0xC0FFFFFFu;  //!< color of the technical details line
     int      infoShadowSize           = 8;            //!< width of the shadow below the info bar
@@ -73,6 +78,7 @@ struct Config {
     int      metaMarginX              = 16;           //!< left and right margin inside the metadata sidebar
     int      metaMarginY              = 8;            //!< upper and lower margin inside the metadata sidebar
     int      metaTextSize             = 32;           //!< text size in the metadata sidebar
+    int      metaMessageWidth         = 32;           //!< approximate number of characters per line to allocate for the module message
     int      metaSectionMargin        = 32;           //!< vertical gap between sections in the metadata sidebar
     uint32_t metaHeadingColor         = 0xFF00FFFFu;  //!< color of a section heading in the metadata sidebar
     uint32_t metaTextColor            = 0xFFFFFFFFu;  //!< color of normal text in the metadata sidebar

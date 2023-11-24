@@ -54,7 +54,12 @@ const ConfigItem g_ConfigItems[] = { {
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.stereoSeparation); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.stereoSeparation, s), s); }
     }, {
-        true, "auto scroll enabled        ",
+        true, "track number enabled       ",
+        "whether to extract and display the track number from the filename; used if the filename starts with two digits followed by a dash (-), underscore (_) or space",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.trackNumberEnabled); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.trackNumberEnabled, s), s); }
+    }, {
+        false, "auto scroll enabled        ",
         "whether to enable automatic scrolling in the metadata sidebar after loading a module",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.autoScrollEnabled); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.autoScrollEnabled, s), s); }
@@ -115,7 +120,7 @@ const ConfigItem g_ConfigItems[] = { {
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.infoEnabled, s), s); }
     }, {
         false, "info margin X              ",
-        "left margin inside the info bar",
+        "outer left margin inside the info bar",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.infoMarginX); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.infoMarginX, s), s); }
     }, {
@@ -123,6 +128,11 @@ const ConfigItem g_ConfigItems[] = { {
         "upper and lower margin inside the info bar",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.infoMarginY); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.infoMarginY, s), s); }
+    }, {
+        false, "info track text size       ",
+        "text size of the track number",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.infoTrackTextSize); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.infoTrackTextSize, s), s); }
     }, {
         false, "info text size             ",
         "text size of the filename, title and artist lines",
@@ -138,6 +148,21 @@ const ConfigItem g_ConfigItems[] = { {
         "extra space between the info bar's lines",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.infoLineSpacing); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.infoLineSpacing, s), s); }
+    }, {
+        false, "info track padding X       ",
+        "horitontal space between the track number and the other information in the info bar",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.infoTrackPaddingX); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.infoTrackPaddingX, s), s); }
+    }, {
+        false, "info key padding X         ",
+        "horizontal space between the \"File\", \"Artist\" and \"Title\" heading and the content text",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.infoKeyPaddingX); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.infoKeyPaddingX, s), s); }
+    }, {
+        false, "info track color           ",
+        "color of the track number",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.infoTrackColor); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.infoTrackColor, s), s); }
     }, {
         false, "info key color             ",
         "color of the \"File\", \"Artist\" and \"Title\" headings",
@@ -198,6 +223,11 @@ const ConfigItem g_ConfigItems[] = { {
         "text size in the metadata sidebar",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.metaTextSize); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.metaTextSize, s), s); }
+    }, {
+        false, "meta message width         ",
+        "approximate number of characters per line to allocate for the module message",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.metaMessageWidth); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.metaMessageWidth, s), s); }
     }, {
         false, "meta section margin        ",
         "vertical gap between sections in the metadata sidebar",

@@ -8,7 +8,7 @@ This application is a player for [tracker music files](https://en.wikipedia.org/
 - based on [libopenmpt](https://lib.openmpt.org/libopenmpt/), a very well-regarded library for module file playback
 - plays all common formats: MOD, XM, IT, S3M, and a dozen others
 - fullscreen interface based on OpenGL
-- metadata display (title, artist, technical info, module comment, intstrument and sample names) with smooth scrolling
+- metadata display (title, artist, technical info, module comment, instrument and sample names) with smooth scrolling
 - pattern display for visualization, including channel names (if present in the module file)
 - fake VU meters (based on note velocity and channel, not the actual audio samples)
 - smooth fade out (triggered manually, or after a specific time)
@@ -33,6 +33,8 @@ Just drag a module file onto the executable, or into the window once the player 
 Playback is always paused after loading a module; this is by design. Press the **Space** key to start playback.
 
 The screen is split into three parts: The pattern display, the info bar at the top (containing basic information about the module format as well as filename, title and artist), and the metadata bar at the right (with the free-text module message, instrument and sample names). If the content doesn't fit in the metadata bar, it slowly scrolls down during playback, so it reaches the bottom end at the end of the track or after four minutes, whatever comes first.
+
+If a module's filename starts with exactly two decimal digits, followed by a space, dash (`-`) or undersore (`_`), the digits will be removed from the filename display and shown as a "track number" in a much larger font in the info bar instead. This can be used to curate playlists by simply prefixing each filename with `01_`, `02_` and so on.
 
 The following other controls are available:
 

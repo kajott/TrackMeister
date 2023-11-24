@@ -373,6 +373,9 @@ void Application::draw(float dt) {
         if (m_infoShadowEndY > m_infoEndY) {
             m_renderer.box(0, m_infoEndY, m_screenSizeX, m_infoShadowEndY, m_config.shadowColor, m_config.shadowColor & 0x00FFFFFFu, false);
         }
+        if (trackValid()) {
+            m_renderer.text(m_trackX, m_trackY, float(m_trackTextSize), m_track, 0u, m_config.infoTrackColor);
+        }
         if (!m_filename.empty()) {
             float x = m_renderer.text(float(m_infoKeyX), float(m_infoFilenameY), float(m_infoTextSize), "File", 0, m_config.infoKeyColor);
             m_renderer.text(x, float(m_infoFilenameY), float(m_infoTextSize), ":", 0, m_config.infoColonColor);
@@ -471,6 +474,7 @@ void Application::unloadModule() {
     }
     m_fullpath.clear();
     m_filename.clear();
+    m_track[0] = '\0';
     m_title.clear();
     m_artist.clear();
     m_details.clear();
@@ -505,6 +509,17 @@ bool Application::loadModule(const char* path) {
     m_config.load(m_mainIniFile.c_str(), m_filename.c_str());
     m_config.load(PathUtil::join(PathUtil::dirname(m_fullpath), "tmcp.ini").c_str(), m_filename.c_str());
     m_config.load((PathUtil::stripExt(m_fullpath) + ".tmcp").c_str(), m_filename.c_str());
+
+    // split off track number
+    if (m_config.trackNumberEnabled
+    && (m_filename.size() > 3)
+    && isDigit(m_filename[0]) && isDigit(m_filename[1])
+    && ((m_filename[2] == '-') || (m_filename[2] == '_') || (m_filename[2] == ' '))) {
+        m_track[0] = m_filename[0];
+        m_track[1] = m_filename[1];
+        m_track[2] = '\0';
+        m_filename.erase(0, 3);
+    }
 
     // stop here if there's no file to load
     auto fail = [&] (const std::string& msg) -> bool {
@@ -621,7 +636,8 @@ bool Application::loadModule(const char* path) {
             start = end + 1u;
         } while (end != msgStr.size());
         // add lines to metadata block (with wrapping)
-        float maxWidth = std::max(meta2.width(), m_renderer.textWidth("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx") * meta2.defaultSize);
+        std::string placeholder(m_config.metaMessageWidth, 'x');
+        float maxWidth = std::max(meta2.width(), m_renderer.textWidth(placeholder.c_str()) * meta2.defaultSize);
         for (const auto& line : msgLines) {
             m_metadata.addWrappedLine(maxWidth, line);
         }
@@ -644,7 +660,7 @@ bool Application::loadModule(const char* path) {
     }
 
     // done!
-    m_sys.setWindowTitle((m_filename + " - " + baseWindowTitle).c_str());
+    m_sys.setWindowTitle((PathUtil::basename(m_fullpath) + " - " + baseWindowTitle).c_str());
     m_duration = std::min(float(m_mod->get_duration_seconds()), m_config.maxScrollDuration);
     m_metaTextAutoScroll = m_config.autoScrollEnabled;
     m_infoVisible  = m_config.infoEnabled && infoValid();

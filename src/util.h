@@ -18,6 +18,10 @@ constexpr inline uint32_t makeFourCC(const char* s) {
                        (uint32_t(s[3]) << 24))))));
 }
 
+//! clone of std::isdigit() that's guaranteed to not choke on 8-bit input
+constexpr inline bool isDigit(char c)
+    { return (c >= '0') && (c <= '9'); }
+
 //! clone of std::isspace() that's guaranteed to not choke on 8-bit input
 constexpr inline bool isSpace(char c)
     { return (c == ' ') || (c == '\t') || (c == '\r') || (c == '\n'); }
