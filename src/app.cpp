@@ -612,6 +612,7 @@ bool Application::loadModule(const char* path) {
         default: break;  // Auto or Amiga -> no need to set anything up
     }
     m_mod->set_render_param(openmpt::module::render_param::RENDER_STEREOSEPARATION_PERCENT, m_config.stereoSeparation);
+    m_mod->set_render_param(openmpt::module::render_param::RENDER_MASTERGAIN_MILLIBEL, int(m_config.gain * 100.0f + 0.5f));
 
     // get info box metadata
     m_artist.assign(m_mod->get_metadata("artist"));

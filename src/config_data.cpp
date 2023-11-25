@@ -54,6 +54,11 @@ const ConfigItem g_ConfigItems[] = { {
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.stereoSeparation); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.stereoSeparation, s), s); }
     }, {
+        false, "gain                       ",
+        "global gain to apply, in decibels",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatFloat(cfg.gain); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseFloat(cfg.gain, s), s); }
+    }, {
         true, "auto play                  ",
         "automatically start playing when loading a module; you may want to turn this off for actual competitions",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.autoPlay); },

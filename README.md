@@ -123,6 +123,9 @@ Here's an example for a useful INI file as a compo organizer would set it up for
         ; we want to play the loop, but fade out directly after it;
         ; the fade has been configured above already, now set up the loop:
         loop: true
-        ; in practice, we would write this option into the tmcp.ini file in
-        ; the directory where the entries reside, not the "global" config file
-        ; next to tmcp.exe, or even in the .tmcp file next to the .mod file
+
+    [07*]
+        ; track 7 is terribly silent, we need to boost it by 4.2 dB:
+        gain = 4.2
+
+Note that in practice, the track-specific options would rather be written into the `tmcp.ini` file in the directory where the entries reside, or the even into the `.tmcp` file next to the module file itself, and maybe not into the "global" config file that's located next to `tmcp.exe`.
