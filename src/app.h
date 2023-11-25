@@ -43,7 +43,7 @@ class Application {
     std::string m_details;
     std::vector<std::string> m_channelNames;
     TextArea m_metadata;
-    float m_duration;
+    float m_duration, m_scrollDuration;
 
     // current position and size information
     int m_currentOrder;
@@ -62,6 +62,9 @@ class Application {
     float m_trackX, m_trackY;
     int m_infoKeyX, m_infoValueX;
     int m_infoFilenameY, m_infoArtistY, m_infoTitleY, m_infoDetailsY;
+    int m_progX0, m_progY0, m_progX1, m_progY1;
+    int m_progOuterDXY, m_progInnerDXY, m_progSize;
+    int m_progPosX0, m_progPosDX;
     int m_metaStartX, m_metaShadowStartX;
     float m_metaTextX, m_metaTextMinY, m_metaTextMaxY;
     int m_pdPosChars, m_pdChannelChars;

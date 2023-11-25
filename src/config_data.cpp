@@ -209,6 +209,46 @@ const ConfigItem g_ConfigItems[] = { {
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.infoShadowSize); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.infoShadowSize, s), s); }
     }, {
+        true, "progress enabled           ",
+        "whether to show a progress bar",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.progressEnabled); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.progressEnabled, s), s); }
+    }, {
+        false, "progress height            ",
+        "height (\"thickness\") of the progress bar",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.progressHeight); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.progressHeight, s), s); }
+    }, {
+        false, "progress margin top        ",
+        "extra space to insert above the progress bar",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.progressMarginTop); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.progressMarginTop, s), s); }
+    }, {
+        false, "progress border size       ",
+        "size/thickness/width of the progress bar's border (0 = no border)",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.progressBorderSize); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.progressBorderSize, s), s); }
+    }, {
+        false, "progress border padding    ",
+        "inside padding between the actual progress indicator and the progress bar's border",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.progressBorderPadding); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.progressBorderPadding, s), s); }
+    }, {
+        false, "progress border color      ",
+        "color of the progress bar's border",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.progressBorderColor); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.progressBorderColor, s), s); }
+    }, {
+        false, "progress outer color       ",
+        "color of the progress bar's empty area (note: this is drawn on top of the border, so be careful with alpha!)",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.progressOuterColor); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.progressOuterColor, s), s); }
+    }, {
+        false, "progress inner color       ",
+        "color of the actual progress indicator (note: this is drawn on top of the other two progress bar elements, so be careful with alpha!)",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.progressInnerColor); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.progressInnerColor, s), s); }
+    }, {
         true, "meta enabled               ",
         "whether to enable the metadata sidebar by default after loading a module",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.metaEnabled); },

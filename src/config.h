@@ -63,7 +63,7 @@ struct Config {
     bool     infoEnabled              = true;         //!< whether to enable the top information bar by default after loading a module
     int      infoMarginX              = 16;           //!< outer left margin inside the info bar
     int      infoMarginY              = 8;            //!< upper and lower margin inside the info bar
-    int      infoTrackTextSize        = 190;          //!< text size of the track number
+    int      infoTrackTextSize        = 233;          //!< text size of the track number
     int      infoTextSize             = 48;           //!< text size of the filename, title and artist lines
     int      infoDetailsTextSize      = 24;           //!< text size of the technical details line
     int      infoLineSpacing          = 4;            //!< extra space between the info bar's lines
@@ -75,6 +75,15 @@ struct Config {
     uint32_t infoValueColor           = 0xFFFFFFFFu;  //!< color of the file, artist and title texts
     uint32_t infoDetailsColor         = 0xC0FFFFFFu;  //!< color of the technical details line
     int      infoShadowSize           = 8;            //!< width of the shadow below the info bar
+
+    bool     progressEnabled          = true;         //!< whether to show a progress bar
+    int      progressHeight           = 16;           //!< height ("thickness") of the progress bar
+    int      progressMarginTop        = 4;            //!< extra space to insert above the progress bar
+    int      progressBorderSize       = 2;            //!< size/thickness/width of the progress bar's border (0 = no border)
+    int      progressBorderPadding    = 2;            //!< inside padding between the actual progress indicator and the progress bar's border
+    uint32_t progressBorderColor      = 0xFF888888u;  //!< color of the progress bar's border
+    uint32_t progressOuterColor       = 0xFF222222u;  //!< color of the progress bar's empty area (note: this is drawn on top of the border, so be careful with alpha!)
+    uint32_t progressInnerColor       = 0xFF888888u;  //!< color of the actual progress indicator (note: this is drawn on top of the other two progress bar elements, so be careful with alpha!)
 
     bool     metaEnabled              = true;         //!< whether to enable the metadata sidebar by default after loading a module
     bool     metaShowMessage          = true;         //!< whether the metadata sidebar shall include the module message section

@@ -48,7 +48,7 @@ void Application::updateLayout(bool resetBoxVisibility) {
     // set up info box geometry
     if (!m_infoVisible) {
         // no info box at all
-        m_infoEndY = m_infoShadowEndY = 0;
+        m_infoEndY = m_infoShadowEndY = m_progSize = 0;
     } else {
         // layout info box
         m_infoTextSize = toPixels(m_config.infoTextSize);
@@ -81,6 +81,20 @@ void Application::updateLayout(bool resetBoxVisibility) {
             m_infoDetailsY = m_infoEndY;
             m_infoEndY += m_infoDetailsSize;
         }
+        if (m_config.progressEnabled) {
+            // compute relative Y geometry
+            m_progSize = toPixels(m_config.progressHeight);
+            m_progOuterDXY = m_config.progressBorderSize ? std::max(1, toPixels(m_config.progressBorderSize)) : 0;
+            m_progInnerDXY = m_progOuterDXY + (m_config.progressBorderPadding ? std::max(1, toPixels(m_config.progressBorderPadding)) : 0);
+            // make the bar big enough to not disappear if the borders are too fat
+            m_progSize = std::max(m_progSize, (m_progInnerDXY << 1) + 1);
+            // set the absolute Y geometry
+            m_infoEndY += lineSpacing + toPixels(m_config.progressMarginTop);
+            m_progY0 = m_infoEndY;
+            m_infoEndY += m_progSize;
+            m_progY1 = m_infoEndY;
+            // X geometry is computed later
+        } else { m_progSize = 0; }
         m_infoEndY += lineSpacing;
         m_trackTextSize = toPixels(m_config.infoTrackTextSize);
         // for the track number, geometry is quite complicated; we try to align
@@ -92,11 +106,11 @@ void Application::updateLayout(bool resetBoxVisibility) {
         if (trackValid()) {
             m_infoKeyX += textWidth(m_trackTextSize, m_track) + toPixels(m_config.infoTrackPaddingX);
             // for the bottom end of the track number, do some font metrics magic again
-            m_infoEndY = std::max(m_infoEndY, int(
-                  m_trackY                                     // upper edge of text box
+            int trackBottom = int(m_trackY                     // upper edge of text box
                 + float(m_trackTextSize) * FontBaselinePos     // end of track number text
-                + float(m_infoTextSize)  * FontNumberUpperPos  // extra margin for visual equalization
-                + 0.5f  /* rounding */ ));
+                + (m_config.progressEnabled ? 0.0f : (float(m_infoDetailsSize) * (1.0f - FontBaselinePos)))  // extra margin for visual equalization
+                + 0.5f  /* rounding */ );
+            m_infoEndY = std::max(m_infoEndY, trackBottom);
         }
         m_infoValueX += m_infoKeyX;
         m_infoEndY += toPixels(m_config.infoMarginY);
@@ -125,6 +139,16 @@ void Application::updateLayout(bool resetBoxVisibility) {
         Dprintf("metadata box scroll range: %.1f ... %.1f\n", m_metaTextMinY, m_metaTextMaxY);
         m_metaTextTargetY = m_metaTextMinY;
         if (resetBoxVisibility) { m_metaTextY = m_metaTextTargetY; }
+    }
+
+    // set up progress bar geometry
+    if (m_infoVisible && m_config.progressEnabled) {
+        m_progSize = m_progY1 - m_progY0;
+        m_progX0 = m_infoKeyX;
+        m_progX1 = m_metaStartX - toPixels(m_config.infoMarginX);
+        int innerRadius = m_progSize - (m_progInnerDXY << 1);
+        m_progPosX0 = m_progX0 + m_progInnerDXY + innerRadius;
+        m_progPosDX = m_progX1 - m_progInnerDXY - m_progPosX0;
     }
 
     // set up pattern display geometry -- step 1: define possible formats

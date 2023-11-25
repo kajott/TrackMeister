@@ -320,7 +320,7 @@ void Application::draw(float dt) {
 
     // handle animations
     if (m_metaTextAutoScroll) {
-        setMetadataScroll(m_metaTextMinY + (m_metaTextMaxY - m_metaTextMinY) * m_position / m_duration);
+        setMetadataScroll(m_metaTextMinY + (m_metaTextMaxY - m_metaTextMinY) * m_position / m_scrollDuration);
     }
     m_metaTextY += (1.0f - std::exp2f(scrollAnimationSpeed * dt)) * (m_metaTextTargetY - m_metaTextY);
 
@@ -426,6 +426,16 @@ void Application::draw(float dt) {
         }
         if (!m_details.empty()) {
             m_renderer.text(float(m_infoKeyX), float(m_infoDetailsY), float(m_infoDetailsSize), m_details.c_str(), 0, m_config.infoDetailsColor);
+        }
+        if (m_progSize > 0) {
+            if (m_progOuterDXY > 0) {
+                m_renderer.box(m_progX0, m_progY0, m_progX1, m_progY1,
+                               m_config.progressBorderColor, m_config.progressBorderColor, false, m_progSize);
+            }
+            m_renderer.box(m_progX0 + m_progOuterDXY, m_progY0 + m_progOuterDXY, m_progX1 - m_progOuterDXY, m_progY1 - m_progOuterDXY,
+                           m_config.progressOuterColor, m_config.progressOuterColor, false, m_progSize);
+            m_renderer.box(m_progX0 + m_progInnerDXY, m_progY0 + m_progInnerDXY, m_progPosX0 + int(std::min(m_position / m_duration, 1.0f) * float(m_progPosDX) + 0.5f), m_progY1 - m_progInnerDXY,
+                           m_config.progressInnerColor, m_config.progressInnerColor, false, m_progSize);
         }
     }
 
@@ -695,7 +705,8 @@ bool Application::loadModule(const char* path) {
 
     // done!
     m_sys.setWindowTitle((PathUtil::basename(m_fullpath) + " - " + baseWindowTitle).c_str());
-    m_duration = std::min(float(m_mod->get_duration_seconds()), m_config.maxScrollDuration);
+    m_duration = std::max(float(m_mod->get_duration_seconds()), 0.001f);
+    m_scrollDuration = std::min(float(m_mod->get_duration_seconds()), m_config.maxScrollDuration);
     m_metaTextAutoScroll = m_config.autoScrollEnabled;
     m_fadeActive = m_autoFadeInitiated = m_endReached = false;
     updateLayout(true);

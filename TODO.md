@@ -3,6 +3,5 @@
 - full file browser
 - more advanced auto-scrolling (up and down with defined minimum speed?)
 - optional pixel font (with antialiased blocky filtering instead of MSDF)
-- automatic fade-out for looping tracks
+- automatic loop detection (depends on https://bugs.openmpt.org/view.php?id=1675)
 - command-line option override
-- progress bar / time display
