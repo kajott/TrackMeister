@@ -11,7 +11,7 @@ This application is a player for [tracker music files](https://en.wikipedia.org/
 - metadata display (title, artist, technical info, module comment, instrument and sample names) with smooth scrolling
 - pattern display for visualization, including channel names (if present in the module file)
 - fake VU meters (based on note velocity and channel, not the actual audio samples)
-- smooth fade out (triggered manually, or after a specific time)
+- smooth fade out (triggered manually, automatically after looping, or after a configurable time)
 - cross-platform (tested on Windows and Linux)
 - single executable; no extra DLLs/`.so`s needed
 - open source (MIT license)
@@ -94,7 +94,7 @@ All sizes (font sizes, margins etc.) are specified in 1/1000s of the display wid
 Boolean values can use any of the `1`/`0`, `false`/`true`, `yes`/`no` or `enabled`/`disabled` nomenclatures. <br>
 Colors are specified in HTML/CSS-style hexadecimal RGB notation, but with optional alpha, i.e. in the form `#rrggbb`, `#rrggbbaa`, `#rgb` or `#rgba`.
 
-Here's an example for a useful INI file:
+Here's an example for a useful INI file as a compo organizer would set it up for hosting a competition:
 
     [TMCP]
     ; generic options, specified in classic INI syntax
@@ -107,6 +107,8 @@ Here's an example for a useful INI file:
     autoplay=disabled
     ; and we want fullscreen too!
     fullscreen=yes
+    ; if the track has a loop, we want to fade out automatically at this point
+    fade out after loop = true
 
     [*.mod]
         ; this section is only active for MOD format file, which tend to be
@@ -115,3 +117,12 @@ Here's an example for a useful INI file:
         ; also, we're specifying this in CSS-like syntax, because we can:
         filter: auto;
         stereo-separation: 100;
+
+    [03*]
+        ; the entry with the track number 3 in the filename has a loop;
+        ; we want to play the loop, but fade out directly after it;
+        ; the fade has been configured above already, now set up the loop:
+        loop: true
+        ; in practice, we would write this option into the tmcp.ini file in
+        ; the directory where the entries reside, not the "global" config file
+        ; next to tmcp.exe, or even in the .tmcp file next to the .mod file

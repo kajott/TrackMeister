@@ -41,11 +41,14 @@ struct Config {
     int      stereoSeparation         = 50;           //!< amount of stereo separation, in percent (0 = mono, 100 = full stereo, higher = fake surround)
 
     bool     autoPlay                 = true;         //!< automatically start playing when loading a module; you may want to turn this off for actual competitions
+    bool     loop                     = false;        //!< whether to loop the song after it's finished, or play the song's programmed loop if it there is one
+    bool     fadeOutAfterLoop         = false;        //!< whether to trigger a slow fade-out after the song looped
+    float    fadeOutAt                = 0.0f;         //!< number of seconds after which the song shall be slowly faded out automatically (0 = no auto-fade)
+    float    fadeDuration             = 10.f;         //!< duration of a fade-out, in seconds
+
     bool     trackNumberEnabled       = true;         //!< whether to extract and display the track number from the filename; used if the filename starts with two digits followed by a dash (-), underscore (_) or space
     bool     autoScrollEnabled        = true;         //!< whether to enable automatic scrolling in the metadata sidebar after loading a module
     float    maxScrollDuration        = 4.f * 60.f;   //!< maximum duration after which automatic metadata scrolling reaches the end, in seconds; if the module is shorter than that, the module's duration will be used instead
-    float    fadeDuration             = 10.f;         //!< duration of a fade-out, in seconds
-    float    autoFadeOutAt            = 0.0f;         //!< number of seconds after which the song shall be faded out automatically (0 = no auto-fade)
 
     uint32_t emptyBackground          = 0xFF503010u;  //!< background color of "no module loaded" screen
     uint32_t patternBackground        = 0xFF503010u;  //!< background color of pattern display

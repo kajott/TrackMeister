@@ -59,7 +59,27 @@ const ConfigItem g_ConfigItems[] = { {
         [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.autoPlay); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.autoPlay, s), s); }
     }, {
-        false, "track number enabled       ",
+        false, "loop                       ",
+        "whether to loop the song after it's finished, or play the song's programmed loop if it there is one",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.loop); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.loop, s), s); }
+    }, {
+        false, "fade out after loop        ",
+        "whether to trigger a slow fade-out after the song looped",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.fadeOutAfterLoop); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.fadeOutAfterLoop, s), s); }
+    }, {
+        false, "fade out at                ",
+        "number of seconds after which the song shall be slowly faded out automatically (0 = no auto-fade)",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatFloat(cfg.fadeOutAt); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseFloat(cfg.fadeOutAt, s), s); }
+    }, {
+        false, "fade duration              ",
+        "duration of a fade-out, in seconds",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatFloat(cfg.fadeDuration); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseFloat(cfg.fadeDuration, s), s); }
+    }, {
+        true, "track number enabled       ",
         "whether to extract and display the track number from the filename; used if the filename starts with two digits followed by a dash (-), underscore (_) or space",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.trackNumberEnabled); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.trackNumberEnabled, s), s); }
@@ -73,16 +93,6 @@ const ConfigItem g_ConfigItems[] = { {
         "maximum duration after which automatic metadata scrolling reaches the end, in seconds; if the module is shorter than that, the module's duration will be used instead",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatFloat(cfg.maxScrollDuration); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseFloat(cfg.maxScrollDuration, s), s); }
-    }, {
-        false, "fade duration              ",
-        "duration of a fade-out, in seconds",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatFloat(cfg.fadeDuration); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseFloat(cfg.fadeDuration, s), s); }
-    }, {
-        false, "auto fade out at           ",
-        "number of seconds after which the song shall be faded out automatically (0 = no auto-fade)",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatFloat(cfg.autoFadeOutAt); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseFloat(cfg.autoFadeOutAt, s), s); }
     }, {
         true, "empty background           ",
         "background color of \"no module loaded\" screen",

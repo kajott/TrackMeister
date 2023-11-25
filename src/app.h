@@ -52,6 +52,7 @@ class Application {
     int m_numChannels;
     int m_patternLength;
     float m_position;
+    bool m_endReached;
 
     // computed layout information (from updateLayout())
     int m_screenSizeX, m_screenSizeY;

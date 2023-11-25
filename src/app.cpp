@@ -76,25 +76,57 @@ void Application::shutdown() {
 
 bool Application::renderAudio(int16_t* data, int sampleCount, bool stereo, int sampleRate) {
     if (!m_mod) { return false; }
-    int done, remain;
-    if (stereo) {
-        done = int(m_mod->read_interleaved_stereo(sampleRate, sampleCount, data));
-    } else {
-        done = int(m_mod->read(sampleRate, sampleCount, data));
+
+    // retrieve samples from libopenmpt
+    int16_t* pos = data;
+    int done, remain = sampleCount;
+    bool hadNullRead = false;
+    while (remain > 0) {
+        // render a fragment
+        if (stereo) {
+            done = int(m_mod->read_interleaved_stereo(sampleRate, remain, pos));
+        } else {
+            done = int(m_mod->read(sampleRate, remain, pos));
+        }
+        // advance pointers
+        if (!done) {
+            // null read -> indicator for end of track or looping position
+            if (hadNullRead) {
+                // second null read in succession -> we're truly at the end of the track
+                m_endReached = true;
+                break;
+            }
+            hadNullRead = true;
+        } else if ((done < 0) || (done > remain)) {
+            Dprintf("openmpt::module::read() returned %d samples, requested were %d samples\n", done, remain);
+            break;  // panic!
+        } else {
+            remain -= done;
+            pos += stereo ? (done << 1) : done;
+        }
     }
-    if (done < sampleCount) {
-        data += stereo ? (done << 1) : done;
-        remain = sampleCount - done;
-        ::memset(static_cast<void*>(data), 0, stereo ? (remain << 2) : (remain << 1));
+
+    // fill in missing samples with silence
+    if (remain) {
+        ::memset(static_cast<void*>(pos), 0, stereo ? (remain << 2) : (remain << 1));
     }
+
+    // apply fade-out
     if (m_fadeActive) {
         remain = stereo ? (sampleCount << 1) : sampleCount;
+        pos = data;
         int gain16b = m_fadeGain >> 15;
         while (remain--) {
-            *data = int16_t((int(*data) * gain16b + 32767) >> 16);
-            ++data;
+            *pos = int16_t((int(*pos) * gain16b + 32767) >> 16);
+            ++pos;
             m_fadeGain = std::max(0, m_fadeGain - m_fadeRate);
         }
+    }
+
+    // start fade-out after loop, if so desired
+    if (hadNullRead && m_config.loop && m_config.fadeOutAfterLoop && !m_autoFadeInitiated) {
+        fadeOut();
+        m_autoFadeInitiated = true;
     }
     return true;
 }
@@ -281,7 +313,7 @@ void Application::draw(float dt) {
     }
 
     // start auto-fading, if applicable
-    if ((m_config.autoFadeOutAt > 0.0f) && !m_autoFadeInitiated && (m_position > m_config.autoFadeOutAt)) {
+    if ((m_config.fadeOutAt > 0.0f) && !m_autoFadeInitiated && (m_position > m_config.fadeOutAt)) {
         fadeOut();
         m_autoFadeInitiated = true;
     }
@@ -300,7 +332,8 @@ void Application::draw(float dt) {
     glClear(GL_COLOR_BUFFER_BIT);
 
     // draw VU meters
-    if (m_mod && m_vuVisible && m_sys.isPlaying() && (m_vuHeight > 0.0f) && ((m_config.vuLowerColor | m_config.vuUpperColor) & 0xFF000000u)) {
+    if (m_mod && m_vuVisible && m_sys.isPlaying() && !m_endReached
+    && (m_vuHeight > 0.0f) && ((m_config.vuLowerColor | m_config.vuUpperColor) & 0xFF000000u)) {
         for (int ch = 0;  ch < m_numChannels;  ++ch) {
             int x = m_pdChannelX0 + ch * m_pdChannelDX;
             float vu = std::min(1.0f, m_mod->get_current_channel_vu_mono(ch)) * fadeAlpha;
@@ -549,7 +582,7 @@ bool Application::loadModule(const char* path) {
     // load and setup OpenMPT instance
     AudioMutexGuard mtx_(m_sys);
     std::map<std::string, std::string> ctls;
-    ctls["play.at_end"] = "stop";
+    ctls["play.at_end"] = m_config.loop ? "continue" : "stop";
     switch (m_config.filter) {
         case FilterMethod::Amiga:
             ctls["render.resampler.emulate_amiga"] = "1";
@@ -663,7 +696,7 @@ bool Application::loadModule(const char* path) {
     m_sys.setWindowTitle((PathUtil::basename(m_fullpath) + " - " + baseWindowTitle).c_str());
     m_duration = std::min(float(m_mod->get_duration_seconds()), m_config.maxScrollDuration);
     m_metaTextAutoScroll = m_config.autoScrollEnabled;
-    m_fadeActive = m_autoFadeInitiated = false;
+    m_fadeActive = m_autoFadeInitiated = m_endReached = false;
     updateLayout(true);
     if (m_config.autoPlay) { m_sys.play(); }
     return true;
