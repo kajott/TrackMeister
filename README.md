@@ -12,6 +12,7 @@ This application is a player for [tracker music files](https://en.wikipedia.org/
 - pattern display for visualization, including channel names (if present in the module file)
 - fake VU meters (based on note velocity and channel, not the actual audio samples)
 - smooth fade out (triggered manually, automatically after looping, or after a configurable time)
+- loudness normalization, with a built-in EBU R128 (a.k.a. ReplayGain 2.0) loudness analyzer
 - cross-platform (tested on Windows and Linux)
 - single executable; no extra DLLs/`.so`s needed
 - open source (MIT license)
@@ -54,9 +55,13 @@ The following other controls are available:
 | **V** | show the TMCP and libopenmpt version numbers
 | **F5** | reload the current module and the application's configuration
 | **F11** | toggle fullscreen mode
+| **Ctrl+L** | start EBU R128 loudness scan for the currently loaded module
+| **Ctrl+Shift+L** | start EBU R128 loudness scan for the currently loaded module and all following modules in the current directory
 | **Ctrl+Shift+S** | save `tmcp_default.ini` (see below)
 
 For directory navigation, "previous" and "next" refer to case-insensitive lexicographical ordering.
+
+To use the loudness normalization feature, perform a loudness scan on the desired module(s); this will write a small `.tmcp` file next to the module file that contains the measured EBU R128 loudness for the currently set up rendering parameters (i.e. filter, stereo separation etc.). The next time that module is loaded, TMCP picks up this loudness value and automatically computes a suitable gain to normalize the volume levels to a target of -18 LUFS. (The target can be adjusted with the `target loudness` configuration setting.)
 
 
 ## Configuration
@@ -75,7 +80,7 @@ All items can be changed at runtime when loading a new module or pressing the **
 The following locations are searched for configuration files:
 - `tmcp.ini` in the program's directory (i.e. directly next to `tmcp.exe`)
 - `tmcp.ini` in the currently opened module file's directory
-- a file with the same name as the currently opened module file, but with `.tmcp` as a suffix; for example, for `foo.mod`, the configuration file will be `foo.tmcp`
+- a file with the same name as the currently opened module file, but with an extra suffix of `.tmcp`; for example, for `foo.mod`, the configuration file will be `foo.mod.tmcp`
 
 The configuration files can contain multiple sections, delimited by lines containing the section name in square brackets, `[like so]`. The following sections are evaluated, and all other sections are ignored:
 - the unnamed section at the beginning of the file

@@ -16,6 +16,11 @@ enum class FilterMethod {
     Auto       //!< OpenMPT INTERPOLATIONFILTER_LENGTH = 0
 };
 
+//! value that designates that no loudness has been measured yet
+constexpr float InvalidLoudness = -999.0f;
+//! check whether a loudness value is valid
+constexpr bool isValidLoudness(float db) { return (db > -100.0f); }
+
 //! TMCP default configuration.
 //!
 //! Unless explicitly noted otherwise, the unit for all lengths (text sizes,
@@ -39,7 +44,9 @@ struct Config {
     int      audioBufferSize          = 512;          //!< size of the audio buffer, in samples; if there are dropouts, try doubling this value
     FilterMethod filter        = FilterMethod::Auto;  //!< audio resampling filter to be used
     int      stereoSeparation         = 50;           //!< amount of stereo separation, in percent (0 = mono, 100 = full stereo, higher = fake surround)
-    float    gain                     = 0.0;          //!< global gain to apply, in decibels
+    float    gain                     = 0.0f;         //!< global gain to apply, in decibels
+    float    loudness             = InvalidLoudness;  //!< the current track's measured loudness, in decibels; values < -100 mean "no loudness measured"
+    float    targetLoudness           = -18.0f;       //!< target loudness, in decibels (or LUFS); if the 'loudness' parameter is valid, an extra gain will be applied (in addition to 'gain') so that the loudness is corrected to this value
 
     bool     autoPlay                 = true;         //!< automatically start playing when loading a module; you may want to turn this off for actual competitions
     bool     loop                     = false;        //!< whether to loop the song after it's finished, or play the song's programmed loop if it there is one
@@ -147,4 +154,5 @@ struct Config {
     inline void reset() { Config defaultConfig; *this = defaultConfig; }
     bool load(const char* filename, const char* matchName=nullptr);
     bool save(const char* filename);
+    bool saveLoudness(const char* filename);
 };

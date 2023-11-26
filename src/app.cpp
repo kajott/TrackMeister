@@ -16,6 +16,7 @@
 
 #include <glad/glad.h>
 #include <libopenmpt/libopenmpt.hpp>
+#include <ebur128.h>
 
 #include "system.h"
 #include "renderer.h"
@@ -28,6 +29,7 @@
 
 constexpr const char* baseWindowTitle = "Tracked Music Compo Player";
 constexpr float scrollAnimationSpeed = -10.f;
+constexpr size_t scanBufferSize = 4096;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -75,7 +77,7 @@ void Application::shutdown() {
 ///// event handlers and related code
 
 bool Application::renderAudio(int16_t* data, int sampleCount, bool stereo, int sampleRate) {
-    if (!m_mod) { return false; }
+    if (!m_mod || m_scanning) { return false; }
 
     // retrieve samples from libopenmpt
     int16_t* pos = data;
@@ -151,6 +153,10 @@ void Application::handleKey(int key, bool ctrl, bool shift, bool alt) {
         case 'Q':  // quit immediately
             m_sys.quit();
             break;
+        case 27:  // [Esc] cancel running loudness scan
+            m_multiScan = false;
+            stopScan();
+            break;
         case ' ':  // [Space] pause/play
             if (m_mod) { m_fadeActive = false; m_sys.togglePause(); }
             break;
@@ -166,7 +172,7 @@ void Application::handleKey(int key, bool ctrl, bool shift, bool alt) {
         case 'A':  // toggle autoscroll
             m_metaTextAutoScroll = !m_metaTextAutoScroll;
             break;
-        case 'S':  // save config
+        case 'S':  // [Ctrl+Shift+S] save config
             if (ctrl && shift) {
                 Config defaultConfig;
                 if (defaultConfig.save("tmcp_default.ini")) {
@@ -174,6 +180,13 @@ void Application::handleKey(int key, bool ctrl, bool shift, bool alt) {
                 } else {
                     toast("saving tmcp_default.ini failed");
                 }
+            }
+            break;
+        case 'L':  // [Ctrl+L] run loudness scan
+            if (ctrl) {
+                stopScan();
+                m_multiScan = shift;
+                startScan();
             }
             break;
         case 'V':  // show version
@@ -297,6 +310,11 @@ void Application::toastVersion() {
 
 void Application::draw(float dt) {
     float fadeAlpha = 1.0f;
+
+    // handle loudness scan end
+    if (m_scanning && m_endReached) {
+        stopScan();
+    }
 
     // latch current position
     if (m_mod) {
@@ -509,6 +527,14 @@ void Application::drawPatternDisplayCell(float x, float y, const char* text, con
 
 void Application::unloadModule() {
     m_sys.pause();
+    m_cancelScanning = true;
+    if (m_scanThread) {
+        m_scanThread->join();
+        delete m_scanThread;
+        m_scanThread = nullptr;
+    }
+    m_scanning = false;
+    m_config.loudness = InvalidLoudness;
     {
         AudioMutexGuard mtx_(m_sys);
         delete m_mod;
@@ -532,7 +558,7 @@ void Application::unloadModule() {
     Dprintf("module unloaded\n");
 }
 
-bool Application::loadModule(const char* path) {
+bool Application::loadModule(const char* path, bool forScanning) {
     // unload module
     unloadModule();
 
@@ -551,7 +577,7 @@ bool Application::loadModule(const char* path) {
     m_config.reset();
     m_config.load(m_mainIniFile.c_str(), m_filename.c_str());
     m_config.load(PathUtil::join(PathUtil::dirname(m_fullpath), "tmcp.ini").c_str(), m_filename.c_str());
-    m_config.load((PathUtil::stripExt(m_fullpath) + ".tmcp").c_str(), m_filename.c_str());
+    m_config.load((m_fullpath + ".tmcp").c_str());
 
     // split off track number
     if (m_config.trackNumberEnabled
@@ -592,7 +618,7 @@ bool Application::loadModule(const char* path) {
     // load and setup OpenMPT instance
     AudioMutexGuard mtx_(m_sys);
     std::map<std::string, std::string> ctls;
-    ctls["play.at_end"] = m_config.loop ? "continue" : "stop";
+    ctls["play.at_end"] = (m_config.loop && !forScanning) ? "continue" : "stop";
     switch (m_config.filter) {
         case FilterMethod::Amiga:
             ctls["render.resampler.emulate_amiga"] = "1";
@@ -622,7 +648,14 @@ bool Application::loadModule(const char* path) {
         default: break;  // Auto or Amiga -> no need to set anything up
     }
     m_mod->set_render_param(openmpt::module::render_param::RENDER_STEREOSEPARATION_PERCENT, m_config.stereoSeparation);
-    m_mod->set_render_param(openmpt::module::render_param::RENDER_MASTERGAIN_MILLIBEL, int(m_config.gain * 100.0f + 0.5f));
+    if (!forScanning) {
+        float gain = m_config.gain;
+        if (isValidLoudness(m_config.loudness)) {
+            gain += m_config.targetLoudness - m_config.loudness;
+        }
+        Dprintf("master gain: %.2f dB\n", gain);
+        m_mod->set_render_param(openmpt::module::render_param::RENDER_MASTERGAIN_MILLIBEL, int(gain * 100.0f + 0.5f));
+    }
 
     // get info box metadata
     m_artist.assign(m_mod->get_metadata("artist"));
@@ -708,9 +741,10 @@ bool Application::loadModule(const char* path) {
     m_duration = std::max(float(m_mod->get_duration_seconds()), 0.001f);
     m_scrollDuration = std::min(float(m_mod->get_duration_seconds()), m_config.maxScrollDuration);
     m_metaTextAutoScroll = m_config.autoScrollEnabled;
-    m_fadeActive = m_autoFadeInitiated = m_endReached = false;
+    m_fadeActive = m_autoFadeInitiated = m_endReached = m_cancelScanning = false;
+    m_scanning = forScanning;
     updateLayout(true);
-    if (m_config.autoPlay) { m_sys.play(); }
+    if (m_config.autoPlay && !forScanning) { m_sys.play(); }
     return true;
 }
 
@@ -746,4 +780,80 @@ void Application::addMetadataGroup(TextArea& block, const std::vector<std::strin
         }
         ++lineIndex;
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+///// scan mode
+
+void Application::startScan(const char* specificFile) {
+    m_scanning = true;
+    std::string modulePath(specificFile ? specificFile : m_fullpath.c_str());
+    if (loadModule(modulePath.c_str(), true)) {
+        m_scanThread = new std::thread(&Application::runScan, this);
+        if (!m_multiScan || m_toastMessage.empty()) {
+            // write message, unless the previous file's loudness result is still on screen
+            toast("started EBU R128 loudness scan");
+        }
+    } else {
+        m_scanning = false;
+        toast("can not perform EBU R128 loudness scan");
+    }
+}
+
+void Application::runScan() {
+    int16_t buffer[scanBufferSize * 2];
+    m_config.loudness = InvalidLoudness;
+    ebur128_state *r128 = ebur128_init(2, m_sampleRate, EBUR128_MODE_I);
+    if (!r128) { return; }
+    while (!m_cancelScanning && !m_endReached && m_mod) {
+        //m_sys.lockAudioMutex();  // <- would be more correct, but we can also generate deadlocks this way, so don't do it
+        size_t count = m_mod->read_interleaved_stereo(m_sampleRate, scanBufferSize, buffer);
+        //m_sys.unlockAudioMutex();
+        if (!count) {
+            m_endReached = true;
+            break;
+        }
+        ebur128_add_frames_short(r128, buffer, count);
+    }
+    if (m_endReached) {
+        double res = InvalidLoudness;
+        ebur128_loudness_global(r128, &res);
+        m_config.loudness = float(res);
+    }
+    ebur128_destroy(&r128);
+}
+
+void Application::stopScan() {
+    m_cancelScanning = true;
+    if (!m_scanning) { return; }
+    if (m_scanThread) {
+        m_scanThread->join();
+        delete m_scanThread;
+        m_scanThread = nullptr;
+    }
+    std::string modulePath;
+    Dprintf("stopScan(): result loudness = %.2f dB\n", m_config.loudness);
+    if (!isValidLoudness(m_config.loudness)) {
+        toast("EBU R128 loudness scan cancelled");
+    } else if (m_config.saveLoudness((m_fullpath + ".tmcp").c_str())) {
+        char message[128];
+        snprintf(message, 128, "EBU R128 loudness scan result (%.2f dB) saved", m_config.loudness);
+        toast(message);
+        if (m_multiScan) {
+            // if everything went fine, we may proceed to the next file
+            modulePath.assign(PathUtil::findSibling(m_fullpath, true, m_playableExts.data()));
+            if (!modulePath.empty()) {
+                startScan(modulePath.c_str());
+                return;
+            }
+        }
+    } else {
+        char message[128];
+        snprintf(message, 128, "could not save EBU R128 loudness scan result (%.2f dB)", m_config.loudness);
+        toast(message);
+    }
+    // re-load module in normal mode
+    modulePath.assign(m_fullpath);
+    loadModule(modulePath.c_str());
 }

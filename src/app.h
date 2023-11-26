@@ -13,6 +13,8 @@
 #if USE_PATTERN_CACHE
     #include <unordered_map>
 #endif
+#include <thread>
+#include <atomic>
 
 #include "system.h"
 #include "renderer.h"
@@ -29,9 +31,12 @@ class Application {
     TextBoxRenderer m_renderer;
     Config m_config;
     int m_sampleRate;
+    bool m_scanning = false;
+    std::atomic<bool> m_cancelScanning = false;
     openmpt::module* m_mod = nullptr;
     std::vector<std::byte> m_mod_data;
     std::vector<uint32_t> m_playableExts;
+    std::thread* m_scanThread = nullptr;
     std::string m_mainIniFile;
 
     // metadata
@@ -52,7 +57,7 @@ class Application {
     int m_numChannels;
     int m_patternLength;
     float m_position;
-    bool m_endReached;
+    std::atomic<bool> m_endReached;
 
     // computed layout information (from updateLayout())
     int m_screenSizeX, m_screenSizeY;
@@ -84,6 +89,7 @@ class Application {
     bool m_fadeActive = false;
     int m_fadeGain, m_fadeRate;
     bool m_autoFadeInitiated = false;
+    bool m_multiScan = false;
 
     // pattern data cache
     struct CacheItem { char text[16], attr[16]; };
@@ -114,7 +120,7 @@ public:  // interface from SystemInterface
 
 private:  // business logic
     void unloadModule();
-    bool loadModule(const char* path);
+    bool loadModule(const char* path, bool forScanning=false);
     void cycleBoxVisibility();
     int toPixels(int value) const;
     int textWidth(int size, const char* text) const;
@@ -131,4 +137,7 @@ private:  // business logic
     inline void toast(const std::string& msg) { toast(msg.c_str()); }
     void toastVersion();
     void fadeOut();
+    void startScan(const char* specificFile=nullptr);
+    void runScan();
+    void stopScan();
 };

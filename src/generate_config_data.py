@@ -106,7 +106,7 @@ if __name__ == "__main__":
 
         # write string<->enum mapping tables
         for enum, items in sorted(enums.items()):
-            f.write(f'\nstatic const EnumItem e_{enum}[] = {{\n')
+            f.write(f'\nextern "C" const EnumItem e_{enum}[] = {{\n')
             item_maxlen = max(map(len, items))
             for item in items:
                 f.write('    { "' + (item + '",').ljust(item_maxlen + 2) + f' static_cast<int>({enum}::' + (item + ')').ljust(item_maxlen + 1) + ' },\n')

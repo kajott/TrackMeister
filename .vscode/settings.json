@@ -1,5 +1,12 @@
 {
     "cmake.configureOnOpen": true,
     "C_Cpp.default.cppStandard": "c++17",
-    "C_Cpp.default.includePath": ["/usr/include/SDL2", "./external/SDL2-2.*/include", "./external/glad/include", "./external/openmpt"]
+    "C_Cpp.default.includePath": [
+        "/usr/include/SDL2",
+        "./external/SDL2-2.*/include",
+        "./external/glad/include",
+        "./external/openmpt",
+        "./external/libebur128/ebur128",
+        "./external/libebur128/ebur128/queue"
+    ]
 }

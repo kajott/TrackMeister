@@ -16,6 +16,8 @@
 #include "config.h"
 #include "config_item.h"
 
+extern "C" const EnumItem e_FilterMethod[];  // used in Config::saveLoudness(), declared in config_data.cpp
+
 ////////////////////////////////////////////////////////////////////////////////
 
 //! check if a character is considered as ignored in INI file key comparisons
@@ -234,4 +236,15 @@ bool Config::save(const char* filename) {
     }
     fclose(f);
     return res;
+}
+
+bool Config::saveLoudness(const char* filename) {
+    if (!isValidLoudness(loudness)) { return false; }
+    if (!filename || !filename[0]) { return false; }
+    FILE* f = fopen(filename, "a");
+    if (!f) { return false; }
+    fprintf(f, "\n; EBU R128 loudness scan result for samplerate=%d, filter=%s, stereo_separation=%d:\nloudness = %.2f\n",
+               sampleRate, ConfigItem::formatEnum(static_cast<int>(filter), e_FilterMethod).c_str(), stereoSeparation, loudness);
+    fclose(f);
+    return true;
 }

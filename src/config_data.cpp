@@ -6,7 +6,7 @@
 #include "config.h"
 #include "config_item.h"
 
-static const EnumItem e_FilterMethod[] = {
+extern "C" const EnumItem e_FilterMethod[] = {
     { "None",   static_cast<int>(FilterMethod::None)   },
     { "Linear", static_cast<int>(FilterMethod::Linear) },
     { "Cubic",  static_cast<int>(FilterMethod::Cubic)  },
@@ -58,6 +58,16 @@ const ConfigItem g_ConfigItems[] = { {
         "global gain to apply, in decibels",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatFloat(cfg.gain); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseFloat(cfg.gain, s), s); }
+    }, {
+        false, "loudness                   ",
+        "the current track's measured loudness, in decibels; values < -100 mean \"no loudness measured\"",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatFloat(cfg.loudness); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseFloat(cfg.loudness, s), s); }
+    }, {
+        false, "target loudness            ",
+        "target loudness, in decibels (or LUFS); if the 'loudness' parameter is valid, an extra gain will be applied (in addition to 'gain') so that the loudness is corrected to this value",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatFloat(cfg.targetLoudness); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseFloat(cfg.targetLoudness, s), s); }
     }, {
         true, "auto play                  ",
         "automatically start playing when loading a module; you may want to turn this off for actual competitions",
