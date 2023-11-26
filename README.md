@@ -3,6 +3,7 @@ Tracked Music Compo Player
 
 This application is a player for [tracker music files](https://en.wikipedia.org/wiki/Module_file) ("module" files) as they were &ndash;and still are&ndash; common in the [demoscene](https://en.wikipedia.org/wiki/Demoscene). With its fullscreen interface and limited interaction options, it's specifically targeted towards presenting tracked music in a competition ("compo").
 
+
 ## Features
 
 - based on [libopenmpt](https://lib.openmpt.org/libopenmpt/), a very well-regarded library for module file playback
@@ -17,15 +18,6 @@ This application is a player for [tracker music files](https://en.wikipedia.org/
 - single executable; no extra DLLs/`.so`s needed
 - open source (MIT license)
 
-## Building
-
-- prerequisites:
-  - a C++17 compatible compiler (GCC 7.1 or later, Clang 6 or later, Microsoft Visual Studio 2019 or later)
-  - CMake 3.15 or later
-  - Python 3.8 or later
-  - SDL2 development packages (only required on non-Windows systems; on Windows, the SDL2 SDK will be downloaded automatically during building)
-- make sure you cloned the repository recursively, as it pulls libopenmpt in as a submodule; if you forgot that, run "`git submodule update --init`"
-- building itself is done using standard CMake (e.g. "`cmake -S . -B build && cmake --build build`")
 
 ## Usage
 
@@ -134,3 +126,24 @@ Here's an example for a useful INI file as a compo organizer would set it up for
         gain = 4.2
 
 Note that in practice, the track-specific options would rather be written into the `tmcp.ini` file in the directory where the entries reside, or the even into the `.tmcp` file next to the module file itself, and maybe not into the "global" config file that's located next to `tmcp.exe`.
+
+
+## Building
+
+- prerequisites:
+  - a C++17 compatible compiler (GCC 7.1 or later, Clang 6 or later, Microsoft Visual Studio 2019 or later)
+  - CMake 3.15 or later
+  - Python 3.8 or later
+  - SDL2 development packages (only required on non-Windows systems; on Windows, the SDL2 SDK will be downloaded automatically during building)
+- make sure you cloned the repository recursively, as it pulls libopenmpt in as a submodule; if you forgot that, run "`git submodule update --init`"
+- building itself is done using standard CMake (e.g. "`cmake -S . -B build && cmake --build build`")
+
+
+## Acknowledgements
+
+TMCP is built upon the following third-party libraries:
+- [SDL 2](http://libsdl.org) is the basic framework for window management, event handling and audio playback
+- [GLAD](https://glad.dav1d.de) is used as the OpenGL interface generator
+- [MSDF](https://github.com/Chlumsky/msdfgen) is what TMCP's font rendering is based upon
+- [libopenmpt](https://lib.openmpt.org/libopenmpt/) is doing all the heavy lifting concerning module file parsing and audio rendering
+- [libebur128](https://github.com/jiixyj/libebur128) is used for loudness normalization
