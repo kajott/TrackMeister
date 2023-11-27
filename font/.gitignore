@@ -1,6 +1,7 @@
 *.ttf
 msdf-atlas-gen*
 !build.cmd
+!build.sh
 
 font_*.bin
 font_hist.txt

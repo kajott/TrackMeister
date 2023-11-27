@@ -57,7 +57,7 @@ static const char* fsSrc =
 "\n" "    } else { // text mode"
 "\n" "        vec3 s = texture(uTex, vTC).rgb;"
 "\n" "        d = max(min(s.r, s.g), min(max(s.r, s.g), s.b)) - 0.5;"
-"\n" "        d /= fwidth(d);"
+"\n" "        d /= fwidth(d) * 1.25;"
 "\n" "    }"
 "\n" "    outColor = vec4(vColor.rgb, vColor.a * clamp((d - vBR.x) * vBR.y + 0.5, 0.0, 1.0));"
 "\n" "}"

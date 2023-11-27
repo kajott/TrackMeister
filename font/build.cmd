@@ -6,7 +6,8 @@ msdf-atlas-gen.exe ^
     -type msdf ^
     -format png -imageout font.png ^
     -json font.json ^
-    -size 32 -pxrange 3
+    -size 32 -pxrange 2 ^
+    -potr
 @if errorlevel 1 goto end
 
 @echo.

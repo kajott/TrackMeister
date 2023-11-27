@@ -144,6 +144,7 @@ Note that in practice, the track-specific options would rather be written into t
 TMCP is built upon the following third-party libraries:
 - [SDL 2](http://libsdl.org) is the basic framework for window management, event handling and audio playback
 - [GLAD](https://glad.dav1d.de) is used as the OpenGL interface generator
-- [MSDF](https://github.com/Chlumsky/msdfgen) is what TMCP's font rendering is based upon
+- [MSDF](https://github.com/Chlumsky/msdf-atlas-gen) is what TMCP's font rendering is based upon
+- [Inconsolata](https://levien.com/type/myfonts/inconsolata.html) is the font that's used in the UI
 - [libopenmpt](https://lib.openmpt.org/libopenmpt/) is doing all the heavy lifting concerning module file parsing and audio rendering
 - [libebur128](https://github.com/jiixyj/libebur128) is used for loudness normalization
