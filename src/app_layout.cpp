@@ -81,7 +81,7 @@ void Application::updateLayout(bool resetBoxVisibility) {
             m_infoDetailsY = m_infoEndY;
             m_infoEndY += m_infoDetailsSize;
         }
-        if (m_config.progressEnabled) {
+        if (m_config.progressEnabled && m_mod) {
             // compute relative Y geometry
             m_progSize = toPixels(m_config.progressHeight);
             m_progOuterDXY = m_config.progressBorderSize ? std::max(1, toPixels(m_config.progressBorderSize)) : 0;
