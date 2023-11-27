@@ -37,10 +37,12 @@ constexpr size_t scanBufferSize = 4096;
 
 void Application::init(int argc, char* argv[]) {
     // load initial configuration (required for video and audio parameters)
+    m_cmdline = Config::prepareCommandLine(argc, argv);
     m_mainIniFile.assign(argv[0]);
     PathUtil::dirnameInplace(m_mainIniFile);
     PathUtil::joinInplace(m_mainIniFile, "tmcp.ini");
-    m_config.load(m_mainIniFile.c_str(), m_filename.c_str());
+    m_config.load(m_mainIniFile.c_str());
+    m_config.load(m_cmdline);
 
     // initialize everything
     m_sys.initVideo(baseWindowTitle,
@@ -592,6 +594,7 @@ bool Application::loadModule(const char* path, bool forScanning) {
     m_config.load(m_mainIniFile.c_str(), m_filename.c_str());
     m_config.load(PathUtil::join(PathUtil::dirname(m_fullpath), "tmcp.ini").c_str(), m_filename.c_str());
     m_config.load((m_fullpath + ".tmcp").c_str());
+    m_config.load(m_cmdline);
 
     // split off track number
     if (m_config.trackNumberEnabled

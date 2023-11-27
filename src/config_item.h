@@ -18,8 +18,8 @@ struct EnumItem {
 struct ConfigParserContext {
     std::string filename;
     int lineno;
-    void error(const char* msg, const char* s);
-    inline bool checkParseResult(bool result, const char* s) {
+    void error(const char* msg, const char* s) const;
+    inline bool checkParseResult(bool result, const char* s) const {
         if (!result) { error("invalid value", s); }
         return result;
     }

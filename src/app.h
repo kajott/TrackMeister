@@ -30,6 +30,7 @@ class Application {
     SystemInterface& m_sys;
     TextBoxRenderer m_renderer;
     Config m_config;
+    Config::PreparedCommandLine m_cmdline;
     int m_sampleRate;
     bool m_scanning = false;
     std::atomic<bool> m_cancelScanning = false;

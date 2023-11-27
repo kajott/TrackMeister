@@ -75,6 +75,8 @@ The following locations are searched for configuration files:
 - `tmcp.ini` in the currently opened module file's directory
 - a file with the same name as the currently opened module file, but with an extra suffix of `.tmcp`; for example, for `foo.mod`, the configuration file will be `foo.mod.tmcp`
 
+Configuration files are processed in this exact order, line by line. Options specified later override options specified earlier.
+
 The configuration files can contain multiple sections, delimited by lines containing the section name in square brackets, `[like so]`. The following sections are evaluated, and all other sections are ignored:
 - the unnamed section at the beginning of the file
 - the `[TMCP]` section
@@ -122,11 +124,9 @@ Here's an example for a useful INI file as a compo organizer would set it up for
         ; the fade has been configured above already, now set up the loop:
         loop: true
 
-    [07*]
-        ; track 7 is terribly silent, we need to boost it by 4.2 dB:
-        gain = 4.2
-
 Note that in practice, the track-specific options would rather be written into the `tmcp.ini` file in the directory where the entries reside, or the even into the `.tmcp` file next to the module file itself, and maybe not into the "global" config file that's located next to `tmcp.exe`.
+
+Options can also be specified on the command line, in the syntax "`+key=value`" or "`+key:value`". No extra spaces are allowed around the value. Command-line options take precedence over all configuration files.
 
 
 ## Building

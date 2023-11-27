@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <list>
 #include <string>
 #include <functional>
 
@@ -44,7 +45,7 @@ inline uint32_t nibbleSwap(uint32_t x) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void ConfigParserContext::error(const char* msg, const char* s) {
+void ConfigParserContext::error(const char* msg, const char* s) const {
     fprintf(stderr, "%s:%d: %s '%s'\n", filename.c_str(), lineno, msg, s);
 }
 
@@ -163,7 +164,6 @@ bool Config::load(const char* filename, const char* matchName) {
     Dprintf("Config::load('%s', '%s')\n", filename, matchName ? matchName : "");
     FILE* f = fopen(filename, "r");
     if (!f) { return false; }
-(void)matchName;
 
     // iterate over lines
     constexpr int LineBufferSize = 128;
@@ -220,6 +220,47 @@ bool Config::load(const char* filename, const char* matchName) {
     }
     fclose(f);
     return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+Config::PreparedCommandLine Config::prepareCommandLine(int& argc, char** argv) {
+    PreparedCommandLine cmdline;
+    int argpOut = 1;
+    for (int argpIn = 1;  argpIn < argc;  ++argpIn) {
+        if (argv[argpIn][0] == '+') {
+            cmdline.emplace_back(&argv[argpIn][1]);
+        } else {
+            argv[argpOut++] = argv[argpIn];
+            cmdline.emplace_back("");
+        }
+    }
+    argc = argpOut;
+    return cmdline;
+}
+
+void Config::load(const Config::PreparedCommandLine& cmdline) {
+    ConfigParserContext ctx;
+    ctx.filename.assign("<cmdline>");
+    ctx.lineno = 0;
+    for (const auto& arg : cmdline) {
+        ctx.lineno++;
+        if (arg.empty()) { continue; }
+        auto sep = arg.find_first_of(":=");
+        if (sep == std::string::npos) {
+            ctx.error("syntax error", arg.c_str());
+            continue;
+        }
+        std::string key = arg.substr(0, sep);
+        const ConfigItem *item;
+        for (item = g_ConfigItems;  item->name;  ++item) {
+            if (stringEqualEx(item->name, key.c_str())) {
+                item->setter(ctx, *this, arg.substr(sep + 1u).c_str());
+                break;
+            }
+        }
+        if (!item->name) { ctx.error("invalid key", key.c_str()); }
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

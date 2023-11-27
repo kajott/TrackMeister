@@ -5,6 +5,9 @@
 
 #include <cstdint>
 
+#include <list>
+#include <string>
+
 enum class FilterMethod {
     None = 0,  //!< OpenMPT INTERPOLATIONFILTER_LENGTH = 1
     Linear,    //!< OpenMPT INTERPOLATIONFILTER_LENGTH = 2
@@ -152,6 +155,9 @@ struct Config {
 
     inline Config() {}
     inline void reset() { Config defaultConfig; *this = defaultConfig; }
+    using PreparedCommandLine = std::list<std::string>;
+    static PreparedCommandLine prepareCommandLine(int& argc, char** argv);
+    void load(const PreparedCommandLine& cmdline);
     bool load(const char* filename, const char* matchName=nullptr);
     bool save(const char* filename);
     bool saveLoudness(const char* filename);
