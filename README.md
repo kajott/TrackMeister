@@ -32,6 +32,7 @@ The following other controls are available:
 | Input | Action |
 |-------|--------|
 | **Q** or **Alt+F4** | quit the application
+| **Esc** | cancel current operation: <br> - stops loudness scan if one is running, <br> - pauses audio if it's playing, <br> - quits the application after pressing _twice_ otherwise
 | **Space** | pause / continue playback
 | **Tab** | show / hide the info and metadata bars
 | **Enter** | show / hide the fake VU meters
@@ -47,7 +48,7 @@ The following other controls are available:
 | **V** | show the TMCP and libopenmpt version numbers
 | **F5** | reload the current module and the application's configuration
 | **F11** | toggle fullscreen mode
-| **Ctrl+L** | start EBU R128 loudness scan for the currently loaded module
+| **Ctrl+L** | start (or cancel) EBU R128 loudness scan for the currently loaded module
 | **Ctrl+Shift+L** | start EBU R128 loudness scan for the currently loaded module and all following modules in the current directory
 | **Ctrl+Shift+S** | save `tmcp_default.ini` (see below)
 

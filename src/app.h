@@ -90,6 +90,7 @@ class Application {
     int m_fadeGain, m_fadeRate;
     bool m_autoFadeInitiated = false;
     bool m_multiScan = false;
+    bool m_escapePressedOnce = false;
 
     // pattern data cache
     struct CacheItem { char text[16], attr[16]; };

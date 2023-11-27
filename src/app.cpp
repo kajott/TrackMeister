@@ -149,13 +149,22 @@ void Application::fadeOut() {
 
 void Application::handleKey(int key, bool ctrl, bool shift, bool alt) {
     (void)alt;
+    if (key != 27) { m_escapePressedOnce = false; }
     switch (key) {
         case 'Q':  // quit immediately
             m_sys.quit();
             break;
-        case 27:  // [Esc] cancel running loudness scan
-            m_multiScan = false;
-            stopScan();
+        case 27:  // [Esc] cancel whatever is currently going on
+            if (m_scanning) {  // cancel loudness scan
+                m_multiScan = false;
+                stopScan();
+            } else if (m_mod && m_sys.isPlaying()) {  // pause
+                m_sys.pause();
+            } else if (!m_escapePressedOnce) {  // first Esc while paused -> do nothing (yet)
+                m_escapePressedOnce = true;
+            } else {
+                m_sys.quit();  // second Esc -> quit
+            }
             break;
         case ' ':  // [Space] pause/play
             if (m_mod) { m_fadeActive = false; m_sys.togglePause(); }
@@ -182,11 +191,15 @@ void Application::handleKey(int key, bool ctrl, bool shift, bool alt) {
                 }
             }
             break;
-        case 'L':  // [Ctrl+L] run loudness scan
+        case 'L':  // [Ctrl+L] run (or stop) loudness scan
             if (ctrl) {
+                bool wasScanning = m_scanning;
+                m_multiScan = false;
                 stopScan();
-                m_multiScan = shift;
-                startScan();
+                if (!wasScanning) {
+                    m_multiScan = shift;
+                    startScan();
+                }
             }
             break;
         case 'V':  // show version
@@ -554,6 +567,7 @@ void Application::unloadModule() {
     m_patternLength = 0;
     m_autoFadeInitiated = true;
     m_sys.setWindowTitle(baseWindowTitle);
+    m_escapePressedOnce = false;
     updateLayout(true);
     Dprintf("module unloaded\n");
 }
