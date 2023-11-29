@@ -21,6 +21,68 @@ constexpr int BatchSize = 16384;  // must be 16384 or less
 
 ///////////////////////////////////////////////////////////////////////////////
 
+unsigned TextBoxRenderer::loadTexture(const void* pngData, size_t pngSize, int channels, bool mipmap, TextureDimensions* dims) {
+    LodePNGColorType pngFormat;  GLenum glIntFormat, glInFormat;
+    switch (channels) {
+        case 1: pngFormat = LCT_GREY;       glIntFormat = GL_R8;    glInFormat = GL_RED;  break;
+        case 2: pngFormat = LCT_GREY_ALPHA; glIntFormat = GL_RG8;   glInFormat = GL_RG;   break;
+        case 3: pngFormat = LCT_RGB;        glIntFormat = GL_RGB8;  glInFormat = GL_RGB;  break;
+        case 4: pngFormat = LCT_RGBA;       glIntFormat = GL_RGBA8; glInFormat = GL_RGBA; break;
+        default: return 0;
+    }
+
+    uint8_t *img = nullptr;
+    unsigned width = 0, height = 0;
+    if (lodepng_decode_memory(&img, &width, &height, static_cast<const unsigned char*>(pngData), pngSize, pngFormat, 8)
+    || !img || !width || !height)
+        { free((void*)img); return 0; }
+    if (dims) { dims->width = int(width); dims->height = int(height); }
+
+    unsigned texID = 0;
+    glGenTextures(1, &texID);
+    if (!texID) { return 0; }
+    while (glGetError());
+    glBindTexture(GL_TEXTURE_2D, texID);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mipmap ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    if ((width * channels) & 3) { glPixelStorei(GL_UNPACK_ALIGNMENT, 1); }
+    glTexImage2D(GL_TEXTURE_2D, 0, glIntFormat, width, height, 0, glInFormat, GL_UNSIGNED_BYTE, static_cast<const void*>(img));
+    if (mipmap) { glGenerateMipmap(GL_TEXTURE_2D); }
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glFlush(); glFinish();
+    free((void*)img);
+    if (glGetError()) { glDeleteTextures(1, &texID); texID = 0; }
+    return texID;
+}
+
+unsigned TextBoxRenderer::loadTexture(const char* filename, int channels, bool mipmap, TextureDimensions* dims) {
+    if (!filename || !filename[0]) { return 0; }
+    FILE *f = fopen(filename, "rb");
+    if (!f) { return 0; }
+    fseek(f, 0, SEEK_END);
+    size_t fsize = ftell(f);
+    if (fsize > (64u << 20)) { fclose(f); return 0; }  // size sanity check: max. 64 MiB
+    void *buf = malloc(fsize);
+    if (!buf) { fclose(f); return 0; }
+    fseek(f, 0, SEEK_SET);
+    if (fread(buf, fsize, 1, f) != 1) { free(buf); fclose(f); return 0; }
+    fclose(f); 
+    unsigned texID = loadTexture(buf, fsize, channels, mipmap, dims);
+    free(buf);
+    return texID;
+}
+
+void TextBoxRenderer::freeTexture(unsigned &texID) {
+    if (!texID) { return; }
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glDeleteTextures(1, &texID);
+    texID = 0;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 static const char* vsSrc =
      "#version 330"
 "\n" "layout(location=0) in vec2 aPos;"
@@ -78,6 +140,7 @@ bool TextBoxRenderer::init() {
     glBufferData(GL_ARRAY_BUFFER, BatchSize * 4 * sizeof(Vertex), nullptr, GL_STREAM_DRAW);
     m_vertices = nullptr;
     m_quadCount = 0;
+    m_tex = 0;
 
     // GL_ARRAY_BUFFER is still bound
     glEnableVertexAttribArray(0);
@@ -108,7 +171,7 @@ bool TextBoxRenderer::init() {
         *iboPtr++ = uint16_t(base + 2);
         *iboPtr++ = uint16_t(base + 3);
     }
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, BatchSize * 6 * sizeof(uint16_t), (const void*) iboData, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, BatchSize * 6 * sizeof(uint16_t), static_cast<const void*>(iboData), GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glFlush(); glFinish();
     delete[] iboData;
@@ -175,20 +238,8 @@ bool TextBoxRenderer::init() {
     glDeleteShader(fs);
     glDeleteShader(vs);
 
-    std::vector<unsigned char> texImg;
-    unsigned texWidth = 0, texHeight = 0;
-    if (lodepng::decode(texImg, texWidth, texHeight, FontData::TexData, size_t(FontData::TexDataSize), LCT_RGB, 8))
-        { m_error = "failed to decode the font texture"; return false; }
-    glGenTextures(1, &m_tex);
-    glBindTexture(GL_TEXTURE_2D, m_tex);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texWidth, texHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, (const void*)texImg.data());
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glFlush(); glFinish();
-    texImg.clear();
+    m_fontTex = loadTexture(static_cast<const void*>(FontData::TexData), FontData::TexDataSize, 3, false);
+    if (!m_fontTex) { m_error = "failed to load and decode the font texture"; return false; }
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -208,6 +259,8 @@ void TextBoxRenderer::viewportChanged() {
 }
 
 void TextBoxRenderer::flush() {
+    if (m_quadCount < 1) { return; }
+
     if (m_vertices) {
         glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
         glUnmapBuffer(GL_ARRAY_BUFFER);
@@ -225,7 +278,7 @@ void TextBoxRenderer::flush() {
 }
 
 void TextBoxRenderer::shutdown() {
-    glBindTexture(GL_TEXTURE_2D, 0);           glDeleteTextures(1, &m_tex);
+    freeTexture(m_fontTex);
     glBindVertexArray(0);                      glDeleteVertexArrays(1, &m_vao);
     glBindBuffer(GL_ARRAY_BUFFER, 0);          glDeleteBuffers(1, &m_vbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);  glDeleteBuffers(1, &m_ibo);
@@ -368,6 +421,7 @@ void TextBoxRenderer::alignText(float &x, float &y, float size, const char* text
 }
 
 float TextBoxRenderer::text(float x, float y, float size, const char* text, uint8_t align, uint32_t colorUpper, uint32_t colorLower, float blur, float offset) {
+    useTexture(m_fontTex);
     alignText(x, y, size, text, align);
     const FontData::Glyph* g;
     while ((g = getGlyph(nextCodepoint(text))) != 0u) {

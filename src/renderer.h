@@ -32,6 +32,7 @@ class TextBoxRenderer {
     unsigned m_ibo;
     unsigned m_prog;
     unsigned m_tex;
+    unsigned m_fontTex;
     int m_quadCount;
     int* m_glyphCache;
 
@@ -53,6 +54,9 @@ class TextBoxRenderer {
     const FontData::Glyph* getGlyph(uint32_t codepoint) const;
     void alignText(float &x, float &y, float size, const char* text, uint8_t align);
 
+    inline void useTexture(unsigned texID)
+        { if (texID && (texID != m_tex)) { flush(); m_tex = texID; } }
+
 public:
     bool init();
     void shutdown();
@@ -62,6 +66,11 @@ public:
     inline const char* error()  const { return m_error; }
     inline int viewportWidth()  const { return m_vpWidth; }
     inline int viewportHeight() const { return m_vpHeight; }
+
+    struct TextureDimensions { int width, height; };
+    static unsigned loadTexture(const void* pngData, size_t pngSize, int channels, bool mipmap, TextureDimensions* dims=nullptr);
+    static unsigned loadTexture(const char* filename, int channels, bool mipmap, TextureDimensions* dims=nullptr);
+    static void freeTexture(unsigned &texID);
 
     void box(int x0, int y0, int x1, int y1,
              uint32_t colorUpperLeft, uint32_t colorLowerRight,
