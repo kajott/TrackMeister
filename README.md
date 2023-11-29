@@ -1,5 +1,4 @@
-TrackMeister
-============
+![TrackMeister](logo/tm_logo.svg)
 
 This application is a player for [tracker music files](https://en.wikipedia.org/wiki/Module_file) ("module" files) as they were &ndash;and still are&ndash; common in the [demoscene](https://en.wikipedia.org/wiki/Demoscene). With its fullscreen interface and limited interaction options, it's specifically targeted towards presenting tracked music in a competition ("compo").
 
