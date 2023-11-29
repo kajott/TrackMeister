@@ -1,5 +1,5 @@
 name: Automated Builds
-on: [push]
+on: [push, workflow_dispatch]
 jobs:
   win32-build:
     runs-on: windows-latest
