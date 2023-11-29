@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: 2023 Martin J. Fiedler <keyj@emphy.de>
 // SPDX-License-Identifier: MIT
 
+#define _CRT_SECURE_NO_WARNINGS  // disable nonsense MSVC warnings
+
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
@@ -68,7 +70,7 @@ unsigned TextBoxRenderer::loadTexture(const char* filename, int channels, bool m
     if (!buf) { fclose(f); return 0; }
     fseek(f, 0, SEEK_SET);
     if (fread(buf, fsize, 1, f) != 1) { free(buf); fclose(f); return 0; }
-    fclose(f); 
+    fclose(f);
     unsigned texID = loadTexture(buf, fsize, channels, mipmap, dims);
     free(buf);
     return texID;
