@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <cstddef>
 
 #include <string>
@@ -11,7 +12,7 @@
 namespace PathUtil {
 
 //! the platform's preferred path separator
-extern const char pathSep;
+extern "C" const char pathSep;
 
 //! check if a character is a path separator
 inline constexpr bool isPathSep(char c)
@@ -82,6 +83,15 @@ bool isDir(const char* path);
 //! check whether a path refers to a directory
 inline bool isDir(const std::string& path)
     { return isDir(path.c_str()); }
+
+//! determine the modification time of a file
+//! \returns an opaque timestamp in an implementation-defined format;
+//!          the only guarantee is that it's monotonically increasing,
+//!          so comparisons between times are possible;
+//!          returns 0 on failure
+int64_t getFileMTime(const char* path);
+inline int64_t getFileMTime(const std::string& path)
+    { return getFileMTime(path.c_str()); }
 
 //! find a sibling file in the same directory
 //! \param path  full path of the reference file; <br>

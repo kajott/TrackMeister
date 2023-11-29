@@ -230,9 +230,9 @@ void Application::updateLayout(bool resetBoxVisibility) {
     m_vuHeight = float(toPixels(m_config.vuHeight));
 
     // set up logo geometry
-    m_logoTex = m_config.logoEnabled ? m_defaultLogoTex : 0;
+    m_logoTex = !m_config.logoEnabled ? 0 : m_customLogoTex ? m_customLogoTex : m_defaultLogoTex;
     if (m_logoTex) {
-        TextBoxRenderer::TextureDimensions &texSize = m_defaultLogoSize;
+        TextBoxRenderer::TextureDimensions &texSize = (m_logoTex == m_customLogoTex) ? m_customLogoSize : m_defaultLogoSize;
         int maxWidth  = m_metaStartX - 2 * toPixels(m_config.logoMargin);
         int maxHeight = m_screenSizeY - m_infoEndY - 2 * toPixels(m_config.logoMargin);
         int logoWidth = texSize.width, logoHeight = texSize.height;

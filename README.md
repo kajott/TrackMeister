@@ -10,6 +10,7 @@ This application is a player for [tracker music files](https://en.wikipedia.org/
 - fullscreen interface based on OpenGL
 - metadata display (title, artist, technical info, module comment, instrument and sample names) with smooth scrolling
 - pattern display for visualization, including channel names (if present in the module file)
+- optional custom logo in the background of the pattern display
 - fake VU meters (based on note velocity and channel, not the actual audio samples)
 - smooth fade out (triggered manually, automatically after looping, or after a configurable time)
 - loudness normalization, with a built-in EBU R128 (a.k.a. ReplayGain 2.0) loudness analyzer

@@ -134,6 +134,11 @@ const ConfigItem g_ConfigItems[] = { {
         [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.logoEnabled); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.logoEnabled, s), s); }
     }, {
+        false, "logo                       ",
+        "custom logo file; must be a grayscale PNG file with high-contrast black-on-white artwork; will be downscaled by a power of two so it fits into the canvas",
+        [] (const Config& cfg) -> std::string { return cfg.logo; },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { (void)ctx; cfg.logo.assign(s); }
+    }, {
         false, "logo margin                ",
         "minimum distance between the logo image and the surrounding screen or panel edges",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.logoMargin); },

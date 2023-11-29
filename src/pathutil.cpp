@@ -9,20 +9,20 @@
 #include "util.h"
 #include "pathutil.h"
 
-namespace PathUtil {
-
 #ifdef _WIN32
-    const char pathSep = '\\';
+    extern "C" const char pathSep = '\\';
     #define WIN32_LEAN_AND_MEAN
     #define NOMINMAX
     #include <windows.h>
 #else
-    const char pathSep = '/';
+    extern "C" const char pathSep = '/';
     #include <sys/types.h>
     #include <sys/stat.h>
     #include <unistd.h>
     #include <dirent.h>
 #endif
+
+namespace PathUtil {
 
 size_t pathSepPos(const std::string& path) {
     size_t res = 0u;
@@ -118,6 +118,25 @@ bool isDir(const char* path) {
         struct stat st;
         if (stat(path, &st) < 0) { return false; }
         return !!S_ISDIR(st.st_mode);
+    #endif
+}
+
+int64_t getFileMTime(const char* path) {
+    if (!path || !path[0]) { return 0; }
+    #ifdef _WIN32
+        HANDLE hFile = CreateFileA(path, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
+        if (hFile == INVALID_HANDLE_VALUE) { return 0; }
+        FILETIME mtime;
+        int64_t res = 0;
+        if (GetFileTime(hFile, nullptr, nullptr, &mtime)) {
+            res = (int64_t(mtime.dwHighDateTime) << 32) + int64_t(mtime.dwLowDateTime);
+        }
+        CloseHandle(hFile);
+        return res;
+    #else
+        struct stat st;
+        if (stat(path, &st) < 0) { return 0; }
+        return int64_t(st.st_mtime);
     #endif
 }
 

@@ -67,6 +67,7 @@ struct Config {
     uint32_t shadowColor              = 0x80000000u;  //!< color of the info and metadata bar's shadows
 
     bool     logoEnabled              = true;         //!< whether to show a logo at all
+    std::string logo;                                 //!< custom logo file; must be a grayscale PNG file with high-contrast black-on-white artwork; will be downscaled by a power of two so it fits into the canvas
     int      logoMargin               = 8;            //!< minimum distance between the logo image and the surrounding screen or panel edges
 
     int      emptyTextSize            = 32;           //!< size of the "no module loaded" text

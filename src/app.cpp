@@ -60,6 +60,7 @@ void Application::init(int argc, char* argv[]) {
         m_sys.fatalError("initialization failed", "could not initialize text box renderer");
     }
     m_defaultLogoTex = m_renderer.loadTexture(LogoData, LogoDataSize, 1, true, &m_defaultLogoSize);
+    updateLogo();
 
     // populate playable extension list
     m_playableExts.clear();
@@ -322,6 +323,17 @@ void Application::toastVersion() {
         ver.append(" Debug");
     #endif
     toast(ver);
+}
+
+void Application::updateLogo() {
+    int64_t mtime = PathUtil::getFileMTime(m_config.logo.c_str());
+    if ((m_config.logo != m_customLogoPath) || (mtime > m_customLogoMTime)) {
+        Dprintf("logo changed/updated: %s\n", m_config.logo.c_str());
+        m_customLogoPath = m_config.logo;
+        m_customLogoMTime = mtime;
+        m_renderer.freeTexture(m_customLogoTex);
+        m_customLogoTex = m_renderer.loadTexture(m_customLogoPath.c_str(), 1, true, &m_customLogoSize);
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -605,6 +617,7 @@ bool Application::loadModule(const char* path, bool forScanning) {
     m_config.load(PathUtil::join(PathUtil::dirname(m_fullpath), "tm.ini").c_str(), m_filename.c_str());
     m_config.load((m_fullpath + ".tm").c_str());
     m_config.load(m_cmdline);
+    updateLogo();
 
     // split off track number
     if (m_config.trackNumberEnabled

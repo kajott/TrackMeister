@@ -84,8 +84,12 @@ class Application {
     float m_channelNameOffsetX, m_vuHeight;
 
     // logo data (textures, layout)
-    unsigned m_defaultLogoTex;
+    unsigned m_defaultLogoTex = 0;
     TextBoxRenderer::TextureDimensions m_defaultLogoSize = {0,0};
+    unsigned m_customLogoTex = 0;
+    TextBoxRenderer::TextureDimensions m_customLogoSize = {0,0};
+    std::string m_customLogoPath;
+    int64_t m_customLogoMTime = 0;
     int m_logoX0, m_logoY0, m_logoX1, m_logoY1;
     unsigned m_logoTex;
 
@@ -132,6 +136,7 @@ private:  // business logic
     void cycleBoxVisibility();
     int toPixels(int value) const;
     int textWidth(int size, const char* text) const;
+    void updateLogo();
     void updateLayout(bool resetBoxVisibility=false);
     void drawPatternDisplayCell(float x, float y, const char* text, const char* attr, float alpha=1.0f, bool pipe=true);
     static void formatPosition(int order, int pattern, int row, char* text, char* attr, int size);

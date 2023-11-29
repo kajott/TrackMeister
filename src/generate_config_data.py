@@ -73,10 +73,9 @@ if __name__ == "__main__":
 
             # config item
             m = in_config and re.match(r'''
-                (?P<type>   \w+) \s*
+                (?P<type>   [a-zA-Z0-9_:]+) \s*
                 (?P<field>  \w+) \s*
-                =                \s*
-                (?P<default> .*?) ;
+                ( = \s* (?P<default> .*?) )? ;
                 \s* //!< \s*
                 (?P<comment> .*)
             ''', line, flags=re.X)
@@ -85,7 +84,7 @@ if __name__ == "__main__":
                 field = m.group('field')
                 name = camelCase_to_space_case(field)
                 name_maxlen = max(name_maxlen, len(name))
-                if not(type in {'bool', 'int', 'float', 'uint32_t'}) and not(type in enums):
+                if not(type in {'bool', 'int', 'float', 'uint32_t', 'std::string'}) and not(type in enums):
                     print(f"{infile}:{lineno}: invalid type '{type}'", file=sys.stderr)
                 else:
                     fields.append((new_section, type, field, name, m.group('comment').strip()))
@@ -132,6 +131,9 @@ if __name__ == "__main__":
             if type in enums:
                 f.write(f'        [] (const Config& cfg) -> std::string {{ return ConfigItem::formatEnum(static_cast<int>(cfg.{field}), e_{type}); }},\n')
                 f.write(f'        [] (ConfigParserContext& ctx, Config& cfg, const char* s) {{ int value; if (ctx.checkParseResult(ConfigItem::parseEnum(value, s, e_{type}), s)) {{ cfg.{field} = static_cast<{type}>(value); }} }}\n')
+            elif type == 'std::string':
+                f.write(f'        [] (const Config& cfg) -> std::string {{ return cfg.{field}; }},\n')
+                f.write(f'        [] (ConfigParserContext& ctx, Config& cfg, const char* s) {{ (void)ctx; cfg.{field}.assign(s); }}\n')
             else:
                 type = { "uint32_t": "Color" }.get(type, type.title())
                 f.write(f'        [] (const Config& cfg) -> std::string {{ return ConfigItem::format{type}(cfg.{field}); }},\n')

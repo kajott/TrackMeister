@@ -33,7 +33,7 @@ $ATLAS_GEN_BINARY \
     -potr
 
 if which optipng &>/dev/null ; then
-    optipng -nx -o7 font.png
+    optipng -nx -o7 -strip all font.png
 elif which pngcrush &>/dev/null ; then
     pngcrush -ow -brute -noreduce font.png
 fi

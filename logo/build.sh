@@ -11,7 +11,7 @@ inkscape $INPUT_SVG_FILE -o logo.png \
     --export-background-opacity=1.0
 
 if which optipng &>/dev/null ; then
-    optipng -nx -o7 logo.png
+    optipng -nx -o7 -strip all logo.png
 elif which pngcrush &>/dev/null ; then
     pngcrush -ow -brute -noreduce logo.png
 fi
