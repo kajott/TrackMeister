@@ -62,7 +62,7 @@ class Application {
 
     // computed layout information (from updateLayout())
     int m_screenSizeX, m_screenSizeY;
-    int m_emptyTextSize;
+    int m_emptyTextSize, m_emptyTextPos;
     int m_trackTextSize, m_infoTextSize, m_infoDetailsSize;
     int m_infoEndY, m_infoShadowEndY;
     float m_trackX, m_trackY;
@@ -82,6 +82,12 @@ class Application {
     int m_toastTextSize, m_toastY, m_toastDX, m_toastDY;
     int m_channelNameBarStartY, m_channelNameTextY;
     float m_channelNameOffsetX, m_vuHeight;
+
+    // logo data (textures, layout)
+    unsigned m_defaultLogoTex;
+    TextBoxRenderer::TextureDimensions m_defaultLogoSize = {0,0};
+    int m_logoX0, m_logoY0, m_logoX1, m_logoY1;
+    unsigned m_logoTex;
 
     // current view/playback state
     float m_metaTextY, m_metaTextTargetY;

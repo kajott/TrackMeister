@@ -233,6 +233,7 @@ add_executable (tmcp
     src/pathutil.cpp
     src/renderer.cpp
     font/font_data.cpp
+    logo/logo_data.cpp
 )
 add_library (tmcp_external STATIC
     external/glad/src/glad.c

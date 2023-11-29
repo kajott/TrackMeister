@@ -112,15 +112,17 @@ static const char* fsSrc =
 "\n" "layout(location=0) out vec4 outColor;"
 "\n" "void main() {"
 "\n" "    float d = 0.;"
-"\n" "    if (vMode == 0u) {  // box mode"
+"\n" "    if (vMode == 1u) { // text mode"
+"\n" "        vec3 s = texture(uTex, vTC).rgb;"
+"\n" "        d = max(min(s.r, s.g), min(max(s.r, s.g), s.b)) - 0.5;"
+"\n" "        d /= fwidth(d) * 1.25;"
+"\n" "    } else if (vMode == 0u) {  // box mode"
 "\n" "        vec2 p = abs(vTC) - vSize.xy;"
 "\n" "        d = (min(p.x, p.y) > (-vSize.z))"
 "\n" "          ? (vSize.z - length(p + vec2(vSize.z)))"
 "\n" "          : min(-p.x, -p.y);"
-"\n" "    } else { // text mode"
-"\n" "        vec3 s = texture(uTex, vTC).rgb;"
-"\n" "        d = max(min(s.r, s.g), min(max(s.r, s.g), s.b)) - 0.5;"
-"\n" "        d /= fwidth(d) * 1.25;"
+"\n" "    } else {  // logo mode"
+"\n" "        d = texture(uTex, vTC).r;"
 "\n" "    }"
 "\n" "    outColor = vec4(vColor.rgb, vColor.a * clamp((d - vBR.x) * vBR.y + 0.5, 0.0, 1.0));"
 "\n" "}"
@@ -355,6 +357,15 @@ void TextBoxRenderer::outlineBox(int x0, int y0, int x1, int y1, uint32_t colorU
     }
     box(x0 + cInner, y0 + cInner, x1 - cInner, y1 - cInner,
         colorUpper | 0xFF000000u, colorLower | 0xFF000000u, false, borderRadius - cInner);
+}
+
+void TextBoxRenderer::logo(int x0, int y0, int x1, int y1, uint32_t color, unsigned texID) {
+    if (!texID || !(color & 0xFF000000u)) { return; }
+    useTexture(texID);
+    Vertex* v = newVertices(2, float(x0), float(y0), float(x1), float(y1), 0.f, 0.f, 1.f, 1.f);
+    v[0].color = v[1].color = v[2].color = v[3].color = color;
+    v[0].br[0] = v[1].br[0] = v[2].br[0] = v[3].br[0] = 0.5f;
+    v[0].br[1] = v[1].br[1] = v[2].br[1] = v[3].br[1] = -1.0f;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

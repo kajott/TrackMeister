@@ -57,7 +57,6 @@ struct Config {
     float    fadeOutAt                = 0.0f;         //!< number of seconds after which the song shall be slowly faded out automatically (0 = no auto-fade)
     float    fadeDuration             = 10.f;         //!< duration of a fade-out, in seconds
 
-    bool     trackNumberEnabled       = true;         //!< whether to extract and display the track number from the filename; used if the filename starts with two digits followed by a dash (-), underscore (_) or space
     bool     autoScrollEnabled        = true;         //!< whether to enable automatic scrolling in the metadata sidebar after loading a module
     float    maxScrollDuration        = 4.f * 60.f;   //!< maximum duration after which automatic metadata scrolling reaches the end, in seconds; if the module is shorter than that, the module's duration will be used instead
 
@@ -67,10 +66,17 @@ struct Config {
     uint32_t metaBackground           = 0xFF1A1E4Du;  //!< background color of the metadata sidebar
     uint32_t shadowColor              = 0x80000000u;  //!< color of the info and metadata bar's shadows
 
+    bool     logoEnabled              = true;         //!< whether to show a logo at all
+    int      logoMargin               = 8;            //!< minimum distance between the logo image and the surrounding screen or panel edges
+
     int      emptyTextSize            = 32;           //!< size of the "no module loaded" text
+    int      emptyLogoPosY            = 500;          //!< vertical position of the center of the logo on the "no module loaded" screen
+    int      emptyTextPosY            = 900;          //!< vertical position of the "no module loaded" text
     uint32_t emptyTextColor           = 0x80FFFFFFu;  //!< color of the "no module loaded" text
+    uint32_t emptyLogoColor           = 0x80FFFFFFu;  //!< logo color on the "no module loaded" screen
 
     bool     infoEnabled              = true;         //!< whether to enable the top information bar by default after loading a module
+    bool     trackNumberEnabled       = true;         //!< whether to extract and display the track number from the filename; used if the filename starts with two digits followed by a dash (-), underscore (_) or space
     int      infoMarginX              = 16;           //!< outer left margin inside the info bar
     int      infoMarginY              = 8;            //!< upper and lower margin inside the info bar
     int      infoTrackTextSize        = 233;          //!< text size of the track number
@@ -116,6 +122,7 @@ struct Config {
     int      patternMarginX           = 8;            //!< left and right margin inside the pattern display
     int      patternBarPaddingX       = 4;            //!< extra left and right padding of the current row bar in the pattern display
     int      patternBarBorderPercent  = 20;           //!< border radius of the current row bar, in percent of the text size
+    uint32_t patternLogoColor         = 0x10000000u;  //!< color of the background logo
     uint32_t patternBarBackground     = 0x40FFFFFFu;  //!< fill color of the current row bar
     uint32_t patternTextColor         = 0x80FFFFFFu;  //!< color of normal text in the pattern display (not used, as everything in the pattern display is covered by the following highlighting colors)
     uint32_t patternDotColor          = 0x30FFFFFFu;  //!< text color of the dots indicating unset notes/instruments/effects etc.

@@ -31,6 +31,9 @@ constexpr const char* baseWindowTitle = "Tracked Music Compo Player";
 constexpr float scrollAnimationSpeed = -10.f;
 constexpr size_t scanBufferSize = 4096;
 
+extern "C" const int LogoDataSize;
+extern "C" const unsigned char LogoData[];
+
 ////////////////////////////////////////////////////////////////////////////////
 
 ///// init + shutdown
@@ -56,6 +59,7 @@ void Application::init(int argc, char* argv[]) {
     if (!m_renderer.init()) {
         m_sys.fatalError("initialization failed", "could not initialize text box renderer");
     }
+    m_defaultLogoTex = m_renderer.loadTexture(LogoData, LogoDataSize, 1, true, &m_defaultLogoSize);
 
     // populate playable extension list
     m_playableExts.clear();
@@ -71,6 +75,7 @@ void Application::init(int argc, char* argv[]) {
 
 void Application::shutdown() {
     unloadModule();
+    m_renderer.freeTexture(m_defaultLogoTex);
     m_renderer.shutdown();
 }
 
@@ -364,6 +369,11 @@ void Application::draw(float dt) {
                  float((clearColor >> 16) & 0xFF) * float(1.f/255.f), 1.f);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    // draw logo
+    m_renderer.logo(m_logoX0, m_logoY0, m_logoX1, m_logoY1,
+                    m_mod ? m_config.patternLogoColor : m_config.emptyLogoColor,
+                    m_logoTex);
+
     // draw VU meters
     if (m_mod && m_vuVisible && m_sys.isPlaying() && !m_endReached
     && (m_vuHeight > 0.0f) && ((m_config.vuLowerColor | m_config.vuUpperColor) & 0xFF000000u)) {
@@ -484,7 +494,7 @@ void Application::draw(float dt) {
     // draw "no module loaded" screen
     if (!m_mod) {
         m_renderer.text(
-            float(m_screenSizeX >> 1), float((m_infoEndY + m_screenSizeY) >> 1),
+            float(m_screenSizeX >> 1), float(m_emptyTextPos),
             float(m_emptyTextSize), "No module loaded.",
             Align::Center + Align::Middle, m_config.emptyTextColor);
     }

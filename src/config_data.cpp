@@ -94,12 +94,7 @@ const ConfigItem g_ConfigItems[] = { {
         [] (const Config& cfg) -> std::string { return ConfigItem::formatFloat(cfg.fadeDuration); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseFloat(cfg.fadeDuration, s), s); }
     }, {
-        true, "track number enabled       ",
-        "whether to extract and display the track number from the filename; used if the filename starts with two digits followed by a dash (-), underscore (_) or space",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.trackNumberEnabled); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.trackNumberEnabled, s), s); }
-    }, {
-        false, "auto scroll enabled        ",
+        true, "auto scroll enabled        ",
         "whether to enable automatic scrolling in the metadata sidebar after loading a module",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.autoScrollEnabled); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.autoScrollEnabled, s), s); }
@@ -134,20 +129,50 @@ const ConfigItem g_ConfigItems[] = { {
         [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.shadowColor); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.shadowColor, s), s); }
     }, {
+        true, "logo enabled               ",
+        "whether to show a logo at all",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.logoEnabled); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.logoEnabled, s), s); }
+    }, {
+        false, "logo margin                ",
+        "minimum distance between the logo image and the surrounding screen or panel edges",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.logoMargin); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.logoMargin, s), s); }
+    }, {
         true, "empty text size            ",
         "size of the \"no module loaded\" text",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.emptyTextSize); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.emptyTextSize, s), s); }
+    }, {
+        false, "empty logo pos Y           ",
+        "vertical position of the center of the logo on the \"no module loaded\" screen",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.emptyLogoPosY); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.emptyLogoPosY, s), s); }
+    }, {
+        false, "empty text pos Y           ",
+        "vertical position of the \"no module loaded\" text",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.emptyTextPosY); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.emptyTextPosY, s), s); }
     }, {
         false, "empty text color           ",
         "color of the \"no module loaded\" text",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.emptyTextColor); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.emptyTextColor, s), s); }
     }, {
+        false, "empty logo color           ",
+        "logo color on the \"no module loaded\" screen",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.emptyLogoColor); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.emptyLogoColor, s), s); }
+    }, {
         true, "info enabled               ",
         "whether to enable the top information bar by default after loading a module",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.infoEnabled); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.infoEnabled, s), s); }
+    }, {
+        false, "track number enabled       ",
+        "whether to extract and display the track number from the filename; used if the filename starts with two digits followed by a dash (-), underscore (_) or space",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.trackNumberEnabled); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.trackNumberEnabled, s), s); }
     }, {
         false, "info margin X              ",
         "outer left margin inside the info bar",
@@ -358,6 +383,11 @@ const ConfigItem g_ConfigItems[] = { {
         "border radius of the current row bar, in percent of the text size",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.patternBarBorderPercent); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.patternBarBorderPercent, s), s); }
+    }, {
+        false, "pattern logo color         ",
+        "color of the background logo",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.patternLogoColor); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.patternLogoColor, s), s); }
     }, {
         false, "pattern bar background     ",
         "fill color of the current row bar",

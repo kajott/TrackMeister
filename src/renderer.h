@@ -79,6 +79,8 @@ public:
     inline void box(int x0, int y0, int x1, int y1, uint32_t color)
         { box(x0, y0, x1, y1, color, color); }
 
+    void logo(int x0, int y0, int x1, int y1, uint32_t color, unsigned texID);
+
     void outlineBox(int x0, int y0, int x1, int y1,
                     uint32_t colorUpper, uint32_t colorLower,  // all colors are forced to fully opaque!
                     uint32_t colorOutline=0xFFFFFFFF,
