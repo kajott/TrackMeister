@@ -558,11 +558,11 @@ const ConfigItem g_ConfigItems[] = { {
 };
 
 const char* g_DefaultConfigFileIntro =
-    "; Edit and save this file as \"tmcp.ini\" in the program directory\n"
-    "; to customize TMCP appearance and behavior.\n"
+    "; Edit and save this file as \"tm.ini\" in the program directory\n"
+    "; to customize TrackMeister appearance and behavior.\n"
     "\n"
-    "[TMCP]\n"
-    "; TMCP default configuration.\n"
+    "[TrackMeister]\n"
+    "; TrackMeister default configuration.\n"
     "; \n"
     "; Unless explicitly noted otherwise, the unit for all lengths (text sizes,\n"
     "; margins etc.) is 1/1000th of the screen or window height, i.e. roughly\n"

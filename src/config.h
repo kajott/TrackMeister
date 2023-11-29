@@ -24,7 +24,7 @@ constexpr float InvalidLoudness = -999.0f;
 //! check whether a loudness value is valid
 constexpr bool isValidLoudness(float db) { return (db > -100.0f); }
 
-//! TMCP default configuration.
+//! TrackMeister default configuration.
 //!
 //! Unless explicitly noted otherwise, the unit for all lengths (text sizes,
 //! margins etc.) is 1/1000th of the screen or window height, i.e. roughly
@@ -122,7 +122,7 @@ struct Config {
     int      patternMarginX           = 8;            //!< left and right margin inside the pattern display
     int      patternBarPaddingX       = 4;            //!< extra left and right padding of the current row bar in the pattern display
     int      patternBarBorderPercent  = 20;           //!< border radius of the current row bar, in percent of the text size
-    uint32_t patternLogoColor         = 0x10000000u;  //!< color of the background logo
+    uint32_t patternLogoColor         = 0x18000000u;  //!< color of the background logo
     uint32_t patternBarBackground     = 0x40FFFFFFu;  //!< fill color of the current row bar
     uint32_t patternTextColor         = 0x80FFFFFFu;  //!< color of normal text in the pattern display (not used, as everything in the pattern display is covered by the following highlighting colors)
     uint32_t patternDotColor          = 0x30FFFFFFu;  //!< text color of the dots indicating unset notes/instruments/effects etc.

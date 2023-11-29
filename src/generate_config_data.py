@@ -19,10 +19,10 @@ if __name__ == "__main__":
     enums = {}
     fields = []
     intro = [
-        '; Edit and save this file as "tmcp.ini" in the program directory',
-        '; to customize TMCP appearance and behavior.',
+        '; Edit and save this file as "tm.ini" in the program directory',
+        '; to customize TrackMeister appearance and behavior.',
         '',
-        '[TMCP]'
+        '[TrackMeister]'
     ]
     name_maxlen = 0
 

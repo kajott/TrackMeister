@@ -14,10 +14,11 @@ jobs:
       - name: Archive Windows Package
         uses: actions/upload-artifact@v3
         with:
-          name: tmcp_windows
+          name: tm_windows
           path: |
-            tmcp.exe
-            tmcp.ini
+            tm.exe
+            tm.ini
+            README.md
   linux-build:
     runs-on: ubuntu-22.04
     steps:
@@ -35,7 +36,8 @@ jobs:
       - name: Archive Linux Packages
         uses: actions/upload-artifact@v3
         with:
-          name: tmcp_linux
+          name: tm_linux
           path: |
-            tmcp
-            tmcp.ini
+            tm
+            tm.ini
+            README.md

@@ -1,5 +1,5 @@
 {
-    "cmake.configureOnOpen": true,
+    "cmake.configureOnOpen": false,
     "C_Cpp.default.cppStandard": "c++17",
     "C_Cpp.default.includePath": [
         "/usr/include/SDL2",

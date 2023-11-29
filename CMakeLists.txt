@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.15)
 
-project (TMCP)
+project (TrackMeister)
 
 # set default build type
 set (default_build_type "Debug")
@@ -223,7 +223,7 @@ endif ()
 ###############################################################################
 
 # set sources for main program and third-party libs
-add_executable (tmcp
+add_executable (tm
     src/main_sdl2.cpp
     src/app.cpp
     src/app_layout.cpp
@@ -235,7 +235,7 @@ add_executable (tmcp
     font/font_data.cpp
     logo/logo_data.cpp
 )
-add_library (tmcp_external STATIC
+add_library (tm_external STATIC
     external/glad/src/glad.c
     external/lodepng/lodepng.cpp
     external/libebur128/ebur128/ebur128.c
@@ -254,67 +254,67 @@ add_custom_command (
 )
 
 # set include directories
-target_include_directories (tmcp_external PUBLIC
+target_include_directories (tm_external PUBLIC
     src
     ${SDL2_INCLUDE_DIRS}
     external/glad/include
     external/lodepng
     external/libebur128/ebur128
 )
-target_include_directories (tmcp_external PRIVATE
+target_include_directories (tm_external PRIVATE
     external/libebur128/ebur128/queue
 )
 if (MSVC)
-    target_compile_definitions (tmcp_external PRIVATE _USE_MATH_DEFINES)
+    target_compile_definitions (tm_external PRIVATE _USE_MATH_DEFINES)
 endif ()
-target_compile_definitions (tmcp_external PRIVATE
+target_compile_definitions (tm_external PRIVATE
     LODEPNG_NO_COMPILE_ENCODER LODEPNG_NO_COMPILE_DISK
     LODEPNG_NO_COMPILE_ANCILLARY_CHUNKS LODEPNG_NO_COMPILE_ERROR_TEXT
 )
-target_include_directories (tmcp PRIVATE src)
+target_include_directories (tm PRIVATE src)
 
 # set library dependencies
-target_link_libraries (tmcp PUBLIC libopenmpt tmcp_external ${SDL2_LIBRARIES})
+target_link_libraries (tm PUBLIC libopenmpt tm_external ${SDL2_LIBRARIES})
 if (WIN32)
-    target_link_libraries (tmcp PUBLIC opengl32)
+    target_link_libraries (tm PUBLIC opengl32)
 else ()
-    target_link_libraries (tmcp PUBLIC m dl GL)
+    target_link_libraries (tm PUBLIC m dl GL)
 endif ()
 
 # platform-dependent additional sources and options
 if (WIN32)
-    target_sources (tmcp PRIVATE
+    target_sources (tm PRIVATE
         src/utf8.manifest
         src/icon.rc
     )
     if (CMAKE_BUILD_TYPE STREQUAL "Release")
-        set_target_properties (tmcp PROPERTIES WIN32_EXECUTABLE ON)
+        set_target_properties (tm PROPERTIES WIN32_EXECUTABLE ON)
     endif ()
-    set_target_properties (tmcp PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
-    target_link_libraries (tmcp PRIVATE SDL2main)
+    set_target_properties (tm PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
+    target_link_libraries (tm PRIVATE SDL2main)
 else ()
     set (THREADS_PREFER_PTHREAD_FLAG TRUE)
     find_package (Threads REQUIRED)
-    target_link_libraries (tmcp PRIVATE Threads::Threads)
+    target_link_libraries (tm PRIVATE Threads::Threads)
 endif ()
 
 # compiler options
 if (NOT MSVC)
-    target_compile_options (tmcp PRIVATE -Wall -Wextra -pedantic -Werror -fwrapv)
+    target_compile_options (tm PRIVATE -Wall -Wextra -pedantic -Werror -fwrapv)
 else ()
-    target_compile_options (tmcp PRIVATE /W4 /WX)
+    target_compile_options (tm PRIVATE /W4 /WX)
 endif ()
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     if (NOT MSVC)
         message (STATUS "Debug build, enabling Address Sanitizer")
-        target_compile_options (tmcp PRIVATE "-fsanitize=address")
-        target_compile_options (tmcp_external PUBLIC "-fsanitize=address")
-        target_link_options (tmcp PRIVATE "-fsanitize=address")
+        target_compile_options (tm PRIVATE "-fsanitize=address")
+        target_compile_options (tm_external PUBLIC "-fsanitize=address")
+        target_link_options (tm PRIVATE "-fsanitize=address")
     elseif (MSVC_VERSION GREATER 1627)
         message (STATUS "Debug build and MSVC 16.8 or greater detected, enabling Address Sanitizer")
-        target_compile_options (tmcp PRIVATE "/fsanitize=address")
-        target_compile_options (tmcp_external PUBLIC "/fsanitize=address")
-        target_link_options (tmcp PRIVATE "/DEBUG")
+        target_compile_options (tm PRIVATE "/fsanitize=address")
+        target_compile_options (tm_external PUBLIC "/fsanitize=address")
+        target_link_options (tm PRIVATE "/DEBUG")
         # ASAN isn't compatible with the /RTC switch and incremental linking,
         # both of which CMake enables by default
         string (REGEX REPLACE "/RTC(su|[1su])?" "" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
@@ -324,11 +324,11 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif ()
 
 # make the binary appear in the project's root directory
-set_target_properties (tmcp PROPERTIES
+set_target_properties (tm PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY                "${CMAKE_CURRENT_LIST_DIR}"
     RUNTIME_OUTPUT_DIRECTORY_DEBUG          "${CMAKE_CURRENT_LIST_DIR}"
     RUNTIME_OUTPUT_DIRECTORY_RELEASE        "${CMAKE_CURRENT_LIST_DIR}"
     RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL     "${CMAKE_CURRENT_LIST_DIR}"
     RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_CURRENT_LIST_DIR}"
-    OUTPUT_NAME_DEBUG                       "tmcp_debug"
+    OUTPUT_NAME_DEBUG                       "tm_debug"
 )

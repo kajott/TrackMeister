@@ -200,7 +200,8 @@ bool Config::load(const char* filename, const char* matchName) {
         if (!key) { continue; }
         if ((key[0] == '[') && !value && (end >= key) && (end[-1] == ']')) {
             ++key;  end[-1] = '\0';
-            validSection = stringEqualEx(key, "TMCP") || (matchName && PathUtil::matchFilename(key, matchName));
+            validSection = stringEqualEx(key, "TrackMeister") || stringEqualEx(key, "TM")
+                       || (matchName && PathUtil::matchFilename(key, matchName));
             Dprintf("  - %s section '%s'\n", validSection ? "parsing" : "ignoring", key);
             continue;
         }

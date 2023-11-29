@@ -1,5 +1,5 @@
-Tracked Music Compo Player
-==========================
+TrackMeister
+============
 
 This application is a player for [tracker music files](https://en.wikipedia.org/wiki/Module_file) ("module" files) as they were &ndash;and still are&ndash; common in the [demoscene](https://en.wikipedia.org/wiki/Demoscene). With its fullscreen interface and limited interaction options, it's specifically targeted towards presenting tracked music in a competition ("compo").
 
@@ -21,7 +21,7 @@ This application is a player for [tracker music files](https://en.wikipedia.org/
 
 ## Usage
 
-Just drag a module file onto the executable, or into the window once the player has already been started. If a directory is opened this way, the first playable file therein is loaded. Note that this is *not* recursive; TMCP won't play entire directory hierarchies.
+Just drag a module file onto the executable, or into the window once the player has already been started. If a directory is opened this way, the first playable file therein is loaded. Note that this is *not* recursive; TrackMeister won't play entire directory hierarchies.
 
 The screen is split into three parts: The pattern display, the info bar at the top (containing basic information about the module format as well as filename, title and artist), and the metadata bar at the right (with the free-text module message, instrument and sample names). If the content doesn't fit in the metadata bar, it slowly scrolls down during playback, so it reaches the bottom end at the end of the track or after four minutes, whatever comes first.
 
@@ -45,21 +45,21 @@ The following other controls are available:
 | Mouse Wheel | manually scroll through the metadata bar (stops autoscrolling)
 | **A** | stop / resume autoscrolling
 | **F** | slowly fade out the song
-| **V** | show the TMCP and libopenmpt version numbers
+| **V** | show the TrackMeister and libopenmpt version numbers
 | **F5** | reload the current module and the application's configuration
 | **F11** | toggle fullscreen mode
 | **Ctrl+L** | start (or cancel) EBU R128 loudness scan for the currently loaded module
 | **Ctrl+Shift+L** | start EBU R128 loudness scan for the currently loaded module and all following modules in the current directory
-| **Ctrl+Shift+S** | save `tmcp_default.ini` (see below)
+| **Ctrl+Shift+S** | save `tm_default.ini` (see below)
 
 For directory navigation, "previous" and "next" refer to case-insensitive lexicographical ordering.
 
-To use the loudness normalization feature, perform a loudness scan on the desired module(s); this will write a small `.tmcp` file next to the module file that contains the measured EBU R128 loudness for the currently set up rendering parameters (i.e. filter, stereo separation etc.). The next time that module is loaded, TMCP picks up this loudness value and automatically computes a suitable gain to normalize the volume levels to a target of -18 LUFS. (The target can be adjusted with the `target loudness` configuration setting.)
+To use the loudness normalization feature, perform a loudness scan on the desired module(s); this will write a small `.tm` file next to the module file that contains the measured EBU R128 loudness for the currently set up rendering parameters (i.e. filter, stereo separation etc.). The next time that module is loaded, TrackMeister picks up this loudness value and automatically computes a suitable gain to normalize the volume levels to a target of -18 LUFS. (The target can be adjusted with the `target loudness` configuration setting.)
 
 
 ## Configuration
 
-TMCP can be configured using configuration files with an INI-like syntax.
+TrackMeister can be configured using configuration files with an INI-like syntax.
 
 The following aspects can be configured:
 - display colors and font sizes (but **not** the font itself; that's "baked into" the program)
@@ -71,15 +71,15 @@ The following aspects can be configured:
 All items can be changed at runtime when loading a new module or pressing the **F5** key, _except_ those marked with an asterisk (*); these are only evaluated once on startup.
 
 The following locations are searched for configuration files:
-- `tmcp.ini` in the program's directory (i.e. directly next to `tmcp.exe`)
-- `tmcp.ini` in the currently opened module file's directory
-- a file with the same name as the currently opened module file, but with an extra suffix of `.tmcp`; for example, for `foo.mod`, the configuration file will be `foo.mod.tmcp`
+- `tm.ini` in the program's directory (i.e. directly next to `tm.exe`)
+- `tm.ini` in the currently opened module file's directory
+- a file with the same name as the currently opened module file, but with an extra suffix of `.tm`; for example, for `foo.mod`, the configuration file will be `foo.mod.tm`
 
 Configuration files are processed in this exact order, line by line. Options specified later override options specified earlier.
 
 The configuration files can contain multiple sections, delimited by lines containing the section name in square brackets, `[like so]`. The following sections are evaluated, and all other sections are ignored:
 - the unnamed section at the beginning of the file
-- the `[TMCP]` section
+- the `[TrackMeister]` or `[TM]` sections
 - sections that match the current module's file name, e.g. `[foo*.mod]`;
   the following rules apply for those:
   - only the filename is matched, no directory names
@@ -88,7 +88,7 @@ The configuration files can contain multiple sections, delimited by lines contai
 
 All other lines contain key-value pairs of the form "`key = value`" or "`key: value`". Spaces, dashes (`-`) and underscores (`_`) in key names are ignored. All parts of a line following a semicolon (`;`) are ignored. It's allowed to put comments at the end of key/value lines.
 
-To get a list of all possible settings, along with documentation and the default values for each setting, run TMCP and press **Ctrl+Shift+S**. This will generate a file `tmcp_default.ini` in the current directory (usually the program directory) that also be used as a template for an individual configuration.
+To get a list of all possible settings, along with documentation and the default values for each setting, run TrackMeister and press **Ctrl+Shift+S**. This will generate a file `tm_default.ini` in the current directory (usually the program directory) that also be used as a template for an individual configuration.
 
 All sizes (font sizes, margins etc.) are specified in 1/1000s of the display width, so they are more or less resolution-independent. <br>
 Boolean values can use any of the `1`/`0`, `false`/`true`, `yes`/`no` or `enabled`/`disabled` nomenclatures. <br>
@@ -96,7 +96,7 @@ Colors are specified in HTML/CSS-style hexadecimal RGB notation, but with option
 
 Here's an example for a useful INI file as a compo organizer would set it up for hosting a competition:
 
-    [TMCP]
+    [TM]
     ; generic options, specified in classic INI syntax
 
     ; we want a decent filter and full stereo for most module formats
@@ -124,7 +124,7 @@ Here's an example for a useful INI file as a compo organizer would set it up for
         ; the fade has been configured above already, now set up the loop:
         loop: true
 
-Note that in practice, the track-specific options would rather be written into the `tmcp.ini` file in the directory where the entries reside, or the even into the `.tmcp` file next to the module file itself, and maybe not into the "global" config file that's located next to `tmcp.exe`.
+Note that in practice, the track-specific options would rather be written into the `tm.ini` file in the directory where the entries reside, or the even into the `.tm` file next to the module file itself, and maybe not into the "global" config file that's located next to `tm.exe`.
 
 Options can also be specified on the command line, in the syntax "`+key=value`" or "`+key:value`". No extra spaces are allowed around the value. Command-line options take precedence over all configuration files.
 
@@ -142,10 +142,10 @@ Options can also be specified on the command line, in the syntax "`+key=value`" 
 
 ## Acknowledgements
 
-TMCP is built upon the following third-party libraries:
+TrackMeister is built upon the following third-party libraries:
 - [SDL 2](http://libsdl.org) is the basic framework for window management, event handling and audio playback
 - [GLAD](https://glad.dav1d.de) is used as the OpenGL interface generator
-- [MSDF](https://github.com/Chlumsky/msdf-atlas-gen) is what TMCP's font rendering is based upon
+- [MSDF](https://github.com/Chlumsky/msdf-atlas-gen) is what TrackMeister's font rendering is based upon
 - [Inconsolata](https://levien.com/type/myfonts/inconsolata.html) is the font that's used in the UI
 - [LodePNG](https://lodev.org/lodepng/) is used to decode PNG files
 - [libopenmpt](https://lib.openmpt.org/libopenmpt/) is doing all the heavy lifting concerning module file parsing and audio rendering

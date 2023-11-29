@@ -43,7 +43,7 @@ void Application::init(int argc, char* argv[]) {
     m_cmdline = Config::prepareCommandLine(argc, argv);
     m_mainIniFile.assign(argv[0]);
     PathUtil::dirnameInplace(m_mainIniFile);
-    PathUtil::joinInplace(m_mainIniFile, "tmcp.ini");
+    PathUtil::joinInplace(m_mainIniFile, "tm.ini");
     m_config.load(m_mainIniFile.c_str());
     m_config.load(m_cmdline);
 
@@ -191,10 +191,10 @@ void Application::handleKey(int key, bool ctrl, bool shift, bool alt) {
         case 'S':  // [Ctrl+Shift+S] save config
             if (ctrl && shift) {
                 Config defaultConfig;
-                if (defaultConfig.save("tmcp_default.ini")) {
-                    toast("saved tmcp_default.ini");
+                if (defaultConfig.save("tm_default.ini")) {
+                    toast("saved tm_default.ini");
                 } else {
-                    toast("saving tmcp_default.ini failed");
+                    toast("saving tm_default.ini failed");
                 }
             }
             break;
@@ -602,8 +602,8 @@ bool Application::loadModule(const char* path, bool forScanning) {
     // load configuration files
     m_config.reset();
     m_config.load(m_mainIniFile.c_str(), m_filename.c_str());
-    m_config.load(PathUtil::join(PathUtil::dirname(m_fullpath), "tmcp.ini").c_str(), m_filename.c_str());
-    m_config.load((m_fullpath + ".tmcp").c_str());
+    m_config.load(PathUtil::join(PathUtil::dirname(m_fullpath), "tm.ini").c_str(), m_filename.c_str());
+    m_config.load((m_fullpath + ".tm").c_str());
     m_config.load(m_cmdline);
 
     // split off track number
@@ -863,7 +863,7 @@ void Application::stopScan() {
     Dprintf("stopScan(): result loudness = %.2f dB\n", m_config.loudness);
     if (!isValidLoudness(m_config.loudness)) {
         toast("EBU R128 loudness scan cancelled");
-    } else if (m_config.saveLoudness((m_fullpath + ".tmcp").c_str())) {
+    } else if (m_config.saveLoudness((m_fullpath + ".tm").c_str())) {
         char message[128];
         snprintf(message, 128, "EBU R128 loudness scan result (%.2f dB) saved", m_config.loudness);
         toast(message);
