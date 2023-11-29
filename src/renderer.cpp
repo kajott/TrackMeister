@@ -10,6 +10,7 @@
 #include <algorithm>
 
 #include <glad/glad.h>
+#include "lodepng.h"
 
 #include "renderer.h"
 #include "font_data.h"
@@ -174,49 +175,20 @@ bool TextBoxRenderer::init() {
     glDeleteShader(fs);
     glDeleteShader(vs);
 
-    int texStride = FontData::TexWidth * 3;
-    int texSize = FontData::TexHeight * texStride;
-    int texOffset = texStride + 16;
-    void *texBuffer = ::calloc(texSize + texOffset, 1);
-    if (!texBuffer) { return false; }
-    uint8_t* texImg = &(static_cast<uint8_t*>(texBuffer))[texOffset];
-    const uint8_t* dataPos = FontData::TexData;
-    for (int c = 0;  c < 3;  ++c) {
-        int texPos = c;
-        while (texPos < texSize) {
-            // zero run
-            int length = *dataPos++;
-            texPos += length * 3;
-            if (texPos >= texSize) { break; }
-            // literal run
-            length = *dataPos++;
-            while ((length--) && (texPos < texSize)) {
-                texImg[texPos] = *dataPos++;
-                texPos += 3;
-            }
-        }
-    }
-    for (int texPos = 0;  texPos < texSize;  ++texPos) {
-        int w  = texImg[texPos - 3];
-        int n  = texImg[texPos - texStride];
-        int nw = texImg[texPos - texStride - 3];
-        int p = n + w - nw;
-        p = std::max(p, std::min(std::min(n, w), nw));
-        p = std::min(p, std::max(std::max(n, w), nw));
-        texImg[texPos] += uint8_t(p);
-    }
-    //{FILE *f = fopen("abfall.ppm", "wb"); fprintf(f, "P6\n%d %d\n255\n", FontData::TexWidth, FontData::TexHeight); fwrite((const void*)texImg, texSize, 1, f); fclose(f);}
-
+    std::vector<unsigned char> texImg;
+    unsigned texWidth = 0, texHeight = 0;
+    if (lodepng::decode(texImg, texWidth, texHeight, FontData::TexData, size_t(FontData::TexDataSize), LCT_RGB, 8))
+        { m_error = "failed to decode the font texture"; return false; }
     glGenTextures(1, &m_tex);
     glBindTexture(GL_TEXTURE_2D, m_tex);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, FontData::TexWidth, FontData::TexHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, (const void*)texImg);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texWidth, texHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, (const void*)texImg.data());
     glBindTexture(GL_TEXTURE_2D, 0);
     glFlush(); glFinish();
-    ::free(texBuffer);
+    texImg.clear();
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

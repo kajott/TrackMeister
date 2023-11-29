@@ -147,5 +147,6 @@ TMCP is built upon the following third-party libraries:
 - [GLAD](https://glad.dav1d.de) is used as the OpenGL interface generator
 - [MSDF](https://github.com/Chlumsky/msdf-atlas-gen) is what TMCP's font rendering is based upon
 - [Inconsolata](https://levien.com/type/myfonts/inconsolata.html) is the font that's used in the UI
+- [LodePNG](https://lodev.org/lodepng/) is used to decode PNG files
 - [libopenmpt](https://lib.openmpt.org/libopenmpt/) is doing all the heavy lifting concerning module file parsing and audio rendering
 - [libebur128](https://github.com/jiixyj/libebur128) is used for loudness normalization

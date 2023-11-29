@@ -236,6 +236,7 @@ add_executable (tmcp
 )
 add_library (tmcp_external STATIC
     external/glad/src/glad.c
+    external/lodepng/lodepng.cpp
     external/libebur128/ebur128/ebur128.c
     external/openmpt/include/stb_vorbis/stb_vorbis.c  # only ever gets included as a header in libopenmpt itself
 )
@@ -256,6 +257,7 @@ target_include_directories (tmcp_external PUBLIC
     src
     ${SDL2_INCLUDE_DIRS}
     external/glad/include
+    external/lodepng
     external/libebur128/ebur128
 )
 target_include_directories (tmcp_external PRIVATE
@@ -264,6 +266,10 @@ target_include_directories (tmcp_external PRIVATE
 if (MSVC)
     target_compile_definitions (tmcp_external PRIVATE _USE_MATH_DEFINES)
 endif ()
+target_compile_definitions (tmcp_external PRIVATE
+    LODEPNG_NO_COMPILE_ENCODER LODEPNG_NO_COMPILE_DISK
+    LODEPNG_NO_COMPILE_ANCILLARY_CHUNKS LODEPNG_NO_COMPILE_ERROR_TEXT
+)
 target_include_directories (tmcp PRIVATE src)
 
 # set library dependencies

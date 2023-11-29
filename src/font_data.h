@@ -16,8 +16,6 @@ namespace FontData {
         Box tc;
     };
 
-    extern const int TexWidth;
-    extern const int TexHeight;
     extern const int TexDataSize;
     extern const uint8_t TexData[];
 

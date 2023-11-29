@@ -32,4 +32,10 @@ $ATLAS_GEN_BINARY \
     -size 32 -pxrange 2 \
     -potr
 
+if which optipng &>/dev/null ; then
+    optipng -nx -o7 font.png
+elif which pngcrush &>/dev/null ; then
+    pngcrush -ow -brute -noreduce font.png
+fi
+
 python3 convert_font.py

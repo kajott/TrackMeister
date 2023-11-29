@@ -5,6 +5,7 @@
         "/usr/include/SDL2",
         "./external/SDL2-2.*/include",
         "./external/glad/include",
+        "./external/lodepng",
         "./external/openmpt",
         "./external/libebur128/ebur128",
         "./external/libebur128/ebur128/queue"
