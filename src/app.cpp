@@ -27,7 +27,7 @@
 #include "app.h"
 #include "version.h"
 
-constexpr const char* baseWindowTitle = "Tracked Music Compo Player";
+constexpr const char* baseWindowTitle = "TrackMeister";
 constexpr float scrollAnimationSpeed = -10.f;
 constexpr size_t scanBufferSize = 4096;
 
