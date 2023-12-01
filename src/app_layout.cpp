@@ -77,7 +77,7 @@ void Application::updateLayout(bool resetBoxVisibility) {
             m_infoValueX = std::max(m_infoValueX, toPixels(m_config.infoKeyPaddingX) + textWidth(m_infoTextSize, "Title:"));
             m_infoEndY += m_infoTextSize;
         }
-        if (!m_details.empty()) {
+        if (!m_shortDetails.empty() && !m_longDetails.empty()) {
             m_infoEndY += lineSpacing;
             m_infoDetailsY = m_infoEndY;
             m_infoEndY += m_infoDetailsSize;
@@ -137,9 +137,27 @@ void Application::updateLayout(bool resetBoxVisibility) {
         m_metaShadowStartX = m_metaStartX - toPixels(m_config.metaShadowSize);
         m_metaTextMinY = float(toPixels(m_config.metaMarginY));
         m_metaTextMaxY = std::min(m_metaTextMinY, float(m_screenSizeY - margin) - m_metadata.height());
-        Dprintf("metadata box scroll range: %.1f ... %.1f\n", m_metaTextMinY, m_metaTextMaxY);
         m_metaTextTargetY = m_metaTextMinY;
         if (resetBoxVisibility) { m_metaTextY = m_metaTextTargetY; }
+    }
+
+    // compile final details string
+    int maxDetails = int(std::min(m_shortDetails.size(), m_longDetails.size()));
+    if (maxDetails > 0) {
+        int maxWidth = m_metaStartX - toPixels(m_config.infoMarginX) - m_infoKeyX;
+        // try successively less long details
+        for (int maxLong = maxDetails;  maxLong >= 0;  --maxLong) {
+            m_details.clear();
+            for (int i = 0;  i < maxDetails;  ++i) {
+                const std::string& s = (i >= maxLong) ? m_shortDetails[i] : m_longDetails[i];
+                if (!s.empty()) {
+                    if (!m_details.empty()) { m_details.append(", "); }
+                    m_details.append(s);
+                }
+            }
+            // stop if it fits
+            if (textWidth(m_infoDetailsSize, m_details.c_str()) <= maxWidth) { break; }
+        }
     }
 
     // set up progress bar geometry

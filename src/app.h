@@ -46,7 +46,9 @@ class Application {
     char m_track[3] = {0,0,0};
     std::string m_artist;
     std::string m_title;
-    std::string m_details;
+    std::vector<std::string> m_shortDetails;
+    std::vector<std::string> m_longDetails;
+    std::string m_details;  // final string compiled in updateLayout()
     std::vector<std::string> m_channelNames;
     TextArea m_metadata;
     float m_duration, m_scrollDuration;

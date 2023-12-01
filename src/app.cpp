@@ -587,6 +587,8 @@ void Application::unloadModule() {
     m_track[0] = '\0';
     m_title.clear();
     m_artist.clear();
+    m_shortDetails.clear();
+    m_longDetails.clear();
     m_details.clear();
     m_metadata.clear();
     m_channelNames.clear();
@@ -704,20 +706,28 @@ bool Application::loadModule(const char* path, bool forScanning) {
     // get info box metadata
     m_artist.assign(m_mod->get_metadata("artist"));
     m_title.assign(m_mod->get_metadata("title"));
-    auto addDetail = [&] (const std::string& s) {
-        if (s.empty()) { return; }
-        if (!m_details.empty()) { m_details.append(", "); }
-        m_details.append(s);
-    };
-    addDetail(m_mod->get_metadata("type_long"));
-    addDetail(std::to_string(m_mod->get_num_channels()) + " channels");
-    addDetail(std::to_string(m_mod->get_num_patterns()) + " patterns");
-    addDetail(std::to_string(m_mod->get_num_orders()) + " orders");
-    if (m_mod->get_num_instruments()) { addDetail(std::to_string(m_mod->get_num_instruments()) + " instruments"); }
-    addDetail(std::to_string(m_mod->get_num_samples()) + " samples");
-    addDetail(std::to_string((m_mod_data.size() + 1023u) >> 10) + "K bytes");
+    m_shortDetails.clear();  m_longDetails.clear();
+    m_shortDetails.emplace_back(m_mod->get_metadata("type"));
+     m_longDetails.emplace_back(m_mod->get_metadata("type_long"));
+    m_shortDetails.emplace_back(std::to_string(m_mod->get_num_channels()) + "ch");
+     m_longDetails.emplace_back(std::to_string(m_mod->get_num_channels()) + " channels");
+    m_shortDetails.emplace_back(std::to_string(m_mod->get_num_patterns()) + " patt");
+     m_longDetails.emplace_back(std::to_string(m_mod->get_num_patterns()) + " patterns");
+    m_shortDetails.emplace_back(std::to_string(m_mod->get_num_orders()) + " ord");
+     m_longDetails.emplace_back(std::to_string(m_mod->get_num_orders()) + " orders");
+    if (m_mod->get_num_instruments()) {
+        m_shortDetails.emplace_back(std::to_string(m_mod->get_num_instruments()) + " inst");
+         m_longDetails.emplace_back(std::to_string(m_mod->get_num_instruments()) + " instruments");
+    }
+    m_shortDetails.emplace_back(std::to_string(m_mod->get_num_samples()) + " smp");
+     m_longDetails.emplace_back(std::to_string(m_mod->get_num_samples()) + " samples");
+    int kBytes = int((m_mod_data.size() + 1023u) >> 10);  // actually kibibytes
+    m_shortDetails.emplace_back(std::to_string(kBytes) + "KB");
+     m_longDetails.emplace_back(std::to_string(kBytes) + "K bytes");
     int sec = int(m_mod->get_duration_seconds());
-    addDetail(std::to_string(sec / 60) + ":" + std::to_string((sec / 10) % 6) + std::to_string(sec % 10));
+    std::string durationStr(std::to_string(sec / 60) + ":" + std::to_string((sec / 10) % 6) + std::to_string(sec % 10));
+    m_shortDetails.emplace_back(durationStr);
+     m_longDetails.emplace_back(durationStr);
 
     // get sidebar metadata: first instrument and sample names into a separate
     // buffer, and then using this buffer's width to line-wrap the module
