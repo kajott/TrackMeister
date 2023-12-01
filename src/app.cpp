@@ -69,8 +69,12 @@ void Application::init(int argc, char* argv[]) {
     }
     m_playableExts.push_back(0);
 
-    // load module from command line
-    loadModule((argc > 1) ? argv[1] : nullptr);
+    // load module from command line, or first module in working directory
+    if (argc > 1) {
+        loadModule(argv[1]);
+    } else {
+        loadModule(PathUtil::findSibling("./", true, m_playableExts.data()).c_str());
+    }
     if (m_fullpath.empty()) { toastVersion(); }
 }
 

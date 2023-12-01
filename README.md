@@ -21,7 +21,7 @@ This application is a player for [tracker music files](https://en.wikipedia.org/
 
 ## Usage
 
-Just drag a module file onto the executable, or into the window once the player has already been started. If a directory is opened this way, the first playable file therein is loaded. Note that this is *not* recursive; TrackMeister won't play entire directory hierarchies.
+Just drag a module file onto the executable, or into the window once the player has already been started. If a directory is opened this way, the first playable file therein is loaded. Note that this is *not* recursive; TrackMeister won't play entire directory hierarchies. If no file is specified upfront, but there are playable files in the current directory when TrackMeister starts, the (lexicographically) first file is loaded.
 
 The screen is split into three parts: The pattern display, the info bar at the top (containing basic information about the module format as well as filename, title and artist), and the metadata bar at the right (with the free-text module message, instrument and sample names). If the content doesn't fit in the metadata bar, it slowly scrolls down during playback, so it reaches the bottom end at the end of the track or after four minutes, whatever comes first.
 
