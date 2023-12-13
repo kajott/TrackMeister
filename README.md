@@ -25,7 +25,7 @@ Just drag a module file onto the executable, or into the window once the player 
 
 The screen is split into three parts: The pattern display, the info bar at the top (containing basic information about the module format as well as filename, title and artist), and the metadata bar at the right (with the free-text module message, instrument and sample names). If the content doesn't fit in the metadata bar, it slowly scrolls down during playback, so it reaches the bottom end at the end of the track or after four minutes, whatever comes first.
 
-If a module's filename starts with exactly two decimal digits, followed by a space, dash (`-`) or undersore (`_`), the digits will be removed from the filename display and shown as a "track number" in a much larger font in the info bar instead. This can be used to curate playlists by simply prefixing each filename with `01_`, `02_` and so on.
+If a module's filename starts with exactly two decimal digits, followed by a space, dash (`-`) or underscore (`_`), the digits will be removed from the filename display and shown as a "track number" in a much larger font in the info bar instead. This can be used to curate playlists by simply prefixing each filename with `01_`, `02_` and so on.
 
 The following other controls are available:
 
@@ -136,17 +136,18 @@ Options can also be specified on the command line, in the syntax "`+key=value`" 
   - CMake 3.15 or later
   - Python 3.8 or later
   - SDL2 development packages (only required on non-Windows systems; on Windows, the SDL2 SDK will be downloaded automatically during building)
-- make sure you cloned the repository recursively, as it pulls libopenmpt in as a submodule; if you forgot that, run "`git submodule update --init`"
+- make sure you cloned the repository recursively, as it pulls in a few libraries as submodules; if you forgot to do that, run "`git submodule update --init`"
 - building itself is done using standard CMake (e.g. "`cmake -S . -B build && cmake --build build`")
 
 
 ## Acknowledgements
 
-TrackMeister is built upon the following third-party libraries:
+TrackMeister was written by Martin J. Fiedler a.k.a. KeyJ of TRBL.
+It is built upon the following third-party libraries:
 - [SDL 2](http://libsdl.org) is the basic framework for window management, event handling and audio playback
 - [GLAD](https://glad.dav1d.de) is used as the OpenGL interface generator
 - [MSDF](https://github.com/Chlumsky/msdf-atlas-gen) is what TrackMeister's font rendering is based upon
-- [Inconsolata](https://levien.com/type/myfonts/inconsolata.html) is the font that's used in the UI
+- [Inconsolata](https://levien.com/type/myfonts/inconsolata.html) is the font that's used in the UI and logo
 - [LodePNG](https://lodev.org/lodepng/) is used to decode PNG files
 - [libopenmpt](https://lib.openmpt.org/libopenmpt/) is doing all the heavy lifting concerning module file parsing and audio rendering
 - [libebur128](https://github.com/jiixyj/libebur128) is used for loudness normalization

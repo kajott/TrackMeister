@@ -332,3 +332,19 @@ set_target_properties (tm PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_CURRENT_LIST_DIR}"
     OUTPUT_NAME_DEBUG                       "tm_debug"
 )
+
+# documentation stuff
+add_custom_target (doc
+    DEPENDS         "${CMAKE_CURRENT_SOURCE_DIR}/tm.html"
+)
+add_custom_command (
+    COMMENT         "generating HTML documentation"
+    COMMAND         "${CMAKE_CURRENT_SOURCE_DIR}/src/md2html.py"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/README.md"
+                 -o "${CMAKE_CURRENT_SOURCE_DIR}/tm.html"
+                 -T "TrackMeister Documentation"
+                 -x building
+    DEPENDS         "${CMAKE_CURRENT_SOURCE_DIR}/src/md2html.py"
+    MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/README.md"
+    OUTPUT          "${CMAKE_CURRENT_SOURCE_DIR}/tm.html"
+)

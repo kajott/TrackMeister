@@ -11,6 +11,8 @@ jobs:
         run: cmake -S . -B build
       - name: Build
         run: cmake --build build --config Release
+      - name: Generate Documentation
+        run: cmake --build build -t doc
       - name: Archive Windows Package
         uses: actions/upload-artifact@v3
         with:
@@ -18,7 +20,7 @@ jobs:
           path: |
             tm.exe
             tm.ini
-            README.md
+            tm.html
   linux-build:
     runs-on: ubuntu-22.04
     steps:
@@ -33,6 +35,8 @@ jobs:
         run: cmake -S . -B build -D CMAKE_BUILD_TYPE=Release -G Ninja
       - name: Build
         run: cmake --build build
+      - name: Generate Documentation
+        run: cmake --build build -t doc
       - name: Archive Linux Packages
         uses: actions/upload-artifact@v3
         with:
@@ -40,4 +44,4 @@ jobs:
           path: |
             tm
             tm.ini
-            README.md
+            tm.html
