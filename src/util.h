@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 #ifndef NDEBUG
     #include <cstdio>
     #define Dprintf printf
