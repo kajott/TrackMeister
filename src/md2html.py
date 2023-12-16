@@ -95,9 +95,10 @@ HTMLFooter = '''
 ###############################################################################
 
 class MarkdownToHTML:
-    def __init__(self, title=None, excludes=[]):
+    def __init__(self, title=None, excludes=[], basedir=None):
         self.title = title
         self.excludes = set(map(make_id, excludes))
+        self.basedir = basedir or ""
         self.html = io.StringIO()
         self.current_stack = []
         self.para_stack = []
@@ -211,25 +212,25 @@ class MarkdownToHTML:
         self.html.write(f'</{tag}>')
         return True
 
-    @staticmethod
-    def format_line(line):
+    def format_line(self, line):
         line = re.sub(r'<br\s*/?>', wrap("<br>"), line)
         line = re.sub(r'&([a-zA-Z0-9]+|#\d+|#[xX][0-9a-fA-F]+);', lambda m: wrap(m.group(0)), line)
         line = H(line)
         line = re.sub(r'`(.*?)`', lambda m: '<code>' + wrap(m.group(1)) + '</code>', line)
-        line = re.sub(r'!\[(.*?)\]\((.*?)\)', lambda m: MarkdownToHTML.embed_image(m.group(2), m.group(1)), line)
+        line = re.sub(r'!\[(.*?)\]\((.*?)\)', lambda m: self.embed_image(m.group(2), m.group(1)), line)
         line = re.sub(r'\[(.*?)\]\((.*?)\)', lambda m: f'<a href="{wrap(m.group(2))}">{m.group(1)}</a>', line)
         line = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', line)
         line = re.sub(r'\*(.*?)\*', r'<em>\1</em>', line)
         line = re.sub(r'\b_(.*?)_\b', r'<em>\1</em>', line)
         return unwrap(line)
 
-    @staticmethod
-    def embed_image(uri, alt=None):
+    def embed_image(self, uri, alt=None):
         data = None
         try:
+            print(self.basedir)
+            print(uri)
             if not uri.startswith(("http://", "https://", "/")):
-                with open(uri, 'rb') as f:
+                with open(os.path.join(self.basedir, uri), 'rb') as f:
                     data = f.read()
         except EnvironmentError:
             pass
@@ -273,7 +274,7 @@ if __name__ == "__main__":
     outfile = args.output
     if not outfile:
         outfile = os.path.splitext(infile)[0] + ".html"
-    conv = MarkdownToHTML(title=args.title, excludes=args.exclude)
+    conv = MarkdownToHTML(title=args.title, excludes=args.exclude or [], basedir=os.path.dirname(infile))
 
     try:
         with open(infile, encoding='utf-8', errors='replace') as md:
