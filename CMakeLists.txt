@@ -339,7 +339,8 @@ add_custom_target (doc
 )
 add_custom_command (
     COMMENT         "generating HTML documentation"
-    COMMAND         "${CMAKE_CURRENT_SOURCE_DIR}/src/md2html.py"
+    COMMAND         python
+                    "${CMAKE_CURRENT_SOURCE_DIR}/src/md2html.py"
                     "${CMAKE_CURRENT_SOURCE_DIR}/README.md"
                  -o "${CMAKE_CURRENT_SOURCE_DIR}/tm.html"
                  -T "TrackMeister Documentation"
