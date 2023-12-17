@@ -227,8 +227,6 @@ class MarkdownToHTML:
     def embed_image(self, uri, alt=None):
         data = None
         try:
-            print(self.basedir)
-            print(uri)
             if not uri.startswith(("http://", "https://", "/")):
                 with open(os.path.join(self.basedir, uri), 'rb') as f:
                     data = f.read()
