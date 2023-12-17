@@ -19,8 +19,9 @@ jobs:
           name: tm_windows
           path: |
             tm.exe
-            tm.ini
             tm.html
+            tm.ini
+            tm_default.ini
   linux-build:
     runs-on: ubuntu-22.04
     steps:
@@ -43,5 +44,6 @@ jobs:
           name: tm_linux
           path: |
             tm
-            tm.ini
             tm.html
+            tm.ini
+            tm_default.ini
