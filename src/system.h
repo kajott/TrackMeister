@@ -23,6 +23,7 @@ public:
 
     [[noreturn]] void fatalError(const char* what, const char* how);
 
+    void initSystem();
     void initVideo(const char* title, bool fullscreen=DEFAULT_FULLSCREEN, int windowWidth=1920, int windowHeight=1080);
     int initAudio(bool stereo, int sampleRate=48000, int bufferSize=512);
 

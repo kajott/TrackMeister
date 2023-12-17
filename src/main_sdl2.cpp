@@ -17,6 +17,7 @@
 #include "app.h"
 
 struct SystemInterfacePrivateData {
+    bool sysInitDone = false;
     Application* app = nullptr;
     SDL_Window* win = nullptr;
     SDL_GLContext ctx = nullptr;
@@ -34,6 +35,15 @@ struct SystemInterfacePrivateData {
         fprintf(stderr, "FATAL: %s - %s\n", what, how);
     #endif
     std::exit(1);
+}
+
+void SystemInterface::initSystem() {
+    if (!m_priv->sysInitDone) {
+        if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
+            fatalError("SDL initialization failed", SDL_GetError());
+        }
+        m_priv->sysInitDone = true;
+    }
 }
 
 #ifndef NDEBUG
@@ -75,6 +85,7 @@ struct SystemInterfacePrivateData {
 #endif
 
 void SystemInterface::initVideo(const char* title, bool fullscreen, int windowWidth, int windowHeight) {
+    initSystem();
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE,            0);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE,          0);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
@@ -127,6 +138,7 @@ static void sysRenderAudio(void* userdata, Uint8* stream, int len) {
 }
 
 int SystemInterface::initAudio(bool stereo, int sampleRate, int bufferSize) {
+    initSystem();
     SDL_AudioSpec want, got;
     SDL_memset(&want, 0, sizeof(want));
     want.freq = sampleRate;
@@ -185,14 +197,9 @@ int main(int argc, char* argv[]) {
     priv.app = &app;
 
     // initialization
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
-        sys.fatalError("SDL initialization failed", SDL_GetError());
-    }
     int ret = app.init(argc, argv);  // this will likely call initVideo() and initAudio()
-    if (ret >= 0) {
-        SDL_Quit();
-        return ret;
-    }
+    if (ret >= 0) { return ret; }
+    sys.initSystem();
 
     // main loop
     SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
