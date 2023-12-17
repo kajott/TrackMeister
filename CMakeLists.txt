@@ -335,17 +335,24 @@ set_target_properties (tm PROPERTIES
 
 # documentation stuff
 add_custom_target (doc
-    DEPENDS         "${CMAKE_CURRENT_SOURCE_DIR}/tm.html"
+    DEPENDS           "${CMAKE_CURRENT_SOURCE_DIR}/tm.html"
+                      "${CMAKE_CURRENT_SOURCE_DIR}/tm_default.ini"
 )
 add_custom_command (
-    COMMENT         "generating HTML documentation"
-    COMMAND         python
-                    "${CMAKE_CURRENT_SOURCE_DIR}/src/md2html.py"
-                    "${CMAKE_CURRENT_SOURCE_DIR}/README.md"
-                 -o "${CMAKE_CURRENT_SOURCE_DIR}/tm.html"
-                 -T "TrackMeister Documentation"
-                 -x building
-    DEPENDS         "${CMAKE_CURRENT_SOURCE_DIR}/src/md2html.py"
-    MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/README.md"
-    OUTPUT          "${CMAKE_CURRENT_SOURCE_DIR}/tm.html"
+    COMMENT           "generating HTML documentation"
+    COMMAND           python
+                      "${CMAKE_CURRENT_SOURCE_DIR}/src/md2html.py"
+                      "${CMAKE_CURRENT_SOURCE_DIR}/README.md"
+                   -o "${CMAKE_CURRENT_SOURCE_DIR}/tm.html"
+                   -T "TrackMeister Documentation"
+                   -x building
+    DEPENDS           "${CMAKE_CURRENT_SOURCE_DIR}/src/md2html.py"
+    MAIN_DEPENDENCY   "${CMAKE_CURRENT_SOURCE_DIR}/README.md"
+    OUTPUT            "${CMAKE_CURRENT_SOURCE_DIR}/tm.html"
+)
+add_custom_command (
+    COMMENT           "dumping default configuration"
+    COMMAND           tm --save-default-config
+    OUTPUT            "${CMAKE_CURRENT_SOURCE_DIR}/tm_default.ini"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
 )

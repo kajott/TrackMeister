@@ -121,7 +121,7 @@ class Application {
 public:  // interface from SystemInterface
     explicit inline Application(SystemInterface& sys) : m_sys(sys), m_metadata(m_renderer) {}
 
-    void init(int argc, char* argv[]);
+    int init(int argc, char* argv[]);
     void draw(float dt);
     void shutdown();
 

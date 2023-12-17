@@ -88,7 +88,7 @@ The configuration files can contain multiple sections, delimited by lines contai
 
 All other lines contain key-value pairs of the form "`key = value`" or "`key: value`". Spaces, dashes (`-`) and underscores (`_`) in key names are ignored. All parts of a line following a semicolon (`;`) are ignored. It's allowed to put comments at the end of key/value lines.
 
-To get a list of all possible settings, along with documentation and the default values for each setting, run TrackMeister and press **Ctrl+Shift+S**. This will generate a file `tm_default.ini` in the current directory (usually the program directory) that also be used as a template for an individual configuration.
+To get a list of all possible settings, along with documentation and the default values for each setting, run TrackMeister normally and press **Ctrl+Shift+S**, or run `tm --save-default-config` from a command line. This will generate a file `tm_default.ini` in the current directory (usually the program directory) that also be used as a template for an individual configuration.
 
 All sizes (font sizes, margins etc.) are specified in 1/1000s of the display width, so they are more or less resolution-independent. <br>
 Boolean values can use any of the `1`/`0`, `false`/`true`, `yes`/`no` or `enabled`/`disabled` nomenclatures. <br>

@@ -38,7 +38,11 @@ extern "C" const unsigned char LogoData[];
 
 ///// init + shutdown
 
-void Application::init(int argc, char* argv[]) {
+int Application::init(int argc, char* argv[]) {
+    if ((argc > 1) && !strcmp(argv[1], "--save-default-config")) {
+        return m_config.save("tm_default.ini") ? 0 : 1;
+    }
+
     // load initial configuration (required for video and audio parameters)
     m_cmdline = Config::prepareCommandLine(argc, argv);
     m_mainIniFile.assign(argv[0]);
@@ -76,6 +80,7 @@ void Application::init(int argc, char* argv[]) {
         loadModule(PathUtil::findSibling("./", true, m_playableExts.data()).c_str());
     }
     if (m_fullpath.empty()) { toastVersion(); }
+    return -1;  // -1 means "continue with execution"
 }
 
 void Application::shutdown() {

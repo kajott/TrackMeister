@@ -188,7 +188,11 @@ int main(int argc, char* argv[]) {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
         sys.fatalError("SDL initialization failed", SDL_GetError());
     }
-    app.init(argc, argv);  // this will likely call initVideo() and initAudio()
+    int ret = app.init(argc, argv);  // this will likely call initVideo() and initAudio()
+    if (ret >= 0) {
+        SDL_Quit();
+        return ret;
+    }
 
     // main loop
     SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
