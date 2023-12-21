@@ -119,9 +119,14 @@ void SystemInterface::initVideo(const char* title, bool fullscreen, int windowWi
         printf("OpenGL renderer: %s\n", glGetString(GL_RENDERER));
         printf("OpenGL version:  %s\n", glGetString(GL_VERSION));
         printf("GLSL   version:  %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
-        glDebugMessageCallback(glDebugProc, nullptr);
-        glEnable(GL_DEBUG_OUTPUT);
+        if (glDebugMessageCallback != nullptr) {
+            glDebugMessageCallback(glDebugProc, nullptr);
+            glEnable(GL_DEBUG_OUTPUT);
+        }
     #endif
+    if ((GLVersion.major < 3) || ((GLVersion.major == 3) && (GLVersion.minor < 3))) {
+        fatalError("could not initialize OpenGL", "at least OpenGL 3.3 is required");
+    }
 
     if (fullscreen) { SDL_ShowCursor(SDL_DISABLE); }
 }
