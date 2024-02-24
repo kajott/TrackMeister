@@ -699,6 +699,7 @@ bool Application::loadModule(const char* path, bool forScanning) {
         default: break;  // Auto or Amiga -> no need to set anything up
     }
     m_mod->set_render_param(openmpt::module::render_param::RENDER_STEREOSEPARATION_PERCENT, m_config.stereoSeparation);
+    m_mod->set_render_param(openmpt::module::render_param::RENDER_VOLUMERAMPING_STRENGTH,   m_config.volumeRamping);
     if (!forScanning) {
         float gain = m_config.gain;
         if (isValidLoudness(m_config.loudness)) {

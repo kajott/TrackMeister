@@ -54,6 +54,11 @@ const ConfigItem g_ConfigItems[] = { {
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.stereoSeparation); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.stereoSeparation, s), s); }
     }, {
+        false, "volume ramping             ",
+        "volume ramping strength (0 = no ramping, 10 = softest ramping, -1 = recommended default)",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.volumeRamping); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.volumeRamping, s), s); }
+    }, {
         false, "gain                       ",
         "global gain to apply, in decibels",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatFloat(cfg.gain); },

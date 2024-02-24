@@ -47,6 +47,7 @@ struct Config {
     int      audioBufferSize          = 512;          //!< size of the audio buffer, in samples; if there are dropouts, try doubling this value
     FilterMethod filter        = FilterMethod::Auto;  //!< audio resampling filter to be used
     int      stereoSeparation         = 50;           //!< amount of stereo separation, in percent (0 = mono, 100 = full stereo, higher = fake surround)
+    int      volumeRamping            = -1;           //!< volume ramping strength (0 = no ramping, 10 = softest ramping, -1 = recommended default)
     float    gain                     = 0.0f;         //!< global gain to apply, in decibels
     float    loudness             = InvalidLoudness;  //!< the current track's measured loudness, in decibels; values < -100 mean "no loudness measured"
     float    targetLoudness           = -18.0f;       //!< target loudness, in decibels (or LUFS); if the 'loudness' parameter is valid, an extra gain will be applied (in addition to 'gain') so that the loudness is corrected to this value

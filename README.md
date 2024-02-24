@@ -113,10 +113,11 @@ Here's an example for a useful INI file as a compo organizer would set it up for
     [*.mod]
         ; this section is only active for MOD format file, which tend to be
         ; written on or for the Amiga, hence we want a suitable filter
-        ; emulation and way less stereo separation;
+        ; emulation, way less stereo separation, and no volume ramping;
         ; also, we're specifying this in CSS-like syntax, because we can:
         filter: auto;
         stereo-separation: 100;
+        volume-ramping: 0;
 
     [03*]
         ; the entry with the track number 3 in the filename has a loop;
