@@ -70,6 +70,8 @@ struct Config {
     bool     logoEnabled              = true;         //!< whether to show a logo at all
     std::string logo;                                 //!< custom logo file; must be a grayscale PNG file with high-contrast black-on-white artwork; will be downscaled by a power of two so it fits into the canvas
     int      logoMargin               = 8;            //!< minimum distance between the logo image and the surrounding screen or panel edges
+    int      logoPosX                 = 50;           //!< horizontal logo position, in percent of the available area (0 = left, 50 = center, 100 = right)
+    int      logoPosY                 = 50;           //!< vertical logo position, in percent of the available area (0 = top, 50 = center, 100 = bottom)
 
     int      emptyTextSize            = 32;           //!< size of the "no module loaded" text
     int      emptyLogoPosY            = 500;          //!< vertical position of the center of the logo on the "no module loaded" screen

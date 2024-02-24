@@ -251,16 +251,26 @@ void Application::updateLayout(bool resetBoxVisibility) {
     m_logoTex = !m_config.logoEnabled ? 0 : m_customLogoTex ? m_customLogoTex : m_defaultLogoTex;
     if (m_logoTex) {
         TextBoxRenderer::TextureDimensions &texSize = (m_logoTex == m_customLogoTex) ? m_customLogoSize : m_defaultLogoSize;
-        int maxWidth  = m_metaStartX - 2 * toPixels(m_config.logoMargin);
-        int maxHeight = m_screenSizeY - m_infoEndY - 2 * toPixels(m_config.logoMargin);
+        int margin    = toPixels(m_config.logoMargin);
+        int maxWidth  = m_metaStartX - 2 * margin;
+        int maxHeight = m_screenSizeY - m_infoEndY - 2 * margin;
         int logoWidth = texSize.width, logoHeight = texSize.height;
         while ((logoWidth > maxWidth) || (logoHeight > maxHeight)) {
             logoWidth  >>= 1;
             logoHeight >>= 1;
         }
-        m_logoX0 = (maxWidth - logoWidth) >> 1;
-        m_logoY0 = m_mod ? (m_infoEndY + ((maxHeight - logoHeight) >> 1))
-                         : (toPixels(m_config.emptyLogoPosY) - (logoHeight >> 1));
+        if (m_mod) {
+            int minX0 = margin;
+            int maxX0 = m_metaStartX - margin - logoWidth;
+            int minY0 = m_infoEndY + margin;
+            int maxY0 = m_screenSizeY - margin - logoHeight;
+            m_logoX0 = (minX0 * (100 - m_config.logoPosX) + maxX0 * m_config.logoPosX + 50) / 100;
+            m_logoY0 = (minY0 * (100 - m_config.logoPosY) + maxY0 * m_config.logoPosY + 50) / 100;
+        }
+        else {
+            m_logoX0 = (m_screenSizeX - logoWidth) >> 1;
+            m_logoY0 = toPixels(m_config.emptyLogoPosY) - (logoHeight >> 1);
+        }
         m_logoX1 = m_logoX0 + logoWidth;
         m_logoY1 = m_logoY0 + logoHeight;
     }

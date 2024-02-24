@@ -149,6 +149,16 @@ const ConfigItem g_ConfigItems[] = { {
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.logoMargin); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.logoMargin, s), s); }
     }, {
+        false, "logo pos X                 ",
+        "horizontal logo position, in percent of the available area (0 = left, 50 = center, 100 = right)",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.logoPosX); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.logoPosX, s), s); }
+    }, {
+        false, "logo pos Y                 ",
+        "vertical logo position, in percent of the available area (0 = top, 50 = center, 100 = bottom)",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.logoPosY); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.logoPosY, s), s); }
+    }, {
         true, "empty text size            ",
         "size of the \"no module loaded\" text",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.emptyTextSize); },
