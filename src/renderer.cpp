@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 Martin J. Fiedler <keyj@emphy.de>
+// SPDX-FileCopyrightText: 2023-2024 Martin J. Fiedler <keyj@emphy.de>
 // SPDX-License-Identifier: MIT
 
 #define _CRT_SECURE_NO_WARNINGS  // disable nonsense MSVC warnings
@@ -17,8 +17,6 @@
 #include "renderer.h"
 #include "font_data.h"
 
-constexpr uint32_t GlyphCacheMin = 32u;
-constexpr uint32_t GlyphCacheMax = 255u;
 constexpr int BatchSize = 16384;  // must be 16384 or less
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -114,7 +112,7 @@ static const char* fsSrc =
 "\n" "layout(location=0) out vec4 outColor;"
 "\n" "void main() {"
 "\n" "    float d = 0.;"
-"\n" "    if (vMode == 1u) { // text mode"
+"\n" "    if (vMode == 1u) {  // MSDF text mode"
 "\n" "        vec3 s = texture(uTex, vTC).rgb;"
 "\n" "        d = max(min(s.r, s.g), min(max(s.r, s.g), s.b)) - 0.5;"
 "\n" "        d /= fwidth(d) * 1.25;"
@@ -248,7 +246,7 @@ bool TextBoxRenderer::init() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    m_glyphCache = static_cast<int*>(::calloc(GlyphCacheMax - GlyphCacheMin + 1u, sizeof(int)));
+    m_currentFont = &FontData::Fonts[0];
     m_error = "success";
     return true;
 }
@@ -287,7 +285,6 @@ void TextBoxRenderer::shutdown() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);          glDeleteBuffers(1, &m_vbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);  glDeleteBuffers(1, &m_ibo);
     glUseProgram(0);                           glDeleteProgram(m_prog);
-    ::free(static_cast<void*>(m_glyphCache));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -374,23 +371,28 @@ void TextBoxRenderer::logo(int x0, int y0, int x1, int y1, uint32_t color, unsig
 
 const FontData::Glyph* TextBoxRenderer::getGlyph(uint32_t codepoint) const {
     if (!codepoint) { return nullptr; }
-    if ((codepoint < 32u) || (codepoint == 0xFFFD)) { return &FontData::GlyphData[FontData::FallbackGlyphIndex]; }
-    if ((codepoint >= GlyphCacheMin) && (codepoint <= GlyphCacheMax) && m_glyphCache && m_glyphCache[codepoint - GlyphCacheMin])
-        { return &FontData::GlyphData[m_glyphCache[codepoint - GlyphCacheMin] - 1]; }
+
+    // resolve fallback character
+    if ((codepoint < 32u) || (codepoint == 0xFFFD)) { return &m_currentFont->glyphs[m_currentFont->fallbackIndex]; }
+
+    // most characters are ASCII, and those are usually the first ones in the
+    // glyph list anyway, so we may have a direct hit
+    int quickIndex = codepoint - m_currentFont->glyphs[0].codepoint;
+    if ((quickIndex < m_currentFont->numGlyphs)
+    && (m_currentFont->glyphs[quickIndex].codepoint == codepoint)) {
+        return &m_currentFont->glyphs[quickIndex];
+    }
 
     // binary search in glyph list
-    int foundIndex = 0;
-    int a = 0, b = FontData::NumGlyphs;
+    int foundIndex = -1;
+    int a = 0, b = m_currentFont->numGlyphs;
     while (b > (a + 1)) {
         int c = (a + b) >> 1;
-        if (FontData::GlyphData[c].codepoint == codepoint) { foundIndex = c + 1; break; }
-        if (FontData::GlyphData[c].codepoint > codepoint) { b = c; } else { a = c; }
+        if (m_currentFont->glyphs[c].codepoint == codepoint) { foundIndex = c; break; }
+        if (m_currentFont->glyphs[c].codepoint > codepoint) { b = c; } else { a = c; }
     }
-    if (FontData::GlyphData[a].codepoint == codepoint) { foundIndex = a + 1; }
-    if (!foundIndex) { foundIndex = FontData::FallbackGlyphIndex + 1; }
-    if ((codepoint >= GlyphCacheMin) && (codepoint <= GlyphCacheMax) && m_glyphCache)
-        { m_glyphCache[codepoint - GlyphCacheMin] = foundIndex; }
-    return &FontData::GlyphData[foundIndex - 1];
+    if (m_currentFont->glyphs[a].codepoint == codepoint) { foundIndex = a; }
+    return &m_currentFont->glyphs[(foundIndex < 0) ? m_currentFont->fallbackIndex : foundIndex];
 }
 
 uint32_t TextBoxRenderer::nextCodepoint(const char* &utf8string) {
@@ -426,9 +428,9 @@ void TextBoxRenderer::alignText(float &x, float &y, float size, const char* text
         default: break;
     }
     switch (align & Align::VMask) {
-        case Align::Middle:   y -= size * 0.5f;                   break;
-        case Align::Bottom:   y -= size;                          break;
-        case Align::Baseline: y -= size * FontData::Baseline;     break;
+        case Align::Middle:   y -= size * 0.5f;                    break;
+        case Align::Bottom:   y -= size;                           break;
+        case Align::Baseline: y -= size * m_currentFont->baseline; break;
         default: break;
     }
 }
@@ -472,7 +474,7 @@ int TextBoxRenderer::control(int x, int y, int size, uint8_t vAlign, bool keyboa
     switch (vAlign & Align::VMask) {
         case Align::Middle:   y -= size >> 1;  break;
         case Align::Bottom:   y -= size;  break;
-        case Align::Baseline: y -= int(float(size) * FontData::Baseline + 0.5f); break;
+        case Align::Baseline: y -= int(float(size) * m_currentFont->baseline + 0.5f); break;
         default: break;
     }
     if (keyboard) {

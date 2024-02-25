@@ -3,8 +3,5 @@ msdf-atlas-gen*
 !build.cmd
 !build.sh
 
-font_*.bin
-font_hist.txt
-
-font.json
-font.png
+*.json
+*.png

@@ -27,8 +27,8 @@ fi
 $ATLAS_GEN_BINARY \
     -font $FONT_FILE -charset charset.txt \
     -type msdf \
-    -format png -imageout font.png \
-    -json font.json \
+    -format png -imageout Inconsolata.png \
+    -json Inconsolata.json \
     -size 32 -pxrange 2 \
     -potr
 

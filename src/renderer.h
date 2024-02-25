@@ -33,8 +33,8 @@ class TextBoxRenderer {
     unsigned m_prog;
     unsigned m_tex;
     unsigned m_fontTex;
+    const FontData::Font *m_currentFont;
     int m_quadCount;
-    int* m_glyphCache;
 
     struct Vertex {
         float pos[2];    // screen position (already transformed into NDC)
