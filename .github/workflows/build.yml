@@ -14,7 +14,7 @@ jobs:
       - name: Generate Documentation
         run: cmake --build build -t doc --config Release
       - name: Archive Windows Package
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: tm_windows
           path: |
@@ -39,7 +39,7 @@ jobs:
       - name: Generate Documentation
         run: cmake --build build -t doc
       - name: Archive Linux Packages
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: tm_linux
           path: |
