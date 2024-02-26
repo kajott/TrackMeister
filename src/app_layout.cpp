@@ -14,10 +14,6 @@
 #include "textarea.h"
 #include "app.h"
 
-constexpr float FontBaselinePos  = 0.820f;  //!< relative vertical position of the font's baseline
-constexpr float FontNumberHeight = 0.595f;  //!< relative height of a number in the font
-constexpr float FontNumberUpperPos = FontBaselinePos - FontNumberHeight;  //!< relative vertical position of the top end of a number
-
 int Application::textWidth(int size, const char* text) const {
     return int(std::ceil(m_renderer.textWidth(text) * float(size)));
 }
@@ -26,9 +22,17 @@ int Application::toPixels(int value) const {
     return int(m_screenSizeY * float(value) * .001f + .5f);
 }
 
+int Application::toTextSize(int value) const {
+    value = toPixels(value);
+    int g = m_renderer.textSizeGranularity();
+    if (g) { value -= value % g; }
+    return value;
+}
+
 void Application::updateLayout(bool resetBoxVisibility) {
     m_screenSizeX = m_renderer.viewportWidth();
     m_screenSizeY = m_renderer.viewportHeight();
+    m_renderer.setFont(m_config.font.c_str());
 
     // set UI element visibility flags
     if (resetBoxVisibility) {
@@ -43,7 +47,7 @@ void Application::updateLayout(bool resetBoxVisibility) {
     }
 
     // set up "no module loaded" screen geometry
-    m_emptyTextSize = toPixels(m_config.emptyTextSize);
+    m_emptyTextSize = toTextSize(m_config.emptyTextSize);
     m_emptyTextPos = toPixels(m_config.emptyTextPosY);
 
     // set up info box geometry
@@ -52,8 +56,8 @@ void Application::updateLayout(bool resetBoxVisibility) {
         m_infoEndY = m_infoShadowEndY = m_progSize = 0;
     } else {
         // layout info box
-        m_infoTextSize = toPixels(m_config.infoTextSize);
-        m_infoDetailsSize = toPixels(m_config.infoDetailsTextSize);
+        m_infoTextSize = toTextSize(m_config.infoTextSize);
+        m_infoDetailsSize = toTextSize(m_config.infoDetailsTextSize);
         m_infoKeyX = toPixels(m_config.infoMarginX);
         m_trackX = float(m_infoKeyX);
         m_infoValueX = 0;
@@ -101,15 +105,17 @@ void Application::updateLayout(bool resetBoxVisibility) {
         // for the track number, geometry is quite complicated; we try to align
         // the top of the number with the top of the other text, requiring some
         // font metrics and a bit of math
-        m_trackY = float(toPixels(m_config.infoMarginY))         // indicated top position
-                 + float(m_infoTextSize)  * FontNumberUpperPos   // where the top of the normal lines ends up at
-                 - float(m_trackTextSize) * FontNumberUpperPos;  // where we need to put the top
+        float baselinePos = m_renderer.textBaseline();
+        float numUpperPos = baselinePos - m_renderer.textNumberHeight();
+        m_trackY = float(toPixels(m_config.infoMarginY))  // indicated top position
+                 + float(m_infoTextSize)  * numUpperPos   // where the top of the normal lines ends up at
+                 - float(m_trackTextSize) * numUpperPos;  // where we need to put the top
         if (trackValid()) {
             m_infoKeyX += textWidth(m_trackTextSize, m_track) + toPixels(m_config.infoTrackPaddingX);
             // for the bottom end of the track number, do some font metrics magic again
-            int trackBottom = int(m_trackY                     // upper edge of text box
-                + float(m_trackTextSize) * FontBaselinePos     // end of track number text
-                + (m_config.progressEnabled ? 0.0f : (float(m_infoDetailsSize) * (1.0f - FontBaselinePos)))  // extra margin for visual equalization
+            int trackBottom = int(m_trackY                // upper edge of text box
+                + float(m_trackTextSize) * baselinePos    // end of track number text
+                + (m_config.progressEnabled ? 0.0f : (float(m_infoDetailsSize) * (1.0f - baselinePos)))  // extra margin for visual equalization
                 + 0.5f  /* rounding */ );
             m_infoEndY = std::max(m_infoEndY, trackBottom);
         }
@@ -123,7 +129,7 @@ void Application::updateLayout(bool resetBoxVisibility) {
         m_metaStartX = m_metaShadowStartX = m_screenSizeX;
     } else {
         // fix up sizes first
-        float textSize = float(toPixels(m_config.metaTextSize));
+        float textSize = float(toTextSize(m_config.metaTextSize));
         float gapHeight = float(toPixels(m_config.metaSectionMargin));
         m_metadata.defaultSize = textSize;
         for (auto& line : m_metadata.lines) {
@@ -206,19 +212,20 @@ void Application::updateLayout(bool resetBoxVisibility) {
     };
 
     // set up pattern display geometry -- step 3: try various formats to fit width
-    m_pdTextSize = toPixels(m_config.patternTextSize);
+    m_pdTextSize = toTextSize(m_config.patternTextSize);
     int pdMaxWidth = m_metaStartX - 2 * toPixels(m_config.patternMarginX);
     // try most compact format first
     int pdWidth = doFormat(pdFormats[0]);
     if (pdWidth > pdMaxWidth) {
         // if the most compact format doesn't fit, we need to shrink the text size
-        int minSize = toPixels(m_config.patternMinTextSize);
+        int step = std::max(m_renderer.textSizeGranularity(), 1);
+        int minSize = std::max(toPixels(m_config.patternMinTextSize), step);
         // make a first guess; shrink later if neccessary
         m_pdTextSize = std::max(minSize, m_pdTextSize * pdMaxWidth / pdWidth);
         for (;;) {
             pdWidth = doFormat(pdFormats[0]);
             if ((pdWidth <= pdMaxWidth) || (m_pdTextSize <= minSize)) { break; }
-            m_pdTextSize--;
+            m_pdTextSize -= step;
         }
     } else {
         // most compact format fits -> try successively less compact formats
@@ -276,7 +283,7 @@ void Application::updateLayout(bool resetBoxVisibility) {
     }
 
     // set up toast geometry
-    m_toastTextSize = toPixels(m_config.toastTextSize);
+    m_toastTextSize = toTextSize(m_config.toastTextSize);
     m_toastY = toPixels(m_config.toastPositionY);
     m_toastDY = ((m_toastTextSize + 1) >> 1) + toPixels(m_config.toastMarginY);
     m_toastDX = m_toastDY + toPixels(m_config.toastMarginX);
@@ -285,7 +292,7 @@ void Application::updateLayout(bool resetBoxVisibility) {
     #if USE_PATTERN_CACHE
         m_patternCache.clear();
     #endif
-    Dprintf("updateLayout(): pdTextSize=%d pdRows=%d\n", m_pdTextSize, m_pdRows);
+    Dprintf("updateLayout(): channels=%d pdTextSize=%d pdRows=%d\n", m_numChannels, m_pdTextSize, m_pdRows);
 }
 
 void Application::formatPosition(int order, int pattern, int row, char* text, char* attr, int size) {

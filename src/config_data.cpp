@@ -109,6 +109,11 @@ const ConfigItem g_ConfigItems[] = { {
         [] (const Config& cfg) -> std::string { return ConfigItem::formatFloat(cfg.maxScrollDuration); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseFloat(cfg.maxScrollDuration, s), s); }
     }, {
+        true, "font                       ",
+        "font to use for all displays: 'inconsolata' (default), 'topaz'/'topaz1200'/'topaz500', 'pc'",
+        [] (const Config& cfg) -> std::string { return cfg.font; },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { (void)ctx; cfg.font.assign(s); }
+    }, {
         true, "empty background           ",
         "background color of \"no module loaded\" screen",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.emptyBackground); },

@@ -14,6 +14,8 @@
 #include <glad/glad.h>
 #include "lodepng.h"
 
+#include "util.h"
+
 #include "renderer.h"
 #include "font_data.h"
 
@@ -109,6 +111,7 @@ static const char* fsSrc =
 "\n" "     in vec4 vColor;"
 "\n" "flat in uint vMode;"
 "\n" "uniform sampler2D uTex;"
+"\n" "uniform sampler2D uBitmap;"
 "\n" "layout(location=0) out vec4 outColor;"
 "\n" "void main() {"
 "\n" "    float d = 0.;"
@@ -121,6 +124,8 @@ static const char* fsSrc =
 "\n" "        d = (min(p.x, p.y) > (-vSize.z))"
 "\n" "          ? (vSize.z - length(p + vec2(vSize.z)))"
 "\n" "          : min(-p.x, -p.y);"
+"\n" "    } else if (vMode == 3u) {  // bitmap texture mode"
+"\n" "        d = texture(uBitmap, vTC).r;"
 "\n" "    } else {  // logo mode"
 "\n" "        d = texture(uTex, vTC).r;"
 "\n" "    }"
@@ -239,9 +244,21 @@ bool TextBoxRenderer::init() {
     }
     glDeleteShader(fs);
     glDeleteShader(vs);
+    glUseProgram(m_prog);
+    glUniform1i(glGetUniformLocation(m_prog, "uBitmap"), 1);
 
     m_fontTex = loadTexture(static_cast<const void*>(FontData::TexData), FontData::TexDataSize, 3, false);
     if (!m_fontTex) { m_error = "failed to load and decode the font texture"; return false; }
+
+    glGenSamplers(1, &m_sampler);
+    glSamplerParameteri(m_sampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glSamplerParameteri(m_sampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glSamplerParameteri(m_sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glSamplerParameteri(m_sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, m_fontTex);
+    glBindSampler(1, m_sampler);
+    glActiveTexture(GL_TEXTURE0);
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -280,11 +297,15 @@ void TextBoxRenderer::flush() {
 }
 
 void TextBoxRenderer::shutdown() {
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, 0);
     freeTexture(m_fontTex);
-    glBindVertexArray(0);                      glDeleteVertexArrays(1, &m_vao);
+    glBindSampler(1, 0);                       glDeleteSamplers(1, &m_sampler);
     glBindBuffer(GL_ARRAY_BUFFER, 0);          glDeleteBuffers(1, &m_vbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);  glDeleteBuffers(1, &m_ibo);
     glUseProgram(0);                           glDeleteProgram(m_prog);
+    glBindVertexArray(0);                      glDeleteVertexArrays(1, &m_vao);
+    glActiveTexture(GL_TEXTURE0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -369,6 +390,20 @@ void TextBoxRenderer::logo(int x0, int y0, int x1, int y1, uint32_t color, unsig
 
 ///////////////////////////////////////////////////////////////////////////////
 
+const char* TextBoxRenderer::setFont(const char* name) {
+    if (!name) { name = ""; }
+    int matchLen = -1;
+    for (const auto* font = FontData::Fonts;  font->name;  ++font) {
+        int l = 0;
+        while (name[l] && font->name[l] && (toLower(name[l]) == toLower(font->name[l]))) { ++l; }
+        if (l > matchLen) {
+            m_currentFont = font;
+            matchLen = l;
+        }
+    }
+    return m_currentFont->name;
+}
+
 const FontData::Glyph* TextBoxRenderer::getGlyph(uint32_t codepoint) const {
     if (!codepoint) { return nullptr; }
 
@@ -414,6 +449,10 @@ uint32_t TextBoxRenderer::nextCodepoint(const char* &utf8string) {
     return cp;
 }
 
+int   TextBoxRenderer::textSizeGranularity() const { return m_currentFont->bitmapHeight; }
+float TextBoxRenderer::textBaseline()        const { return m_currentFont->baseline; }
+float TextBoxRenderer::textNumberHeight()    const { return m_currentFont->numberHeight; }
+
 float TextBoxRenderer::textWidth(const char* text) const {
     float w = 0.0f;
     const FontData::Glyph* g;
@@ -433,19 +472,24 @@ void TextBoxRenderer::alignText(float &x, float &y, float size, const char* text
         case Align::Baseline: y -= size * m_currentFont->baseline; break;
         default: break;
     }
+    if (m_currentFont->bitmapHeight) {
+        x = std::round(x);
+        y = std::round(y);
+    }
 }
 
 float TextBoxRenderer::text(float x, float y, float size, const char* text, uint8_t align, uint32_t colorUpper, uint32_t colorLower, float blur, float offset) {
     useTexture(m_fontTex);
     alignText(x, y, size, text, align);
     const FontData::Glyph* g;
+    bool msdf = !m_currentFont->bitmapHeight;
     while ((g = getGlyph(nextCodepoint(text))) != 0u) {
         if (!g->space) {
-            Vertex* v = newVertices(1, x + g->pos.x0 * size, y + g->pos.y0 * size, x + g->pos.x1 * size, y + g->pos.y1 * size);
+            Vertex* v = newVertices(msdf ? 1 : 3, x + g->pos.x0 * size, y + g->pos.y0 * size, x + g->pos.x1 * size, y + g->pos.y1 * size);
             v[0].color = v[1].color = colorUpper;
             v[2].color = v[3].color = colorLower;
-            v[0].br[0] = v[1].br[0] = v[2].br[0] = v[3].br[0] = offset;
-            v[0].br[1] = v[1].br[1] = v[2].br[1] = v[3].br[1] = 1.33f / blur;
+            v[0].br[0] = v[1].br[0] = v[2].br[0] = v[3].br[0] = msdf ? offset         : 0.5f;
+            v[0].br[1] = v[1].br[1] = v[2].br[1] = v[3].br[1] = msdf ? (1.33f / blur) : 1.0f;
             v[0].tc[0] = g->tc.x0;  v[0].tc[1] = g->tc.y0;
             v[1].tc[0] = g->tc.x1;  v[1].tc[1] = g->tc.y0;
             v[2].tc[0] = g->tc.x0;  v[2].tc[1] = g->tc.y1;

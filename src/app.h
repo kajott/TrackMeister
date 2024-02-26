@@ -137,6 +137,7 @@ private:  // business logic
     bool loadModule(const char* path, bool forScanning=false);
     void cycleBoxVisibility();
     int toPixels(int value) const;
+    int toTextSize(int value) const;
     int textWidth(int size, const char* text) const;
     void updateLogo();
     void updateLayout(bool resetBoxVisibility=false);

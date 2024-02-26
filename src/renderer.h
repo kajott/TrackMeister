@@ -28,6 +28,7 @@ class TextBoxRenderer {
     int m_vpWidth, m_vpHeight;
     float m_vpScaleX, m_vpScaleY;
     unsigned m_vao;
+    unsigned m_sampler;
     unsigned m_vbo;
     unsigned m_ibo;
     unsigned m_prog;
@@ -91,6 +92,11 @@ public:
     inline void circle(int x, int y, int r, uint32_t color, float blur=1.0f, float offset=0.0f)
         { box(x - r, y - r, x + r, y + r, color, color, false, r, blur, offset); }
 
+    const char* setFont(const char* name);
+
+    int textSizeGranularity() const;
+    float textBaseline() const;
+    float textNumberHeight() const;
     float textWidth(const char* text) const;
     float text(float x, float y, float size, const char* text,
               uint8_t align,

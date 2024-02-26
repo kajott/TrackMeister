@@ -61,6 +61,8 @@ struct Config {
     bool     autoScrollEnabled        = true;         //!< whether to enable automatic scrolling in the metadata sidebar after loading a module
     float    maxScrollDuration        = 4.f * 60.f;   //!< maximum duration after which automatic metadata scrolling reaches the end, in seconds; if the module is shorter than that, the module's duration will be used instead
 
+    std::string font;                                 //!< font to use for all displays: 'inconsolata' (default), 'topaz'/'topaz1200'/'topaz500', 'pc' (note: all font sizes will be rounded down to an integer multiple of 16 pixels if a bitmap font is used)
+
     uint32_t emptyBackground          = 0xFF503010u;  //!< background color of "no module loaded" screen
     uint32_t patternBackground        = 0xFF503010u;  //!< background color of pattern display
     uint32_t infoBackground           = 0xFF333333u;  //!< background color of the top information bar

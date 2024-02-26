@@ -22,6 +22,7 @@ namespace FontData {
         const char *name;     //!< font name (nullptr = end of font list)
         int bitmapHeight;     //!< 0: scalable MSDF font; >0: bitmap font with defined height
         float baseline;       //!< baseline position relative to glyph cell height
+        float numberHeight;   //!< height of a number relative to the baseline
         const Glyph *glyphs;  //!< glyph table
         int numGlyphs;        //!< number of entries in the glyph table
         int fallbackIndex;    //!< index of the fallback glyph (typically U+FFFD) in the glyph table
