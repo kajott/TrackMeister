@@ -81,7 +81,7 @@ void Application::updateLayout(bool resetBoxVisibility) {
             m_infoValueX = std::max(m_infoValueX, toPixels(m_config.infoKeyPaddingX) + textWidth(m_infoTextSize, "Title:"));
             m_infoEndY += m_infoTextSize;
         }
-        if (!m_shortDetails.empty() && !m_longDetails.empty()) {
+        if ((!m_shortDetails.empty() && !m_longDetails.empty()) || !m_details.empty()) {
             m_infoEndY += lineSpacing;
             m_infoDetailsY = m_infoEndY;
             m_infoEndY += m_infoDetailsSize;
@@ -168,7 +168,6 @@ void Application::updateLayout(bool resetBoxVisibility) {
 
     // set up progress bar geometry
     if (m_infoVisible && m_config.progressEnabled) {
-        m_progSize = m_progY1 - m_progY0;
         m_progX0 = m_infoKeyX;
         m_progX1 = m_metaStartX - toPixels(m_config.infoMarginX);
         int innerRadius = m_progSize - (m_progInnerDXY << 1);

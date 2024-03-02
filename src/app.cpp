@@ -625,8 +625,8 @@ void Application::unloadModule() {
     m_autoFadeInitiated = true;
     m_sys.setWindowTitle(baseWindowTitle);
     m_escapePressedOnce = false;
-    updateLayout(true);
     Dprintf("module unloaded\n");
+    updateLayout(true);
 }
 
 bool Application::loadModule(const char* path, bool forScanning) {
@@ -635,6 +635,7 @@ bool Application::loadModule(const char* path, bool forScanning) {
 
     // set filename metadata
     if (path) { m_fullpath.assign(path); }
+    Dprintf("\nloadModule(): opening '%s'\n", m_fullpath.c_str());
     bool dirFail = false;
     if (!m_fullpath.empty() && PathUtil::isDir(m_fullpath)) {
         // directory opened -> try to open first file *inside* the directory instead
