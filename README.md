@@ -99,10 +99,6 @@ Here's an example for a useful INI file as a compo organizer would set it up for
     [TM]
     ; generic options, specified in classic INI syntax
 
-    ; we want a decent filter and full stereo for most module formats
-    filter=auto
-    stereoSeparation=100
-
     ; when hosting an actual competition, we want to start playback manually
     autoplay=disabled
     ; and we want fullscreen too!
@@ -111,12 +107,9 @@ Here's an example for a useful INI file as a compo organizer would set it up for
     fade out after loop = true
 
     [*.mod]
-        ; this section is only active for MOD format file, which tend to be
-        ; written on or for the Amiga, hence we want a suitable filter
-        ; emulation, way less stereo separation, and no volume ramping;
-        ; also, we're specifying this in CSS-like syntax, because we can:
-        filter: auto;
-        stereo-separation: 100;
+        ; this section is only active for MOD format files, which tend to be
+        ; written with little stereo separation and no volume ramping in mind
+        stereo-separation: 20;
         volume-ramping: 0;
 
     [03*]

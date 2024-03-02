@@ -671,6 +671,7 @@ bool Application::loadModule(const char* path, bool forScanning) {
     std::map<std::string, std::string> ctls;
     ctls["play.at_end"] = (m_config.loop && !forScanning) ? "continue" : "stop";
     switch (m_config.filter) {
+        case FilterMethod::Auto:
         case FilterMethod::Amiga:
             ctls["render.resampler.emulate_amiga"] = "1";
             break;
@@ -692,11 +693,12 @@ bool Application::loadModule(const char* path, bool forScanning) {
     if (!m_mod) { return fail("invalid module data"); }
     Dprintf("module loaded successfully.\n");
     switch (m_config.filter) {
+        case FilterMethod::Auto:   m_mod->set_render_param(openmpt::module::render_param::RENDER_INTERPOLATIONFILTER_LENGTH, 0); break;
         case FilterMethod::None:   m_mod->set_render_param(openmpt::module::render_param::RENDER_INTERPOLATIONFILTER_LENGTH, 1); break;
         case FilterMethod::Linear: m_mod->set_render_param(openmpt::module::render_param::RENDER_INTERPOLATIONFILTER_LENGTH, 2); break;
         case FilterMethod::Cubic:  m_mod->set_render_param(openmpt::module::render_param::RENDER_INTERPOLATIONFILTER_LENGTH, 4); break;
         case FilterMethod::Sinc:   m_mod->set_render_param(openmpt::module::render_param::RENDER_INTERPOLATIONFILTER_LENGTH, 8); break;
-        default: break;  // Auto or Amiga -> no need to set anything up
+        default: break;  // Amiga -> no need to set up anything
     }
     m_mod->set_render_param(openmpt::module::render_param::RENDER_STEREOSEPARATION_PERCENT, m_config.stereoSeparation);
     m_mod->set_render_param(openmpt::module::render_param::RENDER_VOLUMERAMPING_STRENGTH,   m_config.volumeRamping);

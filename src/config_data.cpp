@@ -50,7 +50,7 @@ const ConfigItem g_ConfigItems[] = { {
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { int value; if (ctx.checkParseResult(ConfigItem::parseEnum(value, s, e_FilterMethod), s)) { cfg.filter = static_cast<FilterMethod>(value); } }
     }, {
         false, "stereo separation          ",
-        "amount of stereo separation, in percent (0 = mono, 100 = full stereo, higher = fake surround)",
+        "amount of stereo separation, in percent (0 = mono, 100 = half stereo for MOD / full stereo for others, 200 = full stereo for MOD)",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.stereoSeparation); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.stereoSeparation, s), s); }
     }, {
@@ -110,7 +110,7 @@ const ConfigItem g_ConfigItems[] = { {
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseFloat(cfg.maxScrollDuration, s), s); }
     }, {
         true, "font                       ",
-        "font to use for all displays: 'inconsolata' (default), 'topaz'/'topaz1200'/'topaz500', 'pc'",
+        "font to use for all displays: 'inconsolata' (default), 'topaz'/'topaz1200'/'topaz500', 'pc' (note: all font sizes will be rounded down to an integer multiple of 16 pixels if a bitmap font is used)",
         [] (const Config& cfg) -> std::string { return cfg.font; },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { (void)ctx; cfg.font.assign(s); }
     }, {

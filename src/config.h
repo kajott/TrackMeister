@@ -16,7 +16,7 @@ enum class FilterMethod {
     Amiga,     //!< OpenMPT render.resampler.emulate_amiga=1, emulate_amiga_type=auto
     A500,      //!< OpenMPT render.resampler.emulate_amiga=1, emulate_amiga_type=a500
     A1200,     //!< OpenMPT render.resampler.emulate_amiga=1, emulate_amiga_type=a1200
-    Auto       //!< OpenMPT INTERPOLATIONFILTER_LENGTH = 0
+    Auto       //!< OpenMPT INTERPOLATIONFILTER_LENGTH = 0, render.resampler.emulate_amiga=1, emulate_amiga_type=auto
 };
 
 //! value that designates that no loudness has been measured yet
@@ -46,7 +46,7 @@ struct Config {
     int      sampleRate               = 48000;        //!< audio sampling rate
     int      audioBufferSize          = 512;          //!< size of the audio buffer, in samples; if there are dropouts, try doubling this value
     FilterMethod filter        = FilterMethod::Auto;  //!< audio resampling filter to be used
-    int      stereoSeparation         = 50;           //!< amount of stereo separation, in percent (0 = mono, 100 = full stereo, higher = fake surround)
+    int      stereoSeparation         = 100;          //!< amount of stereo separation, in percent (0 = mono, 100 = half stereo for MOD / full stereo for others, 200 = full stereo for MOD)
     int      volumeRamping            = -1;           //!< volume ramping strength (0 = no ramping, 10 = softest ramping, -1 = recommended default)
     float    gain                     = 0.0f;         //!< global gain to apply, in decibels
     float    loudness             = InvalidLoudness;  //!< the current track's measured loudness, in decibels; values < -100 mean "no loudness measured"
