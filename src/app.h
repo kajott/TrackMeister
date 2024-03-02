@@ -133,6 +133,8 @@ public:  // interface from SystemInterface
     void handleMouseWheel(int delta);
 
 private:  // business logic
+    std::string findPlayableSibling(const std::string& base, bool next);
+    static bool hasTrackNumber(const char* basename);
     void unloadModule();
     bool loadModule(const char* path, bool forScanning=false);
     void cycleBoxVisibility();

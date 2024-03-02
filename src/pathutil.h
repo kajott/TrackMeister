@@ -7,6 +7,7 @@
 #include <cstddef>
 
 #include <string>
+#include <functional>
 #include <algorithm>
 
 namespace PathUtil {
@@ -63,6 +64,13 @@ uint32_t getExtFourCC(const char* filename);
 inline uint32_t getExtFourCC(const std::string& filename)
     { return getExtFourCC(filename.c_str()); }
 
+//! match a filename's extension to a zero-terminated list of (lowercase) FourCCs
+bool matchExtList(const char* filename, const uint32_t *exts);
+
+//! match a filename's extension to a zero-terminated list of (lowercase) FourCCs
+inline bool matchExtList(std::string& filename, const uint32_t *exts)
+    { return matchExtList(filename.c_str(), exts); }
+
 //! remove extension from a filename
 inline std::string stripExt(const std::string& filename)
     { return filename.substr(0, extSepPos(filename)); }
@@ -94,13 +102,13 @@ inline int64_t getFileMTime(const std::string& path)
     { return getFileMTime(path.c_str()); }
 
 //! find a sibling file in the same directory
-//! \param path  full path of the reference file; <br>
-//!              if the path ends with a path separator,
-//!              the first/last file in the directory is searched instead
-//! \param next  false = find previous/last file in lexicographical order; <br>
-//!              true  = find next/first file <br> (matching is case-insensitive)
-//! \param exts  optional zero-terminated list of valid extension code FourCCs
-//!              (must be lowercase, and without the dot)
-std::string findSibling(const std::string& path, bool next, const uint32_t* exts=nullptr);
+//! \param path    full path of the reference file; <br>
+//!                if the path ends with a path separator,
+//!                the first/last file in the directory is searched instead
+//! \param next    false = find previous/last file in lexicographical order; <br>
+//!                true  = find next/first file <br> (matching is case-insensitive)
+//! \param filter  optional function to be called for every filename (without full path);
+//!                returns true if the file is valid, or false if it shall be ignored
+std::string findSibling(const std::string& path, bool next, std::function<bool(const char*)> filter=nullptr);
 
 }  // namespace PathUtil

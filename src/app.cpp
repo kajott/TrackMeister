@@ -77,7 +77,7 @@ int Application::init(int argc, char* argv[]) {
     if (argc > 1) {
         loadModule(argv[1]);
     } else {
-        loadModule(PathUtil::findSibling("./", true, m_playableExts.data()).c_str());
+        loadModule(findPlayableSibling("./", true).c_str());
     }
     if (m_fullpath.empty()) { toastVersion(); }
     return -1;  // -1 means "continue with execution"
@@ -87,6 +87,28 @@ void Application::shutdown() {
     unloadModule();
     m_renderer.freeTexture(m_defaultLogoTex);
     m_renderer.shutdown();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+///// utilities
+
+std::string Application::findPlayableSibling(const std::string& base, bool next) {
+    return PathUtil::findSibling(base, next, [&] (const char* basename) -> bool {
+        if (PathUtil::matchExtList(basename, m_playableExts.data())) { return true; }
+        if (hasTrackNumber(basename)) { basename += 3; }
+        if ((toLower(basename[0]) == 'm')
+        &&  (toLower(basename[1]) == 'o')
+        &&  (toLower(basename[2]) == 'd')
+        &&  (        basename[3]  == '.')) { return true; }
+        return false;
+    });
+}
+
+bool Application::hasTrackNumber(const char* basename) {
+    return !!basename
+        && isDigit(basename[0]) && isDigit(basename[1])
+        && ((basename[2] == '-') || (basename[2] == '_') || (basename[2] == ' '));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -247,21 +269,21 @@ void Application::handleKey(int key, bool ctrl, bool shift, bool alt) {
                 m_mod->set_position_order_row(dest, 0);
             } break;
         case makeFourCC("PgUp"): {  // previous module
-            std::string newPath(PathUtil::findSibling(m_fullpath, false, m_playableExts.data()));
+            std::string newPath(findPlayableSibling(m_fullpath, false));
             if (!newPath.empty()) { loadModule(newPath.c_str()); }
             break; }
         case makeFourCC("PgDn"): {  // next module
-            std::string newPath(PathUtil::findSibling(m_fullpath, true, m_playableExts.data()));
+            std::string newPath(findPlayableSibling(m_fullpath, true));
             if (!newPath.empty()) { loadModule(newPath.c_str()); }
             break; }
         case makeFourCC("Home"):  // first module in directory
             if (ctrl) {
-                std::string newPath(PathUtil::findSibling(PathUtil::dirname(m_fullpath) + "/", true, m_playableExts.data()));
+                std::string newPath(findPlayableSibling(PathUtil::dirname(m_fullpath) + "/", true));
                 if (!newPath.empty()) { loadModule(newPath.c_str()); }
             }   break;
         case makeFourCC("End"):  // last module in directory
             if (ctrl) {
-                std::string newPath(PathUtil::findSibling(PathUtil::dirname(m_fullpath) + "/", false, m_playableExts.data()));
+                std::string newPath(findPlayableSibling(PathUtil::dirname(m_fullpath) + "/", false));
                 if (!newPath.empty()) { loadModule(newPath.c_str()); }
             }   break;
         default:
@@ -616,7 +638,7 @@ bool Application::loadModule(const char* path, bool forScanning) {
     bool dirFail = false;
     if (!m_fullpath.empty() && PathUtil::isDir(m_fullpath)) {
         // directory opened -> try to open first file *inside* the directory instead
-        std::string newPath(PathUtil::findSibling(m_fullpath + "/", true, m_playableExts.data()));
+        std::string newPath(findPlayableSibling(m_fullpath + "/", true));
         if (newPath.empty()) { dirFail = true; }
         else { m_fullpath.assign(newPath); }
     }
@@ -631,10 +653,7 @@ bool Application::loadModule(const char* path, bool forScanning) {
     updateLogo();
 
     // split off track number
-    if (m_config.trackNumberEnabled
-    && (m_filename.size() > 3)
-    && isDigit(m_filename[0]) && isDigit(m_filename[1])
-    && ((m_filename[2] == '-') || (m_filename[2] == '_') || (m_filename[2] == ' '))) {
+    if (m_config.trackNumberEnabled && hasTrackNumber(m_filename.c_str())) {
         m_track[0] = m_filename[0];
         m_track[1] = m_filename[1];
         m_track[2] = '\0';
@@ -904,7 +923,7 @@ void Application::stopScan() {
         toast(message);
         if (m_multiScan) {
             // if everything went fine, we may proceed to the next file
-            modulePath.assign(PathUtil::findSibling(m_fullpath, true, m_playableExts.data()));
+            modulePath.assign(findPlayableSibling(m_fullpath, true));
             if (!modulePath.empty()) {
                 startScan(modulePath.c_str());
                 return;

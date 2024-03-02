@@ -65,6 +65,13 @@ uint32_t getExtFourCC(const char* filename) {
     return fourCC;
 }
 
+bool matchExtList(const char* filename, const uint32_t *exts) {
+    if (!filename || !exts) { return false; }
+    uint32_t ext = getExtFourCC(filename);
+    while (*exts && (ext != *exts)) { ++exts; }
+    return (*exts != 0);
+}
+
 bool isAbsPath(const std::string& path) {
     if (!path.empty() && isPathSep(path[0])) { return true; }
     #ifdef _WIN32
@@ -140,7 +147,7 @@ int64_t getFileMTime(const char* path) {
     #endif
 }
 
-std::string findSibling(const std::string& path, bool next, const uint32_t* exts) {
+std::string findSibling(const std::string& path, bool next, std::function<bool(const char*)> filter) {
     // prepare directory and base name
     std::string dir(dirname(path));
     if (dir.empty()) { dir.assign("."); }
@@ -169,13 +176,8 @@ std::string findSibling(const std::string& path, bool next, const uint32_t* exts
             // check entry (1): ignore dot files
             if (!curr[0] || (curr[0] == '.')) { continue; }
 
-            // check entry (2): match extensions
-            if (exts) {
-                uint32_t ext = getExtFourCC(curr);
-                const uint32_t* checkExt;
-                for (checkExt = exts;  *checkExt && (*checkExt != ext);  ++checkExt);
-                if (!*checkExt) { continue; }
-            }
+            // check entry (2): apply filter
+            if (filter && !filter(curr)) { continue; }
 
             // check entry (3): compare to see where it slots in
             auto cmp = [] (const char* check, const std::string& sRef, int ifRefEmpty=0) {
