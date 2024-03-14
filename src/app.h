@@ -23,7 +23,7 @@
 
 namespace openmpt {
     class module;
-};
+}
 
 class Application {
     // core data

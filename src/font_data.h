@@ -33,4 +33,4 @@ namespace FontData {
 
     extern const int TexDataSize;
     extern const uint8_t TexData[];
-};
+}

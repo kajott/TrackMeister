@@ -20,7 +20,7 @@ namespace Align {
     constexpr uint8_t Baseline = 0x30;  //!< vertically baseline-aligned (indicated point is at text baseline)
     constexpr uint8_t HMask    = 0x0F;  //!< \private horizontal alignment mask
     constexpr uint8_t VMask    = 0xF0;  //!< \private vertical alignment mask
-};
+}
 
 //! a renderer that can draw two things: MSDF text, or rounded boxes
 class TextBoxRenderer {
