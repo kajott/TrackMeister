@@ -47,3 +47,4 @@ jobs:
             tm.html
             tm.ini
             tm_default.ini
+            download_examples.py
