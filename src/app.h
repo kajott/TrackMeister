@@ -103,6 +103,7 @@ class Application {
     int m_fadeGain, m_fadeRate;
     bool m_autoFadeInitiated = false;
     bool m_multiScan = false;
+    bool m_mayAutoAdvance = false;
     bool m_escapePressedOnce = false;
 
     // pattern data cache
@@ -137,6 +138,7 @@ private:  // business logic
     static bool hasTrackNumber(const char* basename);
     void unloadModule();
     bool loadModule(const char* path, bool forScanning=false);
+    bool loadNextModule(bool reverse=false);
     void cycleBoxVisibility();
     int toPixels(int value) const;
     int toTextSize(int value) const;

@@ -162,6 +162,9 @@ bool Application::renderAudio(int16_t* data, int sampleCount, bool stereo, int s
             ++pos;
             m_fadeGain = std::max(0, m_fadeGain - m_fadeRate);
         }
+        if ((m_fadeGain < 1) && m_autoFadeInitiated) {
+            m_endReached = true;
+        }
     }
 
     // start fade-out after loop, if so desired
@@ -269,12 +272,10 @@ void Application::handleKey(int key, bool ctrl, bool shift, bool alt) {
                 m_mod->set_position_order_row(dest, 0);
             } break;
         case makeFourCC("PgUp"): {  // previous module
-            std::string newPath(findPlayableSibling(m_fullpath, false));
-            if (!newPath.empty()) { loadModule(newPath.c_str()); }
+            loadNextModule(true);
             break; }
         case makeFourCC("PgDn"): {  // next module
-            std::string newPath(findPlayableSibling(m_fullpath, true));
-            if (!newPath.empty()) { loadModule(newPath.c_str()); }
+            loadNextModule();
             break; }
         case makeFourCC("Home"):  // first module in directory
             if (ctrl) {
@@ -304,6 +305,13 @@ void Application::handleResize(int w, int h) {
 void Application::handleMouseWheel(int delta) {
     setMetadataScroll(m_metaTextTargetY + float(delta * 3 * m_metadata.defaultSize));
     m_metaTextAutoScroll = false;
+}
+
+bool Application::loadNextModule(bool reverse) {
+    std::string newPath(findPlayableSibling(m_fullpath, !reverse));
+    if (newPath.empty()) { return false; }
+    loadModule(newPath.c_str());
+    return true;
 }
 
 void Application::setMetadataScroll(float y) {
@@ -374,9 +382,18 @@ void Application::updateLogo() {
 void Application::draw(float dt) {
     float fadeAlpha = 1.0f;
 
-    // handle loudness scan end
-    if (m_scanning && m_endReached) {
-        stopScan();
+    // handle end of track
+    if (m_endReached) {
+        if (m_scanning) {
+            stopScan();
+        } else if (m_mayAutoAdvance) {
+            // disallow auto-advancing the current module again
+            m_mayAutoAdvance = false;
+            // load next module; if loading failed, try again with the next
+            // module, until there are no more modules in the directory or
+            // loading some module succeeded
+            while (loadNextModule() && !m_mod);
+        }
     }
 
     // latch current position
@@ -623,6 +640,7 @@ void Application::unloadModule() {
     m_currentPattern = -1;
     m_patternLength = 0;
     m_autoFadeInitiated = true;
+    m_mayAutoAdvance = false;
     m_sys.setWindowTitle(baseWindowTitle);
     m_escapePressedOnce = false;
     Dprintf("module unloaded\n");
@@ -827,6 +845,7 @@ bool Application::loadModule(const char* path, bool forScanning) {
     m_scanning = forScanning;
     updateLayout(true);
     if (m_config.autoPlay && !forScanning) { m_sys.play(); }
+    m_mayAutoAdvance = !forScanning && m_config.autoAdvance;
     return true;
 }
 

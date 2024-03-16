@@ -53,6 +53,7 @@ struct Config {
     float    targetLoudness           = -18.0f;       //!< target loudness, in decibels (or LUFS); if the 'loudness' parameter is valid, an extra gain will be applied (in addition to 'gain') so that the loudness is corrected to this value
 
     bool     autoPlay                 = true;         //!< automatically start playing when loading a module; you may want to turn this off for actual competitions
+    bool     autoAdvance              = false;        //!< automatically continue with the next song in the directory if the current song stopped; allows for jukebox-like functionality
     bool     loop                     = false;        //!< whether to loop the song after it's finished, or play the song's programmed loop if it there is one
     bool     fadeOutAfterLoop         = false;        //!< whether to trigger a slow fade-out after the song looped
     float    fadeOutAt                = 0.0f;         //!< number of seconds after which the song shall be slowly faded out automatically (0 = no auto-fade)

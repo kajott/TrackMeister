@@ -79,6 +79,11 @@ const ConfigItem g_ConfigItems[] = { {
         [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.autoPlay); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.autoPlay, s), s); }
     }, {
+        false, "auto advance               ",
+        "automatically continue with the next song in the directory if the current song stopped; allows for jukebox-like functionality",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.autoAdvance); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.autoAdvance, s), s); }
+    }, {
         false, "loop                       ",
         "whether to loop the song after it's finished, or play the song's programmed loop if it there is one",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.loop); },
