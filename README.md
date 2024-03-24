@@ -62,7 +62,8 @@ To use the loudness normalization feature, perform a loudness scan on the desire
 TrackMeister can be configured using configuration files with an INI-like syntax.
 
 The following aspects can be configured:
-- display colors and font sizes (but **not** the font itself; that's "baked into" the program)
+- display colors, font sizes and font
+  - font selection is limited to a few "baked-in" presets
 - windowed/fullscreen mode and window size (*)
 - audio sample rate and buffer size (*)
 - audio interpolation filter
@@ -141,7 +142,7 @@ It is built upon the following third-party libraries:
 - [SDL 2](http://libsdl.org) is the basic framework for window management, event handling and audio playback
 - [GLAD](https://glad.dav1d.de) is used as the OpenGL interface generator
 - [MSDF](https://github.com/Chlumsky/msdf-atlas-gen) is what TrackMeister's font rendering is based upon
-- [Inconsolata](https://levien.com/type/myfonts/inconsolata.html) is the font that's used in the UI and logo
+- [Inconsolata](https://levien.com/type/myfonts/inconsolata.html) is the default vector font that's used in the UI and logo
 - [LodePNG](https://lodev.org/lodepng/) is used to decode PNG files
 - [libopenmpt](https://lib.openmpt.org/libopenmpt/) is doing all the heavy lifting concerning module file parsing and audio rendering
 - [libebur128](https://github.com/jiixyj/libebur128) is used for loudness normalization
