@@ -101,14 +101,22 @@ int64_t getFileMTime(const char* path);
 inline int64_t getFileMTime(const std::string& path)
     { return getFileMTime(path.c_str()); }
 
+//! search mode for findSibling()
+enum class FindMode {
+    First,     //!< lexicographically first file in the directory
+    Last,      //!< lexicographically last file in the directory
+    Previous,  //!< lexicographically previous file
+    Next,      //!< lexicographically next file
+    Random,    //!< pick any random file in the directory (except the current file)
+};
+
 //! find a sibling file in the same directory
 //! \param path    full path of the reference file; <br>
-//!                if the path ends with a path separator,
-//!                the first/last file in the directory is searched instead
-//! \param next    false = find previous/last file in lexicographical order; <br>
-//!                true  = find next/first file <br> (matching is case-insensitive)
+//!                must end with a path separator if FindMode::First or
+//!                FindMode::Last are used
+//! \param mode    which file to return
 //! \param filter  optional function to be called for every filename (without full path);
 //!                returns true if the file is valid, or false if it shall be ignored
-std::string findSibling(const std::string& path, bool next, std::function<bool(const char*)> filter=nullptr);
+std::string findSibling(const std::string& path, FindMode mode, std::function<bool(const char*)> filter=nullptr);
 
 }  // namespace PathUtil

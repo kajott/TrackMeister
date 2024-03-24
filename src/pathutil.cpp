@@ -5,6 +5,7 @@
 
 #include <string>
 #include <algorithm>
+#include <random>
 
 #include "util.h"
 #include "pathutil.h"
@@ -147,14 +148,15 @@ int64_t getFileMTime(const char* path) {
     #endif
 }
 
-std::string findSibling(const std::string& path, bool next, std::function<bool(const char*)> filter) {
+std::string findSibling(const std::string& path, FindMode mode, std::function<bool(const char*)> filter) {
     // prepare directory and base name
     std::string dir(dirname(path));
     if (dir.empty()) { dir.assign("."); }
     std::string ref(basename(path));
-    if (ref.empty() && !next) { ref.assign("\xff"); }
     std::string best;
     const char* curr;
+    int randomSamples = 0;
+    static std::mt19937 prng{std::random_device{}()};
 
     // start directory enumeration loop
     #ifdef _WIN32
@@ -180,8 +182,7 @@ std::string findSibling(const std::string& path, bool next, std::function<bool(c
             if (filter && !filter(curr)) { continue; }
 
             // check entry (3): compare to see where it slots in
-            auto cmp = [] (const char* check, const std::string& sRef, int ifRefEmpty=0) {
-                if (sRef.empty() && ifRefEmpty) { return ifRefEmpty; }
+            auto cmp = [] (const char* check, const std::string& sRef) {
                 const char* ref = sRef.c_str();
                 while (*check && *ref) {
                     int d = int(uint8_t(toLower(*check++))) - int(uint8_t(toLower(*ref++)));
@@ -189,9 +190,16 @@ std::string findSibling(const std::string& path, bool next, std::function<bool(c
                 }
                 return int(uint8_t(toLower(*check))) - int(uint8_t(toLower(*ref)));
             };
-            if ((next && ((cmp(curr, ref) <= 0) || (cmp(curr, best, -1) > 0)))
-            || (!next && ((cmp(curr, ref) >= 0) || (cmp(curr, best, +1) < 0))))
-                { continue; }
+            bool take = false;
+            switch (mode) {
+                case FindMode::First:    take = best.empty() || (cmp(curr, best) < 0); break;
+                case FindMode::Last:     take = best.empty() || (cmp(curr, best) > 0); break;
+                case FindMode::Previous: take = (cmp(curr, ref) <  0) && (best.empty() || (cmp(curr, best) > 0)); break;
+                case FindMode::Next:     take = (cmp(curr, ref) >  0) && (best.empty() || (cmp(curr, best) < 0)); break;
+                case FindMode::Random:   take = (cmp(curr, ref) != 0) && (((prng() & 0x7FFFFFFF) % (++randomSamples)) == 0); break;
+                default: break;
+            }
+            if (!take) { continue; }
 
             // check entry (4): confirm that it's a file, not a directory
             #ifdef _WIN32

@@ -54,6 +54,7 @@ struct Config {
 
     bool     autoPlay                 = true;         //!< automatically start playing when loading a module; you may want to turn this off for actual competitions
     bool     autoAdvance              = false;        //!< automatically continue with the next song in the directory if the current song stopped; allows for jukebox-like functionality
+    bool     shuffle                  = false;        //!< play tracks of the directory endlessly, and in random order
     bool     loop                     = false;        //!< whether to loop the song after it's finished, or play the song's programmed loop if it there is one
     bool     fadeOutAfterLoop         = false;        //!< whether to trigger a slow fade-out after the song looped
     float    fadeOutAt                = 0.0f;         //!< number of seconds after which the song shall be slowly faded out automatically (0 = no auto-fade)

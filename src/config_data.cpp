@@ -84,6 +84,11 @@ const ConfigItem g_ConfigItems[] = { {
         [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.autoAdvance); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.autoAdvance, s), s); }
     }, {
+        false, "shuffle                    ",
+        "play tracks of the directory endlessly, and in random order",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.shuffle); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.shuffle, s), s); }
+    }, {
         false, "loop                       ",
         "whether to loop the song after it's finished, or play the song's programmed loop if it there is one",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.loop); },

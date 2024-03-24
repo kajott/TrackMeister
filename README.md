@@ -1,6 +1,6 @@
 ![TrackMeister](logo/tm_logo.svg)
 
-This application is a player for [tracker music files](https://en.wikipedia.org/wiki/Module_file) ("module" files) as they were &ndash;and still are&ndash; common in the [demoscene](https://en.wikipedia.org/wiki/Demoscene). With its fullscreen interface and limited interaction options, it's specifically targeted towards presenting tracked music in a competition ("compo").
+This application is a player for [tracker music files](https://en.wikipedia.org/wiki/Module_file) ("module" files) as they were &ndash;and still are&ndash; common in the [demoscene](https://en.wikipedia.org/wiki/Demoscene). With its fullscreen interface and limited interaction options, it's specifically targeted towards presenting tracked music in a competition ("compo") or for random background playback.
 
 
 ## Features
@@ -49,7 +49,7 @@ The following other controls are available:
 | **F5** | reload the current module and the application's configuration
 | **F11** | toggle fullscreen mode
 | **Ctrl+L** | start (or cancel) EBU R128 loudness scan for the currently loaded module
-| **Ctrl+Shift+L** | start EBU R128 loudness scan for the currently loaded module and all following modules in the current directory
+| **Ctrl+Shift+L** | start EBU R128 loudness scan for the currently loaded module and all following modules in the current directory <br> (this ignores shuffle mode; it's recommended to press **Ctrl+Home** first!)
 | **Ctrl+Shift+S** | save `tm_default.ini` (see below)
 
 For directory navigation, "previous" and "next" refer to case-insensitive lexicographical ordering.
@@ -120,6 +120,16 @@ Here's an example for a useful INI file as a compo organizer would set it up for
         loop: true
 
 Note that in practice, the track-specific options would rather be written into the `tm.ini` file in the directory where the entries reside, or the even into the `.tm` file next to the module file itself, and maybe not into the "global" config file that's located next to `tm.exe`.
+
+Another example is this INI file for a typical "random module jukebox" setup:
+
+    [TM]
+    ; play all files continuously in random order
+    autoplay = yes
+    auto advance = yes
+    shuffle = yes
+    ; and in fullscreen, of course!
+    fullscreen = true
 
 Options can also be specified on the command line, in the syntax "`+key=value`" or "`+key:value`". No extra spaces are allowed around the value. Command-line options take precedence over all configuration files.
 

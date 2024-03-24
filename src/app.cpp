@@ -77,7 +77,7 @@ int Application::init(int argc, char* argv[]) {
     if (argc > 1) {
         loadModule(argv[1]);
     } else {
-        loadModule(findPlayableSibling("./", true).c_str());
+        loadModule(findPlayableSibling("./", m_config.shuffle ? PathUtil::FindMode::Random : PathUtil::FindMode::First).c_str());
     }
     if (m_fullpath.empty()) { toastVersion(); }
     return -1;  // -1 means "continue with execution"
@@ -93,8 +93,8 @@ void Application::shutdown() {
 
 ///// utilities
 
-std::string Application::findPlayableSibling(const std::string& base, bool next) {
-    return PathUtil::findSibling(base, next, [&] (const char* basename) -> bool {
+std::string Application::findPlayableSibling(const std::string& base, PathUtil::FindMode mode) {
+    return PathUtil::findSibling(base, mode, [&] (const char* basename) -> bool {
         if (PathUtil::matchExtList(basename, m_playableExts.data())) { return true; }
         if (hasTrackNumber(basename)) { basename += 3; }
         if ((toLower(basename[0]) == 'm')
@@ -279,12 +279,12 @@ void Application::handleKey(int key, bool ctrl, bool shift, bool alt) {
             break; }
         case makeFourCC("Home"):  // first module in directory
             if (ctrl) {
-                std::string newPath(findPlayableSibling(PathUtil::dirname(m_fullpath) + "/", true));
+                std::string newPath(findPlayableSibling(PathUtil::dirname(m_fullpath) + "/", PathUtil::FindMode::First));
                 if (!newPath.empty()) { loadModule(newPath.c_str()); }
             }   break;
         case makeFourCC("End"):  // last module in directory
             if (ctrl) {
-                std::string newPath(findPlayableSibling(PathUtil::dirname(m_fullpath) + "/", false));
+                std::string newPath(findPlayableSibling(PathUtil::dirname(m_fullpath) + "/", PathUtil::FindMode::Last));
                 if (!newPath.empty()) { loadModule(newPath.c_str()); }
             }   break;
         default:
@@ -308,7 +308,10 @@ void Application::handleMouseWheel(int delta) {
 }
 
 bool Application::loadNextModule(bool reverse) {
-    std::string newPath(findPlayableSibling(m_fullpath, !reverse));
+    std::string newPath(findPlayableSibling(m_fullpath,
+        m_config.shuffle ? PathUtil::FindMode::Random :
+        reverse          ? PathUtil::FindMode::Previous :
+                           PathUtil::FindMode::Next));
     if (newPath.empty()) { return false; }
     loadModule(newPath.c_str());
     return true;
@@ -657,7 +660,7 @@ bool Application::loadModule(const char* path, bool forScanning) {
     bool dirFail = false;
     if (!m_fullpath.empty() && PathUtil::isDir(m_fullpath)) {
         // directory opened -> try to open first file *inside* the directory instead
-        std::string newPath(findPlayableSibling(m_fullpath + "/", true));
+        std::string newPath(findPlayableSibling(m_fullpath + "/", m_config.shuffle ? PathUtil::FindMode::Random : PathUtil::FindMode::First));
         if (newPath.empty()) { dirFail = true; }
         else { m_fullpath.assign(newPath); }
     }
@@ -943,7 +946,7 @@ void Application::stopScan() {
         toast(message);
         if (m_multiScan) {
             // if everything went fine, we may proceed to the next file
-            modulePath.assign(findPlayableSibling(m_fullpath, true));
+            modulePath.assign(findPlayableSibling(m_fullpath, PathUtil::FindMode::Next));
             if (!modulePath.empty()) {
                 startScan(modulePath.c_str());
                 return;
