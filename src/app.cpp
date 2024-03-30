@@ -260,7 +260,10 @@ void Application::handleKey(int key, bool ctrl, bool shift, bool alt) {
         case makeFourCC("Left"):  // previous pattern
             if (m_mod) {
                 AudioMutexGuard mtx_(m_sys);
-                int dest = m_mod->get_current_order() - 1;
+                int dest = m_mod->get_current_order();
+                do {  // decrement order in loop to skip over skipped orders
+                    --dest;
+                } while ((dest >= 0) && (m_mod->get_order_pattern(dest) >= 65534));
                 Dprintf("seeking to order %d\n", dest);
                 m_mod->set_position_order_row(dest, 0);
             } break;
