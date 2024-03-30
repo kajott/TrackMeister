@@ -478,8 +478,7 @@ void Application::draw(float dt) {
                     CacheItem *item;
                     auto entry = m_patternCache.find(key);
                     if (entry == m_patternCache.end()) {
-                        ::strcpy(tempItem.text,    m_mod->format_pattern_row_channel(m_currentPattern, row, ch, m_pdChannelChars).c_str());
-                        ::strcpy(tempItem.attr, m_mod->highlight_pattern_row_channel(m_currentPattern, row, ch, m_pdChannelChars).c_str());
+                        formatPatternDataCell(tempItem, m_currentPattern, row, ch);
                         m_patternCache[key] = tempItem;
                         item = &tempItem;
                     } else {
@@ -487,10 +486,8 @@ void Application::draw(float dt) {
                     }
                     drawPatternDisplayCell(x, y, item->text, item->attr, alpha, pipe);
                 #else
-                    drawPatternDisplayCell(x, y,
-                           m_mod->format_pattern_row_channel(m_currentPattern, row, ch, m_pdChannelChars).c_str(),
-                        m_mod->highlight_pattern_row_channel(m_currentPattern, row, ch, m_pdChannelChars).c_str(),
-                        alpha, pipe);
+                    formatPatternDataCell(tempItem, m_currentPattern, row, ch);
+                    drawPatternDisplayCell(x, y, tempItem.text, tempItem.attr, alpha, pipe);
                 #endif
             }
         }
@@ -580,6 +577,61 @@ void Application::draw(float dt) {
 
     // done
     m_renderer.flush();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void Application::formatPatternDataCell(CacheItem& dest, int pat, int row, int ch) const {
+    if (!m_mod) {
+        dest.text[0] = dest.attr[0] = '\0';
+        return;
+    }
+
+    // use OpemMPT's built-in formatter for a start
+    ::strcpy(dest.text,    m_mod->format_pattern_row_channel(pat, row, ch, m_pdChannelChars).c_str());
+    ::strcpy(dest.attr, m_mod->highlight_pattern_row_channel(pat, row, ch, m_pdChannelChars).c_str());
+    if (int(strlen(dest.text)) != m_pdChannelChars) {
+        // if OpenMPT produced an unexpected number of characters, stop all further analysis
+        return;
+    }
+
+    // helper function: check if a string contains useful information (not just dots and spaces)
+    auto hasData = [] (const char* s) -> bool {
+        while (*s) {
+            if ((*s != ' ') && (*s != '.')) { return true; }
+            ++s;
+        }
+        return false;
+    };
+    // helper function: copy a single character from a C++ string iff it's not empty
+    auto copyChar = [] (char* sOut, const std::string& sIn) {
+        if (!sIn.empty()) { *sOut = sIn[0]; }
+    };
+
+    // helper function: query specific information from OpenMPT to override
+    // an otherwise empty tail of a cell text
+    auto updateTail = [&] (openmpt::module::command_index effectTypeIndex, openmpt::module::command_index paramIndex) {
+        // if there's already valid data in the tail, don't change it
+        if (hasData(&dest.text[m_pdChannelChars - 3])) { return; }
+        // fill in the effect parameter first (will be dots if there's no effect)
+        ::strcpy(&dest.text[m_pdChannelChars - 2],    m_mod->format_pattern_row_channel_command(pat, row, ch, paramIndex).c_str());
+        ::strcpy(&dest.attr[m_pdChannelChars - 2], m_mod->highlight_pattern_row_channel_command(pat, row, ch, paramIndex).c_str());
+        // if there was a parameter, fill in the effect type too
+        if (hasData(&dest.text[m_pdChannelChars - 2])) {
+            copyChar(&dest.text[m_pdChannelChars - 3],    m_mod->format_pattern_row_channel_command(pat, row, ch, effectTypeIndex));
+            copyChar(&dest.attr[m_pdChannelChars - 3], m_mod->highlight_pattern_row_channel_command(pat, row, ch, effectTypeIndex));
+        }
+    };
+
+    // in the more compact formats, replace the last row by the effect
+    // if there is nothing else to show there
+    if (m_pdChannelChars >= 3) {
+        updateTail(openmpt::module::command_index::command_effect, openmpt::module::command_index::command_parameter);
+    }
+    // in the most compact format, try the volume command to
+    if (m_pdChannelChars == 3) {
+        updateTail(openmpt::module::command_index::command_volumeffect, openmpt::module::command_index::command_volume);
+    }
 }
 
 void Application::drawPatternDisplayCell(float x, float y, const char* text, const char* attr, float alpha, bool pipe) {

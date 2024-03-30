@@ -146,6 +146,7 @@ private:  // business logic
     int textWidth(int size, const char* text) const;
     void updateLogo();
     void updateLayout(bool resetBoxVisibility=false);
+    void formatPatternDataCell(CacheItem& dest, int pat, int row, int ch) const;
     void drawPatternDisplayCell(float x, float y, const char* text, const char* attr, float alpha=1.0f, bool pipe=true);
     static void formatPosition(int order, int pattern, int row, char* text, char* attr, int size);
     void addMetadataGroup(TextArea& block, const std::vector<std::string>& data, const char* title, bool numbering=true, int indexStart=1);
