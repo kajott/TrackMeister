@@ -226,6 +226,8 @@ int main(int argc, char* argv[]) {
                         case SDLK_END:      key = makeFourCC("End");   break;
                         case SDLK_INSERT:   key = makeFourCC("Ins");   break;
                         case SDLK_DELETE:   key = makeFourCC("Del");   break;
+                        case SDLK_KP_PLUS:  key = makeFourCC("KP+");   break;
+                        case SDLK_KP_MINUS: key = makeFourCC("KP-");   break;
                         default:
                             if ((key >= 'a') && (key <= 'z')) { key -= 32; }
                             else if ((key >= SDLK_F1) && (key <= SDLK_F12)) { key = key - SDLK_F1 + 0xF1; }

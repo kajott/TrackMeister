@@ -40,6 +40,7 @@ class Application {
     std::vector<uint32_t> m_playableExts;
     std::thread* m_scanThread = nullptr;
     std::string m_mainIniFile;
+    float m_instanceGain = 0.0f;
 
     // metadata
     std::string m_fullpath;
@@ -140,6 +141,8 @@ private:  // business logic
     void unloadModule();
     bool loadModule(const char* path, bool forScanning=false);
     bool loadNextModule(bool reverse=false);
+    void changeInstanceGain(float delta);
+    void updateGain();
     void cycleBoxVisibility();
     int toPixels(int value) const;
     int toTextSize(int value) const;

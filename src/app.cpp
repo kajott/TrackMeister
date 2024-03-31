@@ -290,6 +290,12 @@ void Application::handleKey(int key, bool ctrl, bool shift, bool alt) {
                 std::string newPath(findPlayableSibling(PathUtil::dirname(m_fullpath) + "/", PathUtil::FindMode::Last));
                 if (!newPath.empty()) { loadModule(newPath.c_str()); }
             }   break;
+        case '-': case makeFourCC("KP-"):  // [-] decreaase instance gain
+            changeInstanceGain(-1.0f);
+            break;
+        case '+': case makeFourCC("KP+"):  // [+] increaase instance gain
+            changeInstanceGain(+1.0f);
+            break;
         default:
             break;
     }
@@ -379,6 +385,30 @@ void Application::updateLogo() {
         m_renderer.freeTexture(m_customLogoTex);
         m_customLogoTex = m_renderer.loadTexture(m_customLogoPath.c_str(), 1, true, &m_customLogoSize);
     }
+}
+
+void Application::changeInstanceGain(float delta) {
+    m_instanceGain += delta;
+    updateGain();
+    std::string s("volume adjustment: ");
+    s.append((m_instanceGain < 0.0f) ? "-" : "+");
+    int intAbsGain = int(std::abs(m_instanceGain) * 10.0f);
+    s.append(std::to_string(intAbsGain / 10));
+    s.append(".");
+    s.append(std::to_string(intAbsGain % 10));
+    s.append(" dB");
+    toast(s);
+}
+
+void Application::updateGain() {
+    if (!m_mod || m_scanning) { return; }
+    float gain = m_config.gain + m_instanceGain;
+    if (isValidLoudness(m_config.loudness)) {
+        gain += m_config.targetLoudness - m_config.loudness;
+    }
+    Dprintf("master gain: %.2f dB\n", gain);
+    AudioMutexGuard mtx_(m_sys);
+    m_mod->set_render_param(openmpt::module::render_param::RENDER_MASTERGAIN_MILLIBEL, int(gain * 100.0f + 0.5f));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -798,14 +828,7 @@ bool Application::loadModule(const char* path, bool forScanning) {
     }
     m_mod->set_render_param(openmpt::module::render_param::RENDER_STEREOSEPARATION_PERCENT, m_config.stereoSeparation);
     m_mod->set_render_param(openmpt::module::render_param::RENDER_VOLUMERAMPING_STRENGTH,   m_config.volumeRamping);
-    if (!forScanning) {
-        float gain = m_config.gain;
-        if (isValidLoudness(m_config.loudness)) {
-            gain += m_config.targetLoudness - m_config.loudness;
-        }
-        Dprintf("master gain: %.2f dB\n", gain);
-        m_mod->set_render_param(openmpt::module::render_param::RENDER_MASTERGAIN_MILLIBEL, int(gain * 100.0f + 0.5f));
-    }
+    if (!forScanning) { updateGain(); }
 
     // get info box metadata
     m_artist.assign(m_mod->get_metadata("artist"));
