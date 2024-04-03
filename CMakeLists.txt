@@ -277,7 +277,7 @@ target_include_directories (tm PRIVATE src)
 target_link_libraries (tm PUBLIC libopenmpt tm_external ${SDL2_LIBRARIES})
 if (WIN32)
     target_link_libraries (tm PUBLIC opengl32)
-else ()
+elseif (NOT APPLE)
     target_link_libraries (tm PUBLIC m dl GL)
 endif ()
 

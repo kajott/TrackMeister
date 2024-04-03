@@ -244,7 +244,10 @@ int main(int argc, char* argv[]) {
                     break;
                 case SDL_WINDOWEVENT:
                     if (ev.window.event == SDL_WINDOWEVENT_RESIZED) {
-                        app.handleResize(ev.window.data1, ev.window.data2);
+                        int rw = 0, rh = 0;
+                        // get actual drawable size of the window in pixels to account for high-DPI on macOS
+                        SDL_GL_GetDrawableSize(priv.win, &rw, &rh);
+                        app.handleResize(rw, rh);
                     }
                     break;
                 case SDL_QUIT:
