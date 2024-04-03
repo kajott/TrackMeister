@@ -39,6 +39,9 @@ struct SystemInterfacePrivateData {
 
 void SystemInterface::initSystem() {
     if (!m_priv->sysInitDone) {
+        #ifdef _WIN32
+            SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, "permonitorv2");
+        #endif
         if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
             fatalError("SDL initialization failed", SDL_GetError());
         }
