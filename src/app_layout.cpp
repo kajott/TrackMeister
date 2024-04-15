@@ -261,9 +261,22 @@ void Application::updateLayout(bool resetBoxVisibility) {
         int maxWidth  = m_metaStartX - 2 * margin;
         int maxHeight = m_screenSizeY - m_infoEndY - 2 * margin;
         int logoWidth = texSize.width, logoHeight = texSize.height;
-        while ((logoWidth > maxWidth) || (logoHeight > maxHeight)) {
-            logoWidth  >>= 1;
-            logoHeight >>= 1;
+        if (!m_config.logoScaling) {
+            // scale down to next smaller power of two
+            while ((logoWidth > maxWidth) || (logoHeight > maxHeight)) {
+                logoWidth  >>= 1;
+                logoHeight >>= 1;
+            }
+        } else if ((logoWidth > maxWidth) || (logoHeight > maxHeight)) {
+            // scale to fit
+            int s = (logoHeight * maxWidth + (logoWidth >> 1)) / logoWidth;
+            if (s <= maxHeight) {
+                logoWidth = maxWidth;
+                logoHeight = s;
+            } else {
+                logoWidth = (logoWidth * maxHeight + (logoHeight >> 1)) / logoHeight;
+                logoHeight = maxHeight;
+            }
         }
         if (m_mod) {
             int minX0 = margin;

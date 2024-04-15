@@ -48,6 +48,7 @@ unsigned TextBoxRenderer::loadTexture(const void* pngData, size_t pngSize, int c
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mipmap ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
+    if (mipmap) { glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -1.0f); }
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     if ((width * channels) & 3) { glPixelStorei(GL_UNPACK_ALIGNMENT, 1); }
     glTexImage2D(GL_TEXTURE_2D, 0, glIntFormat, width, height, 0, glInFormat, GL_UNSIGNED_BYTE, static_cast<const void*>(img));

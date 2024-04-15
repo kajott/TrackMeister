@@ -73,7 +73,8 @@ struct Config {
 
     bool     logoEnabled              = true;         //!< whether to show a logo at all
     std::string logo;                                 //!< custom logo file; must be a grayscale PNG file with high-contrast black-on-white artwork; will be downscaled by a power of two so it fits into the canvas
-    int      logoMargin               = 8;            //!< minimum distance between the logo image and the surrounding screen or panel edges
+    bool     logoScaling              = false;        //!< whether to allow arbitrary downscaling scaling of the logo (if false, only allow power-of-two downscaling)
+    int      logoMargin               = 16;           //!< minimum distance between the logo image and the surrounding screen or panel edges
     int      logoPosX                 = 50;           //!< horizontal logo position, in percent of the available area (0 = left, 50 = center, 100 = right)
     int      logoPosY                 = 50;           //!< vertical logo position, in percent of the available area (0 = top, 50 = center, 100 = bottom)
 

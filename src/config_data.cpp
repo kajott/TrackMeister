@@ -159,6 +159,11 @@ const ConfigItem g_ConfigItems[] = { {
         [] (const Config& cfg) -> std::string { return cfg.logo; },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { (void)ctx; cfg.logo.assign(s); }
     }, {
+        false, "logo scaling               ",
+        "whether to allow arbitrary downscaling scaling of the logo (if false, only allow power-of-two downscaling)",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.logoScaling); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.logoScaling, s), s); }
+    }, {
         false, "logo margin                ",
         "minimum distance between the logo image and the surrounding screen or panel edges",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.logoMargin); },
