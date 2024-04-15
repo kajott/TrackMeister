@@ -736,12 +736,25 @@ void Application::unloadModule() {
 }
 
 bool Application::loadModule(const char* path, bool forScanning) {
-    // unload module
+    // unload currenly loaded module first
     unloadModule();
 
     // set filename metadata
     if (path) { m_fullpath.assign(path); }
     Dprintf("\nloadModule(): opening '%s'\n", m_fullpath.c_str());
+
+    // trim .tm suffix (we don't want to load sidecar files)
+    auto pathLen = m_fullpath.size();
+    if ((pathLen > 3)
+    && (m_fullpath[pathLen-3] == '.')
+    && ((m_fullpath[pathLen-2] == 't') || (m_fullpath[pathLen-2] == 'T'))
+    && ((m_fullpath[pathLen-1] == 'm') || (m_fullpath[pathLen-1] == 'M'))
+    ) {
+        m_fullpath.resize(pathLen-3);
+        Dprintf("removed .tm suffix, actually loading '%s'\n", m_fullpath.c_str());
+    }
+
+    // is it a directory?
     bool dirFail = false;
     if (!m_fullpath.empty() && PathUtil::isDir(m_fullpath)) {
         // directory opened -> try to open first file *inside* the directory instead
