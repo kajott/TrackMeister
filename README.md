@@ -48,6 +48,7 @@ The following other controls are available:
 | **V** | show the TrackMeister and libopenmpt version numbers
 | **F5** | reload the current module and the application's configuration
 | **F11** | toggle fullscreen mode
+| **+** / **-** | adjust volume; this adjustment will _not_ be saved (i.e. restarting TrackMeister will start with the default volume again); furthermore, making the sound louder can lead to audio distortion
 | **Ctrl+L** | start (or cancel) EBU R128 loudness scan for the currently loaded module
 | **Ctrl+Shift+L** | start EBU R128 loudness scan for the currently loaded module and all following modules in the current directory <br> (this ignores shuffle mode; it's recommended to press **Ctrl+Home** first!)
 | **Ctrl+Shift+S** | save `tm_default.ini` (see below)
