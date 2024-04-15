@@ -115,7 +115,7 @@ struct Config {
     bool     metaShowSampleNames      = true;         //!< whether the metadata sidebar shall include the sample names section
     int      metaMarginX              = 16;           //!< left and right margin inside the metadata sidebar
     int      metaMarginY              = 8;            //!< upper and lower margin inside the metadata sidebar
-    int      metaTextSize             = 32;           //!< text size in the metadata sidebar
+    int      metaTextSize             = 31;           //!< text size in the metadata sidebar
     int      metaMessageWidth         = 32;           //!< approximate number of characters per line to allocate for the module message
     int      metaSectionMargin        = 32;           //!< vertical gap between sections in the metadata sidebar
     uint32_t metaHeadingColor         = 0xFF00FFFFu;  //!< color of a section heading in the metadata sidebar
