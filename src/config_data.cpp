@@ -120,7 +120,7 @@ const ConfigItem g_ConfigItems[] = { {
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseFloat(cfg.maxScrollDuration, s), s); }
     }, {
         true, "font                       ",
-        "font to use for all displays: 'inconsolata' (default), 'topaz'/'topaz1200'/'topaz500', 'pc' (note: all font sizes will be rounded down to an integer multiple of 16 pixels if a bitmap font is used)",
+        "font to use for all displays: 'inconsolata' (default), 'iosevka', 'topaz'/'topaz1200'/'topaz500', 'pc' (note: all font sizes will be rounded down to an integer multiple of 16 pixels if a bitmap font is used)",
         [] (const Config& cfg) -> std::string { return cfg.font; },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { (void)ctx; cfg.font.assign(s); }
     }, {

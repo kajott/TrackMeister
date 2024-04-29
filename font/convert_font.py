@@ -9,6 +9,7 @@ from PIL import Image, ImageOps
 def load_fonts():
     return MultiFontAtlas(
         MSDFFont("Inconsolata", number_height=0.595),
+        MSDFFont("Iosevka",     number_height=0.588),
         BitmapFont("topaz1200", cell_size=(8,8),  display_size=(8,16), baseline=7,  number_height= 7, mapping='amiga'),
         BitmapFont("topaz500",  cell_size=(8,8),  display_size=(8,16), baseline=7,  number_height= 7, mapping='amiga'),
         BitmapFont("pc16",      cell_size=(8,16), display_size=(9,16), baseline=12, number_height=10, mapping='cp437'),

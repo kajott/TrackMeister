@@ -605,6 +605,9 @@ void Application::draw(float dt) {
         if (m_toastAlpha <= 0.0f) { m_toastMessage.clear(); }
     }
 
+    // helper for measuring a font's line height
+    // m_renderer.text(0,0, 1000, "1234567890", 0, 0xFFFFFFFF);
+
     // done
     m_renderer.flush();
 }
