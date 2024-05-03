@@ -23,6 +23,8 @@ EXTRA_DOWNLOADS_RAW = [
 EXTRA_DOWNLOADS_ZIP = [
     ("https://files.scene.org/get/parties/2018/revision18/tracked-music/logicoma-wrecklamation.zip",
      "Logicoma - Wrecklamation.xm"),
+    ("https://files.scene.org/get/parties/2001/scene_event01/mmul/se2ksense_tracked_cocioandfinsprit_reflexofloopit.zip",
+     "SE2kSense_Tracked_CocioAndFinsprit_ReflexOfLoopit.xm"),
 ]
 
 class DownloadHelper:
