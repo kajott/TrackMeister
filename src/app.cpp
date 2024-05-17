@@ -152,14 +152,18 @@ bool Application::renderAudio(int16_t* data, int sampleCount, bool stereo, int s
         ::memset(static_cast<void*>(pos), 0, stereo ? (remain << 2) : (remain << 1));
     }
 
+    // scan for clipped samples
+    pos = data;
+    for (remain = stereo ? (sampleCount << 1) : sampleCount;  remain;  --remain, ++pos) {
+        if ((*pos <= -32767) || (*pos >= 32767)) { m_clipped = true; break; }
+    }
+
     // apply fade-out
     if (m_fadeActive) {
-        remain = stereo ? (sampleCount << 1) : sampleCount;
-        pos = data;
         int gain16b = m_fadeGain >> 15;
-        while (remain--) {
+        pos = data;
+        for (remain = stereo ? (sampleCount << 1) : sampleCount;  remain;  --remain, ++pos) {
             *pos = int16_t((int(*pos) * gain16b + 32767) >> 16);
-            ++pos;
             m_fadeGain = std::max(0, m_fadeGain - m_fadeRate);
         }
         if ((m_fadeGain < 1) && m_autoFadeInitiated) {
@@ -592,6 +596,19 @@ void Application::draw(float dt) {
             Align::Center + Align::Middle, m_config.emptyTextColor);
     }
 
+    // update and draw clip indicator
+    if (m_mod && m_config.clipEnabled) {
+        if (m_clipped.exchange(false)) {
+            m_clipAlpha = 1.0f;
+        } else {
+            m_clipAlpha -= dt / m_config.clipFadeTime;
+        }
+        if (m_clipAlpha > 0.0f) {
+            uint32_t clipColor = m_renderer.extraAlpha(m_config.clipColor, m_clipAlpha);
+            m_renderer.box(m_clipX0, m_clipY0, m_clipX1, m_clipY1, clipColor, clipColor, false, std::max(m_clipX1, m_clipY1));
+        }
+    }
+
     // draw toast message
     if (!m_toastMessage.empty() && (m_toastAlpha > 0.0f)) {
         int cx = m_screenSizeX >> 1;
@@ -734,6 +751,8 @@ void Application::unloadModule() {
     m_mayAutoAdvance = false;
     m_sys.setWindowTitle(baseWindowTitle);
     m_escapePressedOnce = false;
+    m_clipped = false;
+    m_clipAlpha = 0.0f;
     Dprintf("module unloaded\n");
     updateLayout(true);
 }

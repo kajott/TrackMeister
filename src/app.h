@@ -34,7 +34,8 @@ class Application {
     Config::PreparedCommandLine m_cmdline;
     int m_sampleRate;
     bool m_scanning = false;
-    std::atomic<bool> m_cancelScanning = false;
+    std::atomic_bool m_cancelScanning = false;
+    std::atomic_bool m_clipped = false;
     openmpt::module* m_mod = nullptr;
     std::vector<std::byte> m_mod_data;
     std::vector<uint32_t> m_playableExts;
@@ -86,6 +87,7 @@ class Application {
     int m_toastTextSize, m_toastY, m_toastDX, m_toastDY;
     int m_channelNameBarStartY, m_channelNameTextY;
     float m_channelNameOffsetX, m_vuHeight;
+    int m_clipX0, m_clipY0, m_clipX1, m_clipY1;
 
     // logo data (textures, layout)
     unsigned m_defaultLogoTex = 0;
@@ -107,6 +109,7 @@ class Application {
     bool m_multiScan = false;
     bool m_mayAutoAdvance = false;
     bool m_escapePressedOnce = false;
+    float m_clipAlpha = 0.0f;
 
     // pattern data cache
     struct CacheItem { char text[16], attr[16]; };

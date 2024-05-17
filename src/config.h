@@ -161,6 +161,14 @@ struct Config {
     uint32_t vuUpperColor             = 0x10FF80FFu;  //!< color of the upper end of the fake VU meters
     uint32_t vuLowerColor             = 0x50FF00FFu;  //!< color of the lower end of the fake VU meters
 
+    bool     clipEnabled              = false;        //!< whether the clipping indicator is enabled
+    int      clipSize                 = 8;            //!< circumference of the clipping indicator
+    int      clipPosX                 = 0;            //!< horizontal clipping indicator position, in percent of the available area (0 = left, 50 = center, 100 = right)
+    int      clipPosY                 = 100;          //!< vertical clipping indicator position, in percent of the available area (0 = top, 50 = center, 100 = bottom)
+    int      clipMargin               = 8;            //!< margin around the screen edges that clipPos may not exceed, even at the 0/100 settings
+    uint32_t clipColor                = 0xFF0000FFu;  //!< color of the clipping indicator
+    float    clipFadeTime             = 0.25f;        //!< time the clipping indicator takes to fade out completely, in seconds
+
     int      toastTextSize            = 24;           //!< text size of a "toast" status message
     int      toastMarginX             = 0;            //!< left and right margin inside a "toast" status message (not including the rounded borders)
     int      toastMarginY             = 6;            //!< top and bottom margin inside a "toast" status message

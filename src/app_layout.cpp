@@ -294,6 +294,16 @@ void Application::updateLayout(bool resetBoxVisibility) {
         m_logoY1 = m_logoY0 + logoHeight;
     }
 
+    // set up clip indicator geometry
+    if (m_config.clipEnabled) {
+        int clipSize = toPixels(m_config.clipSize);
+        int clipMargin = toPixels(m_config.clipMargin);
+        m_clipX0 = clipMargin + ((m_screenSizeX - 2 * clipMargin - clipSize) * m_config.clipPosX + 50) / 100;
+        m_clipY0 = clipMargin + ((m_screenSizeY - 2 * clipMargin - clipSize) * m_config.clipPosY + 50) / 100;
+        m_clipX1 = m_clipX0 + clipSize;
+        m_clipY1 = m_clipY0 + clipSize;
+    }
+
     // set up toast geometry
     m_toastTextSize = toTextSize(m_config.toastTextSize);
     m_toastY = toPixels(m_config.toastPositionY);

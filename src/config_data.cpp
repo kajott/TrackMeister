@@ -559,6 +559,41 @@ const ConfigItem g_ConfigItems[] = { {
         [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.vuLowerColor); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.vuLowerColor, s), s); }
     }, {
+        true, "clip enabled               ",
+        "whether the clipping indicator is enabled",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.clipEnabled); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.clipEnabled, s), s); }
+    }, {
+        false, "clip size                  ",
+        "circumference of the clipping indicator",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.clipSize); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.clipSize, s), s); }
+    }, {
+        false, "clip pos X                 ",
+        "horizontal clipping indicator position, in percent of the available area (0 = left, 50 = center, 100 = right)",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.clipPosX); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.clipPosX, s), s); }
+    }, {
+        false, "clip pos Y                 ",
+        "vertical clipping indicator position, in percent of the available area (0 = top, 50 = center, 100 = bottom)",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.clipPosY); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.clipPosY, s), s); }
+    }, {
+        false, "clip margin                ",
+        "margin around the screen edges that clipPos may not exceed, even at the 0/100 settings",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.clipMargin); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.clipMargin, s), s); }
+    }, {
+        false, "clip color                 ",
+        "color of the clipping indicator",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.clipColor); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.clipColor, s), s); }
+    }, {
+        false, "clip fade time             ",
+        "time the clipping indicator takes to fade out completely, in seconds",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatFloat(cfg.clipFadeTime); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseFloat(cfg.clipFadeTime, s), s); }
+    }, {
         true, "toast text size            ",
         "text size of a \"toast\" status message",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.toastTextSize); },
