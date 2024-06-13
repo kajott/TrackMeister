@@ -389,6 +389,7 @@ void Application::updateImage(ExternalImage& img, const std::string& path, int c
         m_renderer.freeTexture(img.tex);
         img.tex = m_renderer.loadTexture(path.c_str(), channels, true, &img.size);
         if (!img.tex) { Dprintf("WARNING: %s didn't load successfully\n", what); }
+        (void)what;  // not used in Release builds
     }
 }
 
