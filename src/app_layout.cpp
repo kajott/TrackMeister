@@ -253,10 +253,24 @@ void Application::updateLayout(bool resetBoxVisibility) {
     m_channelNameOffsetX = float(m_pdChannelWidth) * 0.5f;
     m_vuHeight = float(toPixels(m_config.vuHeight));
 
+    // set up background image geometry
+    if (m_background.tex) {
+        int bgWidth  = m_screenSizeX;
+        int bgHeight = (bgWidth * m_background.size.height + (m_background.size.width >> 1)) / m_background.size.width;
+        if (bgHeight < m_screenSizeY) {
+            bgHeight = m_screenSizeY;
+            bgWidth = (bgHeight * m_background.size.width + (m_background.size.height >> 1)) / m_background.size.height;
+        }
+        m_background.x0 = (m_screenSizeX - bgWidth  + 1) >> 1;
+        m_background.y0 = (m_screenSizeY - bgHeight + 1) >> 1;
+        m_background.x1 = m_background.x0 + bgWidth;
+        m_background.y1 = m_background.y0 + bgHeight;
+    }
+
     // set up logo geometry
-    m_logoTex = !m_config.logoEnabled ? 0 : m_customLogoTex ? m_customLogoTex : m_defaultLogoTex;
-    if (m_logoTex) {
-        TextBoxRenderer::TextureDimensions &texSize = (m_logoTex == m_customLogoTex) ? m_customLogoSize : m_defaultLogoSize;
+    m_usedLogoTex = !m_config.logoEnabled ? 0 : m_logo.tex ? m_logo.tex : m_defaultLogoTex;
+    if (m_usedLogoTex) {
+        TextBoxRenderer::TextureDimensions &texSize = (m_usedLogoTex == m_logo.tex) ? m_logo.size : m_defaultLogoSize;
         int margin    = toPixels(m_config.logoMargin);
         int maxWidth  = m_metaStartX - 2 * margin;
         int maxHeight = m_screenSizeY - m_infoEndY - 2 * margin;
@@ -283,15 +297,15 @@ void Application::updateLayout(bool resetBoxVisibility) {
             int maxX0 = m_metaStartX - margin - logoWidth;
             int minY0 = m_infoEndY + margin;
             int maxY0 = m_screenSizeY - margin - logoHeight;
-            m_logoX0 = (minX0 * (100 - m_config.logoPosX) + maxX0 * m_config.logoPosX + 50) / 100;
-            m_logoY0 = (minY0 * (100 - m_config.logoPosY) + maxY0 * m_config.logoPosY + 50) / 100;
+            m_logo.x0 = (minX0 * (100 - m_config.logoPosX) + maxX0 * m_config.logoPosX + 50) / 100;
+            m_logo.y0 = (minY0 * (100 - m_config.logoPosY) + maxY0 * m_config.logoPosY + 50) / 100;
         }
         else {
-            m_logoX0 = (m_screenSizeX - logoWidth) >> 1;
-            m_logoY0 = toPixels(m_config.emptyLogoPosY) - (logoHeight >> 1);
+            m_logo.x0 = (m_screenSizeX - logoWidth) >> 1;
+            m_logo.y0 = toPixels(m_config.emptyLogoPosY) - (logoHeight >> 1);
         }
-        m_logoX1 = m_logoX0 + logoWidth;
-        m_logoY1 = m_logoY0 + logoHeight;
+        m_logo.x1 = m_logo.x0 + logoWidth;
+        m_logo.y1 = m_logo.y0 + logoHeight;
     }
 
     // set up clip indicator geometry

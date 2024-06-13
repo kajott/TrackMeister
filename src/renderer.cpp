@@ -125,14 +125,24 @@ static const char* fsSrc =
 "\n" "        d = (min(p.x, p.y) > (-vSize.z))"
 "\n" "          ? (vSize.z - length(p + vec2(vSize.z)))"
 "\n" "          : min(-p.x, -p.y);"
-"\n" "    } else if (vMode == 3u) {  // bitmap texture mode"
+"\n" "    } else if (vMode == 3u) {  // bitmap text mode"
 "\n" "        d = texture(uBitmap, vTC).r;"
-"\n" "    } else {  // logo mode"
+"\n" "    } else if (vMode == 2u) {  // logo mode"
 "\n" "        d = texture(uTex, vTC).r;"
+"\n" "    } else {  // normal texture mode"
+"\n" "        outColor = texture(uTex, vTC);  return;"
 "\n" "    }"
 "\n" "    outColor = vec4(vColor.rgb, vColor.a * clamp((d - vBR.x) * vBR.y + 0.5, 0.0, 1.0));"
 "\n" "}"
 "\n";
+
+namespace RenderMode {
+    constexpr uint8_t Texture    = 4;
+    constexpr uint8_t Logo       = 2;
+    constexpr uint8_t Box        = 0;
+    constexpr uint8_t MSDFText   = 1;
+    constexpr uint8_t BitmapText = 3;
+};
 
 bool TextBoxRenderer::init() {
     GLint res;
@@ -346,7 +356,7 @@ TextBoxRenderer::Vertex* TextBoxRenderer::newVertices(uint8_t mode, float x0, fl
 void TextBoxRenderer::box(int x0, int y0, int x1, int y1, uint32_t colorUpperLeft, uint32_t colorLowerRight, bool horizontalGradient, int borderRadius, float blur, float offset) {
     float w = 0.5f * (float(x1) - float(x0));
     float h = 0.5f * (float(y1) - float(y0));
-    Vertex* v = newVertices(0, float(x0), float(y0), float(x1), float(y1), -w, -h, w, h);
+    Vertex* v = newVertices(RenderMode::Box, float(x0), float(y0), float(x1), float(y1), -w, -h, w, h);
     v[0].color = colorUpperLeft;
     v[1].color = horizontalGradient ? colorLowerRight : colorUpperLeft;
     v[2].color = horizontalGradient ? colorUpperLeft : colorLowerRight;
@@ -380,13 +390,21 @@ void TextBoxRenderer::outlineBox(int x0, int y0, int x1, int y1, uint32_t colorU
         colorUpper | 0xFF000000u, colorLower | 0xFF000000u, false, borderRadius - cInner);
 }
 
-void TextBoxRenderer::logo(int x0, int y0, int x1, int y1, uint32_t color, unsigned texID) {
+void TextBoxRenderer::texturedRect(uint8_t mode, int x0, int y0, int x1, int y1, uint32_t color, unsigned texID) {
     if (!texID || !(color & 0xFF000000u)) { return; }
     useTexture(texID);
-    Vertex* v = newVertices(2, float(x0), float(y0), float(x1), float(y1), 0.f, 0.f, 1.f, 1.f);
+    Vertex* v = newVertices(mode, float(x0), float(y0), float(x1), float(y1), 0.f, 0.f, 1.f, 1.f);
     v[0].color = v[1].color = v[2].color = v[3].color = color;
     v[0].br[0] = v[1].br[0] = v[2].br[0] = v[3].br[0] = 0.5f;
     v[0].br[1] = v[1].br[1] = v[2].br[1] = v[3].br[1] = -1.0f;
+}
+
+void TextBoxRenderer::logo(int x0, int y0, int x1, int y1, uint32_t color, unsigned texID) {
+    texturedRect(RenderMode::Logo, x0, y0, x1, y1, color, texID);
+}
+
+void TextBoxRenderer::bitmap(int x0, int y0, int x1, int y1, unsigned texID) {
+    texturedRect(RenderMode::Texture, x0, y0, x1, y1, uint32_t(-1), texID);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -486,7 +504,9 @@ float TextBoxRenderer::text(float x, float y, float size, const char* text, uint
     bool msdf = !m_currentFont->bitmapHeight;
     while ((g = getGlyph(nextCodepoint(text))) != 0u) {
         if (!g->space) {
-            Vertex* v = newVertices(msdf ? 1 : 3, x + g->pos.x0 * size, y + g->pos.y0 * size, x + g->pos.x1 * size, y + g->pos.y1 * size);
+            Vertex* v = newVertices(msdf ? RenderMode::MSDFText : RenderMode::BitmapText,
+                            x + g->pos.x0 * size, y + g->pos.y0 * size,
+                            x + g->pos.x1 * size, y + g->pos.y1 * size);
             v[0].color = v[1].color = colorUpper;
             v[2].color = v[3].color = colorLower;
             v[0].br[0] = v[1].br[0] = v[2].br[0] = v[3].br[0] = msdf ? offset         : 0.5f;

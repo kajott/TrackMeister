@@ -89,15 +89,18 @@ class Application {
     float m_channelNameOffsetX, m_vuHeight;
     int m_clipX0, m_clipY0, m_clipX1, m_clipY1;
 
-    // logo data (textures, layout)
+    // background image and logo data (texture, layout)
+    struct ExternalImage {
+        std::string path;
+        int64_t mtime = 0;
+        TextBoxRenderer::TextureDimensions size = {0,0};
+        unsigned tex = 0;
+        int x0, y0, x1, y1;
+    };
+    ExternalImage m_background, m_logo;
     unsigned m_defaultLogoTex = 0;
     TextBoxRenderer::TextureDimensions m_defaultLogoSize = {0,0};
-    unsigned m_customLogoTex = 0;
-    TextBoxRenderer::TextureDimensions m_customLogoSize = {0,0};
-    std::string m_customLogoPath;
-    int64_t m_customLogoMTime = 0;
-    int m_logoX0, m_logoY0, m_logoX1, m_logoY1;
-    unsigned m_logoTex;
+    unsigned m_usedLogoTex = 0;
 
     // current view/playback state
     float m_metaTextY, m_metaTextTargetY;
@@ -150,7 +153,8 @@ private:  // business logic
     int toPixels(int value) const;
     int toTextSize(int value) const;
     int textWidth(int size, const char* text) const;
-    void updateLogo();
+    void updateImages();
+    void updateImage(ExternalImage& img, const std::string& path, int channels, const char* what);
     void updateLayout(bool resetBoxVisibility=false);
     void formatPatternDataCell(CacheItem& dest, int pat, int row, int ch) const;
     void drawPatternDisplayCell(float x, float y, const char* text, const char* attr, float alpha=1.0f, bool pipe=true);

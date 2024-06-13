@@ -64,7 +64,7 @@ int Application::init(int argc, char* argv[]) {
         m_sys.fatalError("initialization failed", "could not initialize text box renderer");
     }
     m_defaultLogoTex = m_renderer.loadTexture(LogoData, LogoDataSize, 1, true, &m_defaultLogoSize);
-    updateLogo();
+    updateImages();
 
     // populate playable extension list
     m_playableExts.clear();
@@ -380,15 +380,21 @@ void Application::toastVersion() {
     toast(ver);
 }
 
-void Application::updateLogo() {
-    int64_t mtime = PathUtil::getFileMTime(m_config.logo.c_str());
-    if ((m_config.logo != m_customLogoPath) || (mtime > m_customLogoMTime)) {
-        Dprintf("logo changed/updated: %s\n", m_config.logo.c_str());
-        m_customLogoPath = m_config.logo;
-        m_customLogoMTime = mtime;
-        m_renderer.freeTexture(m_customLogoTex);
-        m_customLogoTex = m_renderer.loadTexture(m_customLogoPath.c_str(), 1, true, &m_customLogoSize);
+void Application::updateImage(ExternalImage& img, const std::string& path, int channels, const char* what) {
+    int64_t mtime = PathUtil::getFileMTime(path.c_str());
+    if ((path != img.path) || (mtime > img.mtime)) {
+        Dprintf("%s changed/updated: %s\n", what, path.c_str());
+        img.path = path;
+        img.mtime = mtime;
+        m_renderer.freeTexture(img.tex);
+        img.tex = m_renderer.loadTexture(path.c_str(), channels, true, &img.size);
+        if (!img.tex) { Dprintf("WARNING: %s didn't load successfully\n", what); }
     }
+}
+
+void Application::updateImages() {
+    updateImage(m_background, m_config.backgroundImage, 4, "background image");
+    updateImage(m_logo,       m_config.logo,            1, "custom logo");
 }
 
 void Application::changeInstanceGain(float delta) {
@@ -469,10 +475,13 @@ void Application::draw(float dt) {
                  float((clearColor >> 16) & 0xFF) * float(1.f/255.f), 1.f);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    // draw background image
+    m_renderer.bitmap(m_background.x0, m_background.y0, m_background.x1, m_background.y1, m_background.tex);
+
     // draw logo
-    m_renderer.logo(m_logoX0, m_logoY0, m_logoX1, m_logoY1,
+    m_renderer.logo(m_logo.x0, m_logo.y0, m_logo.x1, m_logo.y1,
                     m_mod ? m_config.patternLogoColor : m_config.emptyLogoColor,
-                    m_logoTex);
+                    m_usedLogoTex);
 
     // draw VU meters
     if (m_mod && m_vuVisible && m_sys.isPlaying() && !m_endReached
@@ -792,7 +801,7 @@ bool Application::loadModule(const char* path, bool forScanning) {
     m_config.load(PathUtil::join(PathUtil::dirname(m_fullpath), "tm.ini").c_str(), m_filename.c_str());
     m_config.load((m_fullpath + ".tm").c_str());
     m_config.load(m_cmdline);
-    updateLogo();
+    updateImages();
 
     // split off track number
     if (m_config.trackNumberEnabled && hasTrackNumber(m_filename.c_str())) {

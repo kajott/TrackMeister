@@ -70,6 +70,7 @@ struct Config {
     uint32_t infoBackground           = 0xFF333333u;  //!< background color of the top information bar
     uint32_t metaBackground           = 0xFF1A1E4Du;  //!< background color of the metadata sidebar
     uint32_t shadowColor              = 0x80000000u;  //!< color of the info and metadata bar's shadows
+    std::string backgroundImage;                      //!< background image; must be a PNG file; will be cropped scaled to fill the entire screen (without distorting the aspect ratio)
 
     bool     logoEnabled              = true;         //!< whether to show a logo at all
     std::string logo;                                 //!< custom logo file; must be a grayscale PNG file with high-contrast black-on-white artwork; will be downscaled by a power of two so it fits into the canvas

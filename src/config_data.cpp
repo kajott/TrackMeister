@@ -149,6 +149,11 @@ const ConfigItem g_ConfigItems[] = { {
         [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.shadowColor); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.shadowColor, s), s); }
     }, {
+        false, "background image           ",
+        "background image; must be a PNG file; will be cropped scaled to fill the entire screen (without distorting the aspect ratio)",
+        [] (const Config& cfg) -> std::string { return cfg.backgroundImage; },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { (void)ctx; cfg.backgroundImage.assign(s); }
+    }, {
         true, "logo enabled               ",
         "whether to show a logo at all",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.logoEnabled); },

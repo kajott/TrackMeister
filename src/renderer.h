@@ -58,6 +58,8 @@ class TextBoxRenderer {
     inline void useTexture(unsigned texID)
         { if (texID && (texID != m_tex)) { flush(); m_tex = texID; } }
 
+    void texturedRect(uint8_t mode, int x0, int y0, int x1, int y1, uint32_t color, unsigned texID);
+
 public:
     bool init();
     void shutdown();
@@ -81,6 +83,7 @@ public:
         { box(x0, y0, x1, y1, color, color); }
 
     void logo(int x0, int y0, int x1, int y1, uint32_t color, unsigned texID);
+    void bitmap(int x0, int y0, int x1, int y1, unsigned texID);
 
     void outlineBox(int x0, int y0, int x1, int y1,
                     uint32_t colorUpper, uint32_t colorLower,  // all colors are forced to fully opaque!
