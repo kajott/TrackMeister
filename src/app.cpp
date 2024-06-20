@@ -93,14 +93,18 @@ void Application::shutdown() {
 
 ///// utilities
 
+bool isOldModPrefix(const char* basename) {
+    return (toLower(basename[0]) == 'm')
+        && (toLower(basename[1]) == 'o')
+        && (toLower(basename[2]) == 'd')
+        && (        basename[3]  == '.');
+}
+
 std::string Application::findPlayableSibling(const std::string& base, PathUtil::FindMode mode) {
     return PathUtil::findSibling(base, mode, [&] (const char* basename) -> bool {
         if (PathUtil::matchExtList(basename, m_playableExts.data())) { return true; }
         if (hasTrackNumber(basename)) { basename += 3; }
-        if ((toLower(basename[0]) == 'm')
-        &&  (toLower(basename[1]) == 'o')
-        &&  (toLower(basename[2]) == 'd')
-        &&  (        basename[3]  == '.')) { return true; }
+        if (isOldModPrefix(basename)) { return true; }
         return false;
     });
 }
@@ -868,7 +872,16 @@ bool Application::loadModule(const char* path, bool forScanning) {
     // get info box metadata
     std::string artist(m_mod->get_metadata("artist"));
     std::string title(m_mod->get_metadata("title"));
-    m_info.emplace_back(std::make_pair("File", filename));
+    if (!m_config.autoHideFileName || (artist.empty() && title.empty())) {
+        if (m_config.hideFileExt) {
+            if (isOldModPrefix(filename.c_str())) {
+                filename.erase(0, 4);
+            } else {
+                PathUtil::stripExtInplace(filename);
+            }
+        }
+        m_info.emplace_back(std::make_pair("File", filename));
+    }
     if (!artist.empty()) { m_info.emplace_back(std::make_pair("Artist", artist)); }
     if (!title.empty())  { m_info.emplace_back(std::make_pair("Title",  title)); }
     m_shortDetails.clear();  m_longDetails.clear();

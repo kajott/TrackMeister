@@ -219,6 +219,16 @@ const ConfigItem g_ConfigItems[] = { {
         [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.trackNumberEnabled); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.trackNumberEnabled, s), s); }
     }, {
+        false, "hide file ext              ",
+        "whether to remove the file extension from the filename in the info bar",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.hideFileExt); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.hideFileExt, s), s); }
+    }, {
+        false, "auto hide file name        ",
+        "whether to hide the filename completely if title and/or artist information is available",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.autoHideFileName); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.autoHideFileName, s), s); }
+    }, {
         false, "info margin X              ",
         "outer left margin inside the info bar",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.infoMarginX); },
