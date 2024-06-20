@@ -25,6 +25,8 @@ EXTRA_DOWNLOADS_ZIP = [
      "Logicoma - Wrecklamation.xm"),
     ("https://files.scene.org/get/parties/2001/scene_event01/mmul/se2ksense_tracked_cocioandfinsprit_reflexofloopit.zip",
      "SE2kSense_Tracked_CocioAndFinsprit_ReflexOfLoopit.xm"),
+    ("https://files.scene.org/get/parties/2020/revision20/amiga-intro/logicoma_and_loonies_-_way_too_rude.zip",
+     "mod.way too rude"),
 ]
 
 class DownloadHelper:
