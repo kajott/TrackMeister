@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <cstddef>
 
+#include <utility>
 #include <vector>
 #include <string>
 #if USE_PATTERN_CACHE
@@ -45,10 +46,8 @@ class Application {
 
     // metadata
     std::string m_fullpath;
-    std::string m_filename;
     char m_track[3] = {0,0,0};
-    std::string m_artist;
-    std::string m_title;
+    std::vector<std::pair<std::string, std::string>> m_info;
     std::vector<std::string> m_shortDetails;
     std::vector<std::string> m_longDetails;
     std::string m_details;  // final string compiled in updateLayout()
@@ -71,7 +70,7 @@ class Application {
     int m_trackTextSize, m_infoTextSize, m_infoDetailsSize;
     int m_infoEndY, m_infoShadowEndY;
     float m_trackX, m_trackY;
-    int m_infoKeyX, m_infoValueX;
+    int m_infoStartY, m_infoLineSpacing, m_infoKeyX, m_infoValueX;
     int m_infoFilenameY, m_infoArtistY, m_infoTitleY, m_infoDetailsY;
     int m_progX0, m_progY0, m_progX1, m_progY1;
     int m_progOuterDXY, m_progInnerDXY, m_progSize;
@@ -162,7 +161,7 @@ private:  // business logic
     void addMetadataGroup(TextArea& block, const std::vector<std::string>& data, const char* title, bool numbering=true, int indexStart=1);
     void setMetadataScroll(float y);
     inline bool trackValid() const { return (m_track[0] != '\0'); }
-    inline bool infoValid()  const { return !m_filename.empty() || !m_title.empty() || !m_artist.empty() || !m_details.empty(); }
+    inline bool infoValid()  const { return !m_info.empty() || !m_details.empty(); }
     inline bool metaValid()  const { return !m_metadata.empty(); }
     inline bool namesValid() const { return !m_channelNames.empty(); }
     void toast(const char* msg);

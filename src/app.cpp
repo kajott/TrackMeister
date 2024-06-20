@@ -559,20 +559,12 @@ void Application::draw(float dt) {
         if (trackValid()) {
             m_renderer.text(m_trackX, m_trackY, float(m_trackTextSize), m_track, 0u, m_config.infoTrackColor);
         }
-        if (!m_filename.empty()) {
-            float x = m_renderer.text(float(m_infoKeyX), float(m_infoFilenameY), float(m_infoTextSize), "File", 0, m_config.infoKeyColor);
-            m_renderer.text(x, float(m_infoFilenameY), float(m_infoTextSize), ":", 0, m_config.infoColonColor);
-            m_renderer.text(float(m_infoValueX), float(m_infoFilenameY), float(m_infoTextSize), m_filename.c_str(), 0, m_config.infoValueColor);
-        }
-        if (!m_artist.empty()) {
-            float x = m_renderer.text(float(m_infoKeyX), float(m_infoArtistY), float(m_infoTextSize), "Artist", 0, m_config.infoKeyColor);
-            m_renderer.text(x, float(m_infoArtistY), float(m_infoTextSize), ":", 0, m_config.infoColonColor);
-            m_renderer.text(float(m_infoValueX), float(m_infoArtistY), float(m_infoTextSize), m_artist.c_str(), 0, m_config.infoValueColor);
-        }
-        if (!m_title.empty()) {
-            float x = m_renderer.text(float(m_infoKeyX), float(m_infoTitleY), float(m_infoTextSize), "Title", 0, m_config.infoKeyColor);
-            m_renderer.text(x, float(m_infoTitleY), float(m_infoTextSize), ":", 0, m_config.infoColonColor);
-            m_renderer.text(float(m_infoValueX), float(m_infoTitleY), float(m_infoTextSize), m_title.c_str(), 0, m_config.infoValueColor);
+        float y = float(m_infoStartY);
+        for (const auto& it : m_info) {
+            float x = m_renderer.text(float(m_infoKeyX), y, float(m_infoTextSize), it.first.c_str(), 0, m_config.infoKeyColor);
+            m_renderer.text(x, y, float(m_infoTextSize), ":", 0, m_config.infoColonColor);
+            m_renderer.text(float(m_infoValueX), y, float(m_infoTextSize), it.second.c_str(), 0, m_config.infoValueColor);
+            y += float(m_infoLineSpacing);
         }
         if (!m_details.empty()) {
             m_renderer.text(float(m_infoKeyX), float(m_infoDetailsY), float(m_infoDetailsSize), m_details.c_str(), 0, m_config.infoDetailsColor);
@@ -745,10 +737,8 @@ void Application::unloadModule() {
         m_mod_data.clear();
     }
     m_fullpath.clear();
-    m_filename.clear();
     m_track[0] = '\0';
-    m_title.clear();
-    m_artist.clear();
+    m_info.clear();
     m_shortDetails.clear();
     m_longDetails.clear();
     m_details.clear();
@@ -794,22 +784,22 @@ bool Application::loadModule(const char* path, bool forScanning) {
         if (newPath.empty()) { dirFail = true; }
         else { m_fullpath.assign(newPath); }
     }
-    m_filename.assign(PathUtil::basename(m_fullpath));
+    std::string filename(PathUtil::basename(m_fullpath));
 
     // load configuration files
     m_config.reset();
-    m_config.load(m_mainIniFile.c_str(), m_filename.c_str());
-    m_config.load(PathUtil::join(PathUtil::dirname(m_fullpath), "tm.ini").c_str(), m_filename.c_str());
+    m_config.load(m_mainIniFile.c_str(), filename.c_str());
+    m_config.load(PathUtil::join(PathUtil::dirname(m_fullpath), "tm.ini").c_str(), filename.c_str());
     m_config.load((m_fullpath + ".tm").c_str());
     m_config.load(m_cmdline);
     updateImages();
 
     // split off track number
-    if (m_config.trackNumberEnabled && hasTrackNumber(m_filename.c_str())) {
-        m_track[0] = m_filename[0];
-        m_track[1] = m_filename[1];
+    if (m_config.trackNumberEnabled && hasTrackNumber(filename.c_str())) {
+        m_track[0] = filename[0];
+        m_track[1] = filename[1];
         m_track[2] = '\0';
-        m_filename.erase(0, 3);
+        filename.erase(0, 3);
     }
 
     // stop here if there's no file to load
@@ -876,8 +866,11 @@ bool Application::loadModule(const char* path, bool forScanning) {
     if (!forScanning) { updateGain(); }
 
     // get info box metadata
-    m_artist.assign(m_mod->get_metadata("artist"));
-    m_title.assign(m_mod->get_metadata("title"));
+    std::string artist(m_mod->get_metadata("artist"));
+    std::string title(m_mod->get_metadata("title"));
+    m_info.emplace_back(std::make_pair("File", filename));
+    if (!artist.empty()) { m_info.emplace_back(std::make_pair("Artist", artist)); }
+    if (!title.empty())  { m_info.emplace_back(std::make_pair("Title",  title)); }
     m_shortDetails.clear();  m_longDetails.clear();
     m_shortDetails.emplace_back(m_mod->get_metadata("type"));
      m_longDetails.emplace_back(m_mod->get_metadata("type_long"));

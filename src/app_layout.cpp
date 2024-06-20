@@ -63,23 +63,11 @@ void Application::updateLayout(bool resetBoxVisibility) {
         m_infoValueX = 0;
         int lineSpacing = toPixels(m_config.infoLineSpacing);
         m_infoEndY = toPixels(m_config.infoMarginY) - lineSpacing;
-        if (!m_filename.empty()) {
-            m_infoEndY += lineSpacing;
-            m_infoFilenameY = m_infoEndY;
-            m_infoValueX = std::max(m_infoValueX, toPixels(m_config.infoKeyPaddingX) + textWidth(m_infoTextSize, "File:"));
-            m_infoEndY += m_infoTextSize;
-        }
-        if (!m_artist.empty()) {
-            m_infoEndY += lineSpacing;
-            m_infoArtistY = m_infoEndY;
-            m_infoValueX = std::max(m_infoValueX, toPixels(m_config.infoKeyPaddingX) + textWidth(m_infoTextSize, "Artist:"));
-            m_infoEndY += m_infoTextSize;
-        }
-        if (!m_title.empty()) {
-            m_infoEndY += lineSpacing;
-            m_infoTitleY = m_infoEndY;
-            m_infoValueX = std::max(m_infoValueX, toPixels(m_config.infoKeyPaddingX) + textWidth(m_infoTextSize, "Title:"));
-            m_infoEndY += m_infoTextSize;
+        m_infoStartY = m_infoEndY + lineSpacing;
+        m_infoLineSpacing = m_infoTextSize + lineSpacing;
+        for (const auto& it : m_info) {
+            m_infoValueX = std::max(m_infoValueX, toPixels(m_config.infoKeyPaddingX) + textWidth(m_infoTextSize, (it.first + ":").c_str()));
+            m_infoEndY += m_infoLineSpacing;
         }
         if ((!m_shortDetails.empty() && !m_longDetails.empty()) || !m_details.empty()) {
             m_infoEndY += lineSpacing;
