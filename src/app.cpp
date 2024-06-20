@@ -870,8 +870,8 @@ bool Application::loadModule(const char* path, bool forScanning) {
     if (!forScanning) { updateGain(); }
 
     // get info box metadata
-    std::string artist(m_mod->get_metadata("artist"));
-    std::string title(m_mod->get_metadata("title"));
+    std::string artist(m_config.artist.empty() ? m_mod->get_metadata("artist") : m_config.artist);
+    std::string title (m_config.title.empty()  ? m_mod->get_metadata("title")  : m_config.title);
     if (!m_config.autoHideFileName || (artist.empty() && title.empty())) {
         if (m_config.hideFileExt) {
             if (isOldModPrefix(filename.c_str())) {

@@ -229,6 +229,16 @@ const ConfigItem g_ConfigItems[] = { {
         [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.autoHideFileName); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.autoHideFileName, s), s); }
     }, {
+        false, "artist                     ",
+        "override artist info from the module with a custom string",
+        [] (const Config& cfg) -> std::string { return cfg.artist; },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { (void)ctx; cfg.artist.assign(s); }
+    }, {
+        false, "title                      ",
+        "override title info from the module with a custom string",
+        [] (const Config& cfg) -> std::string { return cfg.title; },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { (void)ctx; cfg.title.assign(s); }
+    }, {
         false, "info margin X              ",
         "outer left margin inside the info bar",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.infoMarginX); },

@@ -89,6 +89,8 @@ struct Config {
     bool     trackNumberEnabled       = true;         //!< whether to extract and display the track number from the filename; used if the filename starts with two digits followed by a dash (-), underscore (_) or space
     bool     hideFileExt              = false;        //!< whether to remove the file extension from the filename in the info bar
     bool     autoHideFileName         = false;        //!< whether to hide the filename completely if title and/or artist information is available
+    std::string artist;                               //!< override artist info from the module with a custom string
+    std::string title;                                //!< override title info from the module with a custom string
     int      infoMarginX              = 16;           //!< outer left margin inside the info bar
     int      infoMarginY              = 8;            //!< upper and lower margin inside the info bar
     int      infoTrackTextSize        = 233;          //!< text size of the track number
