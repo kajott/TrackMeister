@@ -119,7 +119,7 @@ static const char* fsSrc =
 "\n" "    if (vMode == 1u) {  // MSDF text mode"
 "\n" "        vec3 s = texture(uTex, vTC).rgb;"
 "\n" "        d = max(min(s.r, s.g), min(max(s.r, s.g), s.b)) - 0.5;"
-"\n" "        d /= fwidth(d) * 1.25;"
+"\n" "        d /= fwidth(d);"
 "\n" "    } else if (vMode == 0u) {  // box mode"
 "\n" "        vec2 p = abs(vTC) - vSize.xy;"
 "\n" "        d = (min(p.x, p.y) > (-vSize.z))"
@@ -509,8 +509,8 @@ float TextBoxRenderer::text(float x, float y, float size, const char* text, uint
                             x + g->pos.x1 * size, y + g->pos.y1 * size);
             v[0].color = v[1].color = colorUpper;
             v[2].color = v[3].color = colorLower;
-            v[0].br[0] = v[1].br[0] = v[2].br[0] = v[3].br[0] = msdf ? offset         : 0.5f;
-            v[0].br[1] = v[1].br[1] = v[2].br[1] = v[3].br[1] = msdf ? (1.33f / blur) : 1.0f;
+            v[0].br[0] = v[1].br[0] = v[2].br[0] = v[3].br[0] = msdf ? offset        : 0.5f;
+            v[0].br[1] = v[1].br[1] = v[2].br[1] = v[3].br[1] = msdf ? (1.0f / blur) : 1.0f;
             v[0].tc[0] = g->tc.x0;  v[0].tc[1] = g->tc.y0;
             v[1].tc[0] = g->tc.x1;  v[1].tc[1] = g->tc.y0;
             v[2].tc[0] = g->tc.x0;  v[2].tc[1] = g->tc.y1;
