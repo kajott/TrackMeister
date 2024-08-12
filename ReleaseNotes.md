@@ -1,3 +1,12 @@
+# 1.2.1
+
+Another small release:
+- updated to libopenmpt 0.7.9 with several fixes - see [here](https://lib.openmpt.org/libopenmpt/2024/07/21/security-updates-0.7.9-0.6.18-0.5.32-0.4.44/)
+- some changes regarding font rendering
+  - flickering / shimmering in scrolling info texts and missing lines in small texts should now be greatly reduced
+  - caveat: slightly "thicker" fonts
+
+
 # 1.2.0
 
 Just a service release to get the changes from the last few months out the door:
