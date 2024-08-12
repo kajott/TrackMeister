@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 # SPDX-FileCopyrightText: 2023-2024 Martin J. Fiedler <keyj@emphy.de>
 # SPDX-License-Identifier: MIT
-import io
 import json
+import os
+import subprocess
+import tempfile
 from PIL import Image, ImageOps
 
 
@@ -72,9 +74,9 @@ class MultiFontAtlas:
         for font in self.fonts:
             img.paste(font.img, font.atlas_pos)
         if ShowAtlas: img.show()
-        png = io.BytesIO()
-        img.save(png, format='png', optimize=True)
-        return png.getvalue()
+        pngfile = tempfile.mktemp(".png", "convert_font-")
+        img.save(pngfile, format='png', optimize=True)
+        return pngfile
 
 
 class Font:
@@ -166,8 +168,23 @@ class BitmapFont(Font):
 
 if __name__ == "__main__":
     atlas = load_fonts()
-    png = atlas.get_png()
+    pngfile = atlas.get_png()
 
+    try:
+        subprocess.run(["optipng", "-nx", "-o7", "-strip", "all", pngfile], check=True)
+    except (EnvironmentError, subprocess.CalledProcessError) as e:
+        print("WARNING: failed to run optipng:", e)
+    try:
+        subprocess.run(["advpng", "-z4", pngfile], check=True)
+    except (EnvironmentError, subprocess.CalledProcessError) as e:
+        print("WARNING: failed to run advpng:", e)
+
+    with open(pngfile, 'rb') as f:
+        png = f.read()
+    try: os.unlink(pngfile)
+    except EnvironmentError: pass
+
+    print("generating font_data.cpp ...")
     with open("font_data.cpp", 'w') as f:
         f.write('// This file has been generated automatically, DO NOT EDIT!\n\n')
         f.write('#include "font_data.h"\n\n')
@@ -207,3 +224,4 @@ if __name__ == "__main__":
             f.write(comma + '\n    ' + ','.join(f"0x{b:02X}" for b in png[pos : pos + BPL]))
             comma = ","
         f.write('\n};\n\n} // namespace FontData\n')
+    print("done.")

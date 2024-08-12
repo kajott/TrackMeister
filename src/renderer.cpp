@@ -258,7 +258,7 @@ bool TextBoxRenderer::init() {
     glUseProgram(m_prog);
     glUniform1i(glGetUniformLocation(m_prog, "uBitmap"), 1);
 
-    m_fontTex = loadTexture(static_cast<const void*>(FontData::TexData), FontData::TexDataSize, 3, false);
+    m_fontTex = loadTexture(static_cast<const void*>(FontData::TexData), FontData::TexDataSize, 3, true);
     if (!m_fontTex) { m_error = "failed to load and decode the font texture"; return false; }
 
     glGenSamplers(1, &m_sampler);

@@ -631,6 +631,21 @@ void Application::draw(float dt) {
     // helper for measuring a font's line height
     // m_renderer.text(0,0, 1000, "1234567890", 0, 0xFFFFFFFF);
 
+    #if 0  // helper screen for font rendering quality assessment
+        auto textScaleDemo = [&] (int size, int sizeStep, int x, uint8_t align) {
+            int y = 0;
+            char line[80];
+            while (y < m_screenSizeY) {
+                sprintf(line, "This is text in font size %d.", size);
+                m_renderer.text(float(x), float(y), float(size), line, align);
+                y += int(size * 1.2f + 0.5f);
+                size += sizeStep;
+            }
+        };
+        textScaleDemo(1, 1, 10, 0);
+        textScaleDemo(60, 20, m_screenSizeX - 10, Align::Right);
+    #endif
+
     // done
     m_renderer.flush();
 }
