@@ -34,6 +34,11 @@ const ConfigItem g_ConfigItems[] = { {
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.windowHeight); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.windowHeight, s), s); }
     }, {
+        false, "alpha gamma                ",
+        "fake gamma-correct rendering by applying gamma to the alpha channel; higher values = thicker and less aliasing for bright-on-dark text",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatFloat(cfg.alphaGamma); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseFloat(cfg.alphaGamma, s), s); }
+    }, {
         true, "sample rate                ",
         "audio sampling rate",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.sampleRate); },

@@ -32,6 +32,7 @@ class TextBoxRenderer {
     unsigned m_vbo;
     unsigned m_ibo;
     unsigned m_prog;
+    unsigned m_locInvAlphaGamma;
     unsigned m_tex;
     unsigned m_fontTex;
     const FontData::Font *m_currentFont;
@@ -65,6 +66,7 @@ public:
     void shutdown();
     void viewportChanged();
     void flush();
+    void setAlphaGamma(float gamma);
 
     inline const char* error()  const { return m_error; }
     inline int viewportWidth()  const { return m_vpWidth; }

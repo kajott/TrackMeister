@@ -42,6 +42,7 @@ struct Config {
     bool     fullscreen               = false;        //!< whether to run in fullscreen mode
     int      windowWidth              = 1920;         //!< initial window width  in non-fullscreen mode, in pixels
     int      windowHeight             = 1080;         //!< initial window height in non-fullscreen mode, in pixels
+    float    alphaGamma               = 2.2f;         //!< fake gamma-correct rendering by applying gamma to the alpha channel; higher values = thicker and less aliasing for bright-on-dark text
 
     int      sampleRate               = 48000;        //!< audio sampling rate
     int      audioBufferSize          = 512;          //!< size of the audio buffer, in samples; if there are dropouts, try doubling this value

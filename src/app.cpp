@@ -65,6 +65,7 @@ int Application::init(int argc, char* argv[]) {
     }
     m_defaultLogoTex = m_renderer.loadTexture(LogoData, LogoDataSize, 1, true, &m_defaultLogoSize);
     updateImages();
+    m_renderer.setAlphaGamma(m_config.alphaGamma);
 
     // populate playable extension list
     m_playableExts.clear();
@@ -812,6 +813,7 @@ bool Application::loadModule(const char* path, bool forScanning) {
     m_config.load((m_fullpath + ".tm").c_str());
     m_config.load(m_cmdline);
     updateImages();
+    m_renderer.setAlphaGamma(m_config.alphaGamma);
 
     // split off track number
     if (m_config.trackNumberEnabled && hasTrackNumber(filename.c_str())) {

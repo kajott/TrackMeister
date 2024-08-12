@@ -113,6 +113,7 @@ static const char* fsSrc =
 "\n" "flat in uint vMode;"
 "\n" "uniform sampler2D uTex;"
 "\n" "uniform sampler2D uBitmap;"
+"\n" "uniform float uInvAlphaGamma;"
 "\n" "layout(location=0) out vec4 outColor;"
 "\n" "void main() {"
 "\n" "    float d = 0.;"
@@ -132,7 +133,7 @@ static const char* fsSrc =
 "\n" "    } else {  // normal texture mode"
 "\n" "        outColor = texture(uTex, vTC);  return;"
 "\n" "    }"
-"\n" "    outColor = vec4(vColor.rgb, vColor.a * clamp((d - vBR.x) * vBR.y + 0.5, 0.0, 1.0));"
+"\n" "    outColor = vec4(vColor.rgb, vColor.a * pow(clamp((d - vBR.x) * vBR.y + 0.5, 0.0, 1.0), uInvAlphaGamma));"
 "\n" "}"
 "\n";
 
@@ -257,6 +258,8 @@ bool TextBoxRenderer::init() {
     glDeleteShader(vs);
     glUseProgram(m_prog);
     glUniform1i(glGetUniformLocation(m_prog, "uBitmap"), 1);
+    m_locInvAlphaGamma = glGetUniformLocation(m_prog, "uInvAlphaGamma");
+    glUniform1f(m_locInvAlphaGamma, 1.0f);
 
     m_fontTex = loadTexture(static_cast<const void*>(FontData::TexData), FontData::TexDataSize, 3, true);
     if (!m_fontTex) { m_error = "failed to load and decode the font texture"; return false; }
@@ -277,6 +280,11 @@ bool TextBoxRenderer::init() {
     m_currentFont = &FontData::Fonts[0];
     m_error = "success";
     return true;
+}
+
+void TextBoxRenderer::setAlphaGamma(float gamma) {
+    glUseProgram(m_prog);
+    glUniform1f(m_locInvAlphaGamma, 1.0f / gamma);
 }
 
 void TextBoxRenderer::viewportChanged() {
