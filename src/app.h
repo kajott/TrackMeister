@@ -167,6 +167,7 @@ private:  // business logic
     void toast(const char* msg);
     inline void toast(const std::string& msg) { toast(msg.c_str()); }
     void toastVersion();
+    void toastPosition();
     void fadeOut();
     void startScan(const char* specificFile=nullptr);
     void runScan();

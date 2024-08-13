@@ -45,6 +45,7 @@ The following other controls are available:
 | Mouse Wheel | manually scroll through the metadata bar (stops autoscrolling)
 | **A** | stop / resume autoscrolling
 | **F** | slowly fade out the song
+| **P** | show the current track position in seconds (hold key to update continuously)
 | **V** | show the TrackMeister and libopenmpt version numbers
 | **F5** | reload the current module and the application's configuration
 | **F11** | toggle fullscreen mode
@@ -154,6 +155,7 @@ Options can also be specified on the command line, in the syntax "`+key=value`" 
 - Listen to the tracks again and set track-specific options in `tm.ini`. For each track you want to set special options for, you create a new section based on the running order, e.g. `[08*]` for the options of the file in the aforementioned example. <br> Typical per-track options are:
   - If the track shall loop, set `loop = true`. If you also set `fade out after loop = true`, the track will also fade out at this point.
   - If the track shall fade out at some position, set `fade out at =` to the number of seconds after which fading shall start (e.g. `fade out at = 123` fades out after 123 seconds, i.e. 2 minutes and 3 seconds).
+    - To determine the proper value, just pause playback at the position where you want the fade to start (using the **Space** key) and press the **P** key to display the position. The raw value in seconds can be directly used for the `fade out at` option.
   - If the track shall be played in mono, set `stereo separation = 0`.
   - If the track shall be played with some volume ramping, set `volume ramping = 10`; if it shall not use ramping, set `volume ramping = 0`.
   - You can also override the track's title/artist metadata by setting it manually, e.g. `title = Professional Tracker` and `artist = H0ffman feat. Daytripper`.

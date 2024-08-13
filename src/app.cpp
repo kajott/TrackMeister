@@ -256,6 +256,9 @@ void Application::handleKey(int key, bool ctrl, bool shift, bool alt) {
         case 'V':  // show version
             toastVersion();
             break;
+        case 'P':  // show position
+            toastPosition();
+            break;
         case 'F':  // start fade-out
             fadeOut();
             break;
@@ -383,6 +386,15 @@ void Application::toastVersion() {
         ver.append(" Debug");
     #endif
     toast(ver);
+}
+
+void Application::toastPosition() {
+    if (!m_mod) { return; }
+    char line[80];
+    AudioMutexGuard mtx_(m_sys);
+    auto sec = m_mod->get_position_seconds();
+    sprintf(line, "current track position: %d:%02d (%.2f seconds)", int(sec) / 60, int(sec) % 60, sec);
+    toast(line);
 }
 
 void Application::updateImage(ExternalImage& img, const std::string& path, int channels, const char* what) {
