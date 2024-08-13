@@ -1,3 +1,3 @@
 #pragma once
 constexpr inline const char* g_ProductName    = "TrackMeister";
-constexpr inline const char* g_ProductVersion = "1.2.1";
+constexpr inline const char* g_ProductVersion = "1.2.2~pre";
