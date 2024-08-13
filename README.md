@@ -135,6 +135,44 @@ Another example is this INI file for a typical "random module jukebox" setup:
 Options can also be specified on the command line, in the syntax "`+key=value`" or "`+key:value`". No extra spaces are allowed around the value. Command-line options take precedence over all configuration files.
 
 
+## FAQ
+
+**Q:** TrackMeister quits with an OpenGL error message or runs extremely slowly on Windows. What can I do? <br>
+**A:** This is most likely due to an improperly installed graphics driver. Windows Update automatically installs drivers, but those are often incomplete and sometimes lack OpenGL support. Please install the proper driver from [AMD](https://www.amd.com/en/support/download/drivers.html), [Intel](https://www.intel.com/content/www/us/en/support/detect.html) or [NVidia](https://www.nvidia.com/en-us/drivers/), depending on your hardware.
+
+**Q:** Can I run TrackMeister on a Raspberry Pi? <br>
+**A:** Turns out, you can! You will need a Raspberry Pi 4 or 5 and some magical incantations to run it, but it's possible. You need to paste the following line in a terminal: <br>
+`    export MESA_GL_VERSION_OVERRIDE=3.3 MESA_GLSL_VERSION_OVERRIDE=330`
+<br> and then run TrackMeister from there (e.g. `./tm`).
+
+**Q:** OK, so what do I need to do to host a demoparty competition with TrackMeister? <br>
+**A:** The most basic flow is as follows:
+- Put `tm.exe` and the contestant's module files into a directory.
+- Create a `tm.ini` file with general options in the `[TM]` section. The chapter above has a nice example to get started with.
+- Listen through the files (simply double-clicking `tm.exe` should suffice). Make mental or written notes about the play order as you want to have it in the compo.
+- Rename the module files by prepending exactly two digits with the running order number, followed by a space, underscore or dash. For example, if you want to play `pt.mod` at position 8 in the compo, it becomes `08_pt.mod`, `08 pt.mod` or `08-pt.mod`.
+- Listen to the tracks again and set track-specific options in `tm.ini`. For each track you want to set special options for, you create a new section based on the running order, e.g. `[08*]` for the options of the file in the aforementioned example. <br> Typical per-track options are:
+  - If the track shall loop, set `loop = true`. If you also set `fade out after loop = true`, the track will also fade out at this point.
+  - If the track shall fade out at some position, set `fade out at =` to the number of seconds after which fading shall start (e.g. `fade out at = 123` fades out after 123 seconds, i.e. 2 minutes and 3 seconds).
+  - If the track shall be played in mono, set `stereo separation = 0`.
+  - If the track shall be played with some volume ramping, set `volume ramping = 10`; if it shall not use ramping, set `volume ramping = 0`.
+  - You can also override the track's title/artist metadata by setting it manually, e.g. `title = Professional Tracker` and `artist = H0ffman feat. Daytripper`.
+  - If the instrument/sample texts in the sidebar are utterly uninteresting, you can hide the sidebar completely with `meta enabled = false`.
+  - In general, you can override almost every option that TrackMeister has! Custom colors per entry? No problem. Or even an image? Sure. Have a look into `tm_default.ini` for a list of all possible settings.
+  - When tuning per-track options, it can be useful to put TrackMeister into windowed mode if it was running fullscreen (**F11**), have an editor with `tm.ini` open and use the **F5** key to re-load the configuration and re-start the currently playing track.
+  - Do **not** set a per-track `gain` (volume) yet; we're going to use TrackMeister's assistance for that!
+- When done with the per-track configuration, navigate to track 1 and press **Ctrl**+**Shift**+**L**. This will start loudness measurement of the entire playlist. After restarting TrackMeister, the tracks should play a bit quieter on average, but without loudness jumps between tracks.
+  - If you really want to fine-tune the volume for each track, this is the time. Use the `gain =` option with the desired adjustment in decibels.
+- For the compo itself, make sure that the options `autoplay = false` is set, and that `auto advance` is *not* set (or set to `false` too).
+- During the compo:
+  - Show the first entry's slide on the bigscreen. In the meantime, run `tm.exe`; it should start with entry #1 loaded, but in paused state.
+  - Switch the bigscreen over to the TrackMeister computer and press **Space** to start playback.
+  - After the track is finished, switch over to the bigscreen again.
+  - While switching the bigscreen from entry #1's slide to entry #2, also press **PageDown** on TrackMeister to cue the next track.
+  - Switch the bigscreen over to the TrackMeister computer and press **Space** to start playback.
+  - Rinse and repeat.
+
+
 ## Building
 
 - prerequisites:
