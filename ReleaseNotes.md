@@ -1,3 +1,9 @@
+# 1.2.2
+
+A quick service release just before [some specific party](https://2024.evoke.eu), to make the compo organizer's life a bit easier:
+- new key binding: **P** shows the current track time in seconds; useful to determine the values for the `fade out at` option
+
+
 # 1.2.1
 
 Another small release:
