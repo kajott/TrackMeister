@@ -124,6 +124,11 @@ const ConfigItem g_ConfigItems[] = { {
         [] (const Config& cfg) -> std::string { return ConfigItem::formatFloat(cfg.maxScrollDuration); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseFloat(cfg.maxScrollDuration, s), s); }
     }, {
+        false, "scroll delay               ",
+        "delay (in seconds) before autoscrolling begins, and ends early before the track end",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatFloat(cfg.scrollDelay); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseFloat(cfg.scrollDelay, s), s); }
+    }, {
         true, "font                       ",
         "font to use for all displays: 'inconsolata' (default), 'iosevka', 'topaz'/'topaz1200'/'topaz500', 'pc' (note: all font sizes will be rounded down to an integer multiple of 16 pixels if a bitmap font is used)",
         [] (const Config& cfg) -> std::string { return cfg.font; },

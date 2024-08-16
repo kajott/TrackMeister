@@ -482,7 +482,7 @@ void Application::draw(float dt) {
 
     // handle animations
     if (m_metaTextAutoScroll) {
-        setMetadataScroll(m_metaTextMinY + (m_metaTextMaxY - m_metaTextMinY) * m_position / m_scrollDuration);
+        setMetadataScroll(m_metaTextMinY + (m_metaTextMaxY - m_metaTextMinY) * (m_position - m_config.scrollDelay) / m_scrollDuration);
     }
     m_metaTextY += (1.0f - std::exp2f(scrollAnimationSpeed * dt)) * (m_metaTextTargetY - m_metaTextY);
 
@@ -1007,7 +1007,7 @@ bool Application::loadModule(const char* path, bool forScanning) {
     // done!
     m_sys.setWindowTitle((PathUtil::basename(m_fullpath) + " - " + baseWindowTitle).c_str());
     m_duration = std::max(float(m_mod->get_duration_seconds()), 0.001f);
-    m_scrollDuration = std::min(float(m_mod->get_duration_seconds()), m_config.maxScrollDuration);
+    m_scrollDuration = std::min(float(m_mod->get_duration_seconds()) - m_config.scrollDelay, m_config.maxScrollDuration) - m_config.scrollDelay;
     m_metaTextAutoScroll = m_config.autoScrollEnabled;
     m_fadeActive = m_autoFadeInitiated = m_endReached = m_cancelScanning = false;
     m_scanning = forScanning;
