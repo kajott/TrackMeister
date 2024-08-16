@@ -584,7 +584,14 @@ void Application::draw(float dt) {
             y += float(m_infoLineSpacing);
         }
         if (!m_details.empty()) {
-            m_renderer.text(float(m_infoKeyX), float(m_infoDetailsY), float(m_infoDetailsSize), m_details.c_str(), 0, m_config.infoDetailsColor);
+            if (m_config.showTime) {
+                char suffix[20];
+                int sec = int(m_position);
+                sprintf(suffix, " (%d:%02d)", sec / 60, sec % 60);
+                m_renderer.text(float(m_infoKeyX), float(m_infoDetailsY), float(m_infoDetailsSize), (m_details + suffix).c_str(), 0, m_config.infoDetailsColor);
+            } else {
+                m_renderer.text(float(m_infoKeyX), float(m_infoDetailsY), float(m_infoDetailsSize), m_details.c_str(), 0, m_config.infoDetailsColor);
+            }
         }
         if (m_progSize > 0) {
             if (m_progOuterDXY > 0) {

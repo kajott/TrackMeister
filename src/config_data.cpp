@@ -224,6 +224,11 @@ const ConfigItem g_ConfigItems[] = { {
         [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.trackNumberEnabled); },
         [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.trackNumberEnabled, s), s); }
     }, {
+        false, "show time                  ",
+        "show current time in track at the end of the details line",
+        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.showTime); },
+        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.showTime, s), s); }
+    }, {
         false, "hide file ext              ",
         "whether to remove the file extension from the filename in the info bar",
         [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.hideFileExt); },

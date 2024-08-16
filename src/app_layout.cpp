@@ -150,7 +150,7 @@ void Application::updateLayout(bool resetBoxVisibility) {
                 }
             }
             // stop if it fits
-            if (textWidth(m_infoDetailsSize, m_details.c_str()) <= maxWidth) { break; }
+            if (textWidth(m_infoDetailsSize, (m_details + (m_config.showTime ? " (0:00)" : "")).c_str()) <= maxWidth) { break; }
         }
     }
 
