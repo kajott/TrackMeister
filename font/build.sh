@@ -4,7 +4,7 @@ cd "$(dirname "$0")"
 ATLAS_GEN_REPO=https://github.com/Chlumsky/msdf-atlas-gen
 ATLAS_GEN_BUILDDIR=msdf-atlas-gen/build
 ATLAS_GEN_BINARY=$ATLAS_GEN_BUILDDIR/bin/msdf-atlas-gen
-ATLAS_GEN_OPTS="-charset charset.txt -type msdf -format png -potr -size 32 -pxrange 8"
+ATLAS_GEN_OPTS="-charset charset.txt -type msdf -format png -potr -size 32 -pxrange 8 -outerpxpadding 2"
 
 FONT1_NAME=Inconsolata
 FONT1_FILE=${FONT1_NAME}-Regular.ttf

@@ -118,7 +118,7 @@ static const char* fsSrc =
 "\n" "float sampleMSDF(in vec2 tc) {"
 "\n" "    vec3 s = texture(uTex, tc).rgb;"
 "\n" "    float d = max(min(s.r, s.g), min(max(s.r, s.g), s.b)) - 0.5;"
-"\n" "    return d / fwidth(d);"
+"\n" "    return clamp(d / fwidth(d), -0.5, 0.5);"
 "\n" "}"
 "\n" "void main() {"
 "\n" "    float d = 0.;"
@@ -518,6 +518,7 @@ float TextBoxRenderer::text(float x, float y, float size, const char* text, uint
     bool msdf = !m_currentFont->bitmapHeight;
     while ((g = getGlyph(nextCodepoint(text))) != 0u) {
         if (!g->space) {
+            float aaSizeFactor = std::min(1.0f, 10.0f / size) / size;
             Vertex* v = newVertices(msdf ? RenderMode::MSDFText : RenderMode::BitmapText,
                             x + g->pos.x0 * size, y + g->pos.y0 * size,
                             x + g->pos.x1 * size, y + g->pos.y1 * size);
@@ -525,8 +526,8 @@ float TextBoxRenderer::text(float x, float y, float size, const char* text, uint
             v[2].color = v[3].color = colorLower;
             v[0].br[0] = v[1].br[0] = v[2].br[0] = v[3].br[0] = msdf ? offset        : 0.5f;
             v[0].br[1] = v[1].br[1] = v[2].br[1] = v[3].br[1] = msdf ? (1.0f / blur) : 1.0f;
-            v[0].size[0] = v[1].size[0] = v[2].size[0] = v[3].size[0] = (g->tc.x1 - g->tc.x0) / ((g->pos.x1 - g->pos.x0) * size);
-            v[0].size[1] = v[1].size[1] = v[2].size[1] = v[3].size[1] = (g->tc.y1 - g->tc.y0) / ((g->pos.y1 - g->pos.y0) * size);
+            v[0].size[0] = v[1].size[0] = v[2].size[0] = v[3].size[0] = (g->tc.x1 - g->tc.x0) / (g->pos.x1 - g->pos.x0) * aaSizeFactor;
+            v[0].size[1] = v[1].size[1] = v[2].size[1] = v[3].size[1] = (g->tc.y1 - g->tc.y0) / (g->pos.y1 - g->pos.y0) * aaSizeFactor;
             v[0].tc[0] = g->tc.x0;  v[0].tc[1] = g->tc.y0;
             v[1].tc[0] = g->tc.x1;  v[1].tc[1] = g->tc.y0;
             v[2].tc[0] = g->tc.x0;  v[2].tc[1] = g->tc.y1;
