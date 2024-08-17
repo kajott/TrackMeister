@@ -115,12 +115,18 @@ static const char* fsSrc =
 "\n" "uniform sampler2D uBitmap;"
 "\n" "uniform float uInvAlphaGamma;"
 "\n" "layout(location=0) out vec4 outColor;"
+"\n" "float sampleMSDF(in vec2 tc) {"
+"\n" "    vec3 s = texture(uTex, tc).rgb;"
+"\n" "    float d = max(min(s.r, s.g), min(max(s.r, s.g), s.b)) - 0.5;"
+"\n" "    return d / fwidth(d);"
+"\n" "}"
 "\n" "void main() {"
 "\n" "    float d = 0.;"
 "\n" "    if (vMode == 1u) {  // MSDF text mode"
-"\n" "        vec3 s = texture(uTex, vTC).rgb;"
-"\n" "        d = max(min(s.r, s.g), min(max(s.r, s.g), s.b)) - 0.5;"
-"\n" "        d /= fwidth(d);"
+"\n" "        d = 0.25 * (sampleMSDF(vTC + vSize.xy * vec2(-0.375, -0.125))"
+"\n" "                 +  sampleMSDF(vTC + vSize.xy * vec2(+0.125, -0.375))"
+"\n" "                 +  sampleMSDF(vTC + vSize.xy * vec2(-0.125, +0.375))"
+"\n" "                 +  sampleMSDF(vTC + vSize.xy * vec2(+0.375, +0.125)));"
 "\n" "    } else if (vMode == 0u) {  // box mode"
 "\n" "        vec2 p = abs(vTC) - vSize.xy;"
 "\n" "        d = (min(p.x, p.y) > (-vSize.z))"
@@ -519,6 +525,8 @@ float TextBoxRenderer::text(float x, float y, float size, const char* text, uint
             v[2].color = v[3].color = colorLower;
             v[0].br[0] = v[1].br[0] = v[2].br[0] = v[3].br[0] = msdf ? offset        : 0.5f;
             v[0].br[1] = v[1].br[1] = v[2].br[1] = v[3].br[1] = msdf ? (1.0f / blur) : 1.0f;
+            v[0].size[0] = v[1].size[0] = v[2].size[0] = v[3].size[0] = (g->tc.x1 - g->tc.x0) / ((g->pos.x1 - g->pos.x0) * size);
+            v[0].size[1] = v[1].size[1] = v[2].size[1] = v[3].size[1] = (g->tc.y1 - g->tc.y0) / ((g->pos.y1 - g->pos.y0) * size);
             v[0].tc[0] = g->tc.x0;  v[0].tc[1] = g->tc.y0;
             v[1].tc[0] = g->tc.x1;  v[1].tc[1] = g->tc.y0;
             v[2].tc[0] = g->tc.x0;  v[2].tc[1] = g->tc.y1;
