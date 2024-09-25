@@ -1,3 +1,17 @@
+# 1.3.0
+
+This release packs together all the small changes and (literal!) last-minute fixes that happened at Evoke, and a few others:
+- updated to libopenmpt 0.7.10 with several fixes - see [here](https://lib.openmpt.org/libopenmpt/2024/09/22/security-update-0.6.19-releases-0.7.10-0.5.33-0.4.45/)
+- more font rendering changes
+  - small fonts are now *way* more readable
+  - aliasing in scrolling texts is now really minimal
+- added option to permanently the currently elapsed track time in the info bar: `show time = true`
+- metadata auto-scrolling now only starts 10 seconds into the track and stops 10 seconds before the end, at latest
+  - makes it easier for the audience to read longer scrolltexts
+  - the delay can be adjusted with the `scroll delay` option (setting it to zero restores the old behavior)
+
+
+
 # 1.2.2
 
 A quick service release just before [some specific party](https://2024.evoke.eu), to make the compo organizer's life a bit easier:
