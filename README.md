@@ -31,7 +31,7 @@ The following other controls are available:
 
 | Input | Action |
 |-------|--------|
-| **Q** or **Alt+F4** | quit the application
+| **Q** or **F10** | quit the application
 | **Esc** | cancel current operation: <br> - stops loudness scan if one is running, <br> - pauses audio if it's playing, <br> - quits the application after pressing _twice_ otherwise
 | **Space** | pause / continue playback
 | **Tab** | show / hide the info and metadata bars

@@ -203,7 +203,8 @@ void Application::handleKey(int key, bool ctrl, bool shift, bool alt) {
     (void)alt;
     if (key != 27) { m_escapePressedOnce = false; }
     switch (key) {
-        case 'Q':  // quit immediately
+        case 'Q':  // [Q] quit immediately
+        case 0xFA:  // [F10] same
             m_sys.quit();
             break;
         case 27:  // [Esc] cancel whatever is currently going on
@@ -262,6 +263,9 @@ void Application::handleKey(int key, bool ctrl, bool shift, bool alt) {
             break;
         case 'F':  // start fade-out
             fadeOut();
+            break;
+        case 0xF1:  // [F1] toggle help window
+            m_showHelp = !m_showHelp;
             break;
         case 0xF5: {  // [F5] reload module
             std::string savePath(m_fullpath);
@@ -671,10 +675,10 @@ void Application::draw(float dt) {
     #endif
 
     // handle ImGui stuff
+    if (m_showHelp) { uiHelpWindow(); }
     #ifndef NDEBUG
         if (m_showDemo) { ImGui::ShowDemoWindow(&m_showDemo); }
     #endif
-
 
     // done
     m_renderer.flush();
