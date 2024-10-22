@@ -227,6 +227,7 @@ add_executable (tm
     src/main_sdl2.cpp
     src/app.cpp
     src/app_layout.cpp
+    src/app_ui.cpp
     src/config.cpp
     src/config_data.cpp
     src/textarea.cpp

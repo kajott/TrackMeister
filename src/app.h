@@ -128,6 +128,7 @@ class Application {
 
     // debug/config UI
     bool m_showDemo = false;
+    bool m_showHelp = false;
 
 public:  // interface from SystemInterface
     explicit inline Application(SystemInterface& sys) : m_sys(sys), m_metadata(m_renderer) {}
@@ -175,4 +176,5 @@ private:  // business logic
     void startScan(const char* specificFile=nullptr);
     void runScan();
     void stopScan();
+    void uiHelpWindow();
 };
