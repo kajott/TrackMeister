@@ -8,3 +8,6 @@
 [submodule "external/lodepng"]
 	path = external/lodepng
 	url = https://github.com/kajott/lodepng
+[submodule "external/imgui"]
+	path = external/imgui
+	url = https://github.com/ocornut/imgui

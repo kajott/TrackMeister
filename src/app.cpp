@@ -17,6 +17,7 @@
 #include <glad/glad.h>
 #include <libopenmpt/libopenmpt.hpp>
 #include <ebur128.h>
+#include "imgui.h"
 
 #include "system.h"
 #include "renderer.h"
@@ -266,6 +267,9 @@ void Application::handleKey(int key, bool ctrl, bool shift, bool alt) {
             std::string savePath(m_fullpath);
             loadModule(savePath.c_str());
             break; }
+        case 0xF9:  // [F9] toggle ImGui demo window
+            m_showDemo = !m_showDemo;
+            break;
         case 0xFB:  // [F11] toggle fullscreen
             m_sys.toggleFullscreen();
             break;
@@ -665,6 +669,12 @@ void Application::draw(float dt) {
         textScaleDemo(1, 1, 10, 0);
         textScaleDemo(60, 20, m_screenSizeX - 10, Align::Right);
     #endif
+
+    // handle ImGui stuff
+    #ifndef NDEBUG
+        if (m_showDemo) { ImGui::ShowDemoWindow(&m_showDemo); }
+    #endif
+
 
     // done
     m_renderer.flush();

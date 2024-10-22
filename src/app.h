@@ -126,6 +126,9 @@ class Application {
     std::string m_toastMessage;
     float m_toastAlpha;
 
+    // debug/config UI
+    bool m_showDemo = false;
+
 public:  // interface from SystemInterface
     explicit inline Application(SystemInterface& sys) : m_sys(sys), m_metadata(m_renderer) {}
 
