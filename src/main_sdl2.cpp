@@ -11,6 +11,9 @@
 
 #include <SDL.h>
 #include <glad/glad.h>
+#include "imgui.h"
+#include "imgui_impl_sdl2.h"
+#include "imgui_impl_opengl3.h"
 
 #include "system.h"
 #include "util.h"
@@ -21,6 +24,7 @@ struct SystemInterfacePrivateData {
     Application* app = nullptr;
     SDL_Window* win = nullptr;
     SDL_GLContext ctx = nullptr;
+    ImGuiIO* io = nullptr;
     SDL_AudioDeviceID audio = 0;
     int sampleRate = 0;
     bool stereo = false;
@@ -131,6 +135,13 @@ void SystemInterface::initVideo(const char* title, bool fullscreen, int windowWi
         fatalError("could not initialize OpenGL", "at least OpenGL 3.3 is required");
     }
 
+    ImGui::CreateContext();
+    m_priv->io = &ImGui::GetIO();
+    m_priv->io->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    m_priv->io->IniFilename = nullptr;
+    ImGui_ImplSDL2_InitForOpenGL(m_priv->win, m_priv->ctx);
+    ImGui_ImplOpenGL3_Init("#version 330");
+
     if (fullscreen) { SDL_ShowCursor(SDL_DISABLE); }
 }
 
@@ -215,6 +226,7 @@ int main(int argc, char* argv[]) {
     while (sys.active()) {
         SDL_Event ev;
         while (SDL_PollEvent(&ev)) {
+            ImGui_ImplSDL2_ProcessEvent(&ev);
             switch (ev.type) {
                 case SDL_KEYDOWN: {
                     uint32_t key = uint32_t(ev.key.keysym.sym);
@@ -236,10 +248,14 @@ int main(int argc, char* argv[]) {
                             else if ((key >= SDLK_F1) && (key <= SDLK_F12)) { key = key - SDLK_F1 + 0xF1; }
                     }
                     auto mods = SDL_GetModState();
-                    app.handleKey(key, !!(mods & KMOD_CTRL), !!(mods & KMOD_SHIFT), !!(mods & KMOD_ALT));
+                    if (!priv.io || !priv.io->WantCaptureKeyboard) {
+                        app.handleKey(key, !!(mods & KMOD_CTRL), !!(mods & KMOD_SHIFT), !!(mods & KMOD_ALT));
+                    }
                     break; }
                 case SDL_MOUSEWHEEL:
-                    app.handleMouseWheel(ev.wheel.y);
+                    if (!priv.io || !priv.io->WantCaptureMouse) {
+                        app.handleMouseWheel(ev.wheel.y);
+                    }
                     break;
                 case SDL_DROPFILE:
                     app.handleDropFile(ev.drop.file);
@@ -262,9 +278,14 @@ int main(int argc, char* argv[]) {
         }   // end of event poll loop
 
         // let the application render the frame
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplSDL2_NewFrame();
+        ImGui::NewFrame();
         Uint64 tNow = SDL_GetPerformanceCounter();
         app.draw(tPrev ? float(double(tNow - tPrev) / double(SDL_GetPerformanceFrequency())) : 0.0f);
         tPrev = tNow;
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         SDL_GL_SwapWindow(priv.win);
     }
 
@@ -275,6 +296,11 @@ int main(int argc, char* argv[]) {
     app.shutdown();
     if (priv.audio) {
         SDL_CloseAudioDevice(priv.audio);
+    }
+    if (priv.io) {
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui_ImplSDL2_Shutdown();
+        ImGui::DestroyContext();
     }
     if (priv.ctx) {
         SDL_GL_MakeCurrent(nullptr, nullptr);

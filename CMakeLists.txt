@@ -237,6 +237,13 @@ add_executable (tm
 )
 add_library (tm_external STATIC
     external/glad/src/glad.c
+    external/imgui/imgui.cpp
+    external/imgui/imgui_demo.cpp
+    external/imgui/imgui_widgets.cpp
+    external/imgui/imgui_tables.cpp
+    external/imgui/imgui_draw.cpp
+    external/imgui/backends/imgui_impl_sdl2.cpp
+    external/imgui/backends/imgui_impl_opengl3.cpp
     external/lodepng/lodepng.cpp
     external/libebur128/ebur128/ebur128.c
     external/openmpt/include/stb_vorbis/stb_vorbis.c  # only ever gets included as a header in libopenmpt itself
@@ -258,6 +265,8 @@ target_include_directories (tm_external PUBLIC
     src
     ${SDL2_INCLUDE_DIRS}
     external/glad/include
+    external/imgui
+    external/imgui/backends
     external/lodepng
     external/libebur128/ebur128
 )
@@ -266,6 +275,7 @@ target_include_directories (tm_external PRIVATE
 )
 if (MSVC)
     target_compile_definitions (tm_external PRIVATE _USE_MATH_DEFINES)
+    set_source_files_properties (external/imgui/backends/imgui_impl_sdl2.cpp PROPERTIES COMPILE_FLAGS -DHAVE_M_PI)
 endif ()
 target_compile_definitions (tm_external PRIVATE
     LODEPNG_NO_COMPILE_ENCODER LODEPNG_NO_COMPILE_DISK
