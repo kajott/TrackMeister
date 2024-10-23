@@ -49,8 +49,9 @@ int Application::init(int argc, char* argv[]) {
     m_mainIniFile.assign(argv[0]);
     PathUtil::dirnameInplace(m_mainIniFile);
     PathUtil::joinInplace(m_mainIniFile, "tm.ini");
-    m_config.load(m_mainIniFile.c_str());
-    m_config.load(m_cmdline);
+    m_globalConfig.load(m_mainIniFile.c_str());
+    m_cmdlineConfig.load(m_cmdline);
+    updateConfig();
 
     // initialize everything
     m_sys.initVideo(baseWindowTitle,
@@ -115,6 +116,13 @@ bool Application::hasTrackNumber(const char* basename) {
     return !!basename
         && isDigit(basename[0]) && isDigit(basename[1])
         && ((basename[2] == '-') || (basename[2] == '_') || (basename[2] == ' '));
+}
+
+void Application::updateConfig() {
+    m_config.reset();
+    m_config.import(m_globalConfig);
+    m_config.import(m_fileConfig);
+    m_config.import(m_cmdlineConfig);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -840,11 +848,16 @@ bool Application::loadModule(const char* path, bool forScanning) {
     std::string filename(PathUtil::basename(m_fullpath));
 
     // load configuration files
-    m_config.reset();
-    m_config.load(m_mainIniFile.c_str(), filename.c_str());
-    m_config.load(PathUtil::join(PathUtil::dirname(m_fullpath), "tm.ini").c_str(), filename.c_str());
-    m_config.load((m_fullpath + ".tm").c_str());
-    m_config.load(m_cmdline);
+    m_dirIniFile = PathUtil::join(PathUtil::dirname(m_fullpath), "tm.ini");
+    m_fileIniFile = m_fullpath + ".tm";
+    m_globalConfig.reset();
+    m_globalConfig.load(m_mainIniFile.c_str());
+    m_globalConfig.load(m_dirIniFile.c_str());
+    m_fileConfig.reset();
+    m_fileConfig.load(m_mainIniFile.c_str(), filename.c_str());
+    m_fileConfig.load(m_dirIniFile.c_str(), filename.c_str());
+    m_fileConfig.load(m_fileIniFile.c_str());
+    updateConfig();
     updateImages();
     m_renderer.setAlphaGamma(m_config.alphaGamma);
 

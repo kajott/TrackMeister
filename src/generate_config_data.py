@@ -3,9 +3,10 @@ import io
 import re
 import sys
 
+uppercase_words = "X Y VU".lower().split()
 def camelCase_to_space_case(x):
     words = ''.join(((' ' + c.lower()) if c.isupper() else c) for c in x).split()
-    return ' '.join((word.upper() if (len(word) < 2) else word) for word in words)
+    return ' '.join((word.upper() if (word in uppercase_words) else word) for word in words)
 
 if __name__ == "__main__":
     try:
@@ -25,6 +26,7 @@ if __name__ == "__main__":
         '[TrackMeister]'
     ]
     name_maxlen = 0
+    flags_maxlen = 0
 
     with open(infile, 'r') as f:
         in_enum, in_config = None, False
@@ -77,17 +79,23 @@ if __name__ == "__main__":
                 (?P<field>  \w+) \s*
                 ( = \s* (?P<default> .*?) )? ;
                 \s* //!< \s*
-                (?P<comment> .*)
+                (?P<comment> .*?)
+                (\s* \[ (?P<flags> .*?) \] )?
+                $
             ''', line, flags=re.X)
             if m:
                 type = m.group('type')
                 field = m.group('field')
+                flags = m.group('flags')
+                flags = {f.strip().capitalize() for f in flags.split(',')} if flags else set()
+                if new_section: flags.add("NewGroup")
                 name = camelCase_to_space_case(field)
                 name_maxlen = max(name_maxlen, len(name))
+                flags_maxlen = max(flags_maxlen, len(flags))
                 if not(type in {'bool', 'int', 'float', 'uint32_t', 'std::string'}) and not(type in enums):
                     print(f"{infile}:{lineno}: invalid type '{type}'", file=sys.stderr)
                 else:
-                    fields.append((new_section, type, field, name, m.group('comment').strip()))
+                    fields.append((flags, type, field, name, m.group('comment').strip()))
                 new_section = False
 
             # end of struct or enum
@@ -102,6 +110,7 @@ if __name__ == "__main__":
         f.write('// DO NOT EDIT! Changes will be overwritten without asking.\n\n')
         f.write('#include <cstdint>\n\n')
         f.write('#include "config.h"\n#include "config_item.h"\n')
+        f.write(f'\nconst int g_ConfigItemMaxNameLength = {name_maxlen};\n')
 
         # write string<->enum mapping tables
         for enum, items in sorted(enums.items()):
@@ -114,7 +123,8 @@ if __name__ == "__main__":
         # write main config item table
         f.write('\nconst ConfigItem g_ConfigItems[] = { {\n')
         first = True
-        for new_section, type, field, name, desc in fields:
+        ordinal = 0
+        for flags, type, field, name, desc in fields:
             if first: first = False
             else: f.write('    }, {\n')
 
@@ -123,23 +133,27 @@ if __name__ == "__main__":
                 desc += " [possible values: " + ", ".join(f"'{e}'" for e in enums[type]) + "]"
 
             # write name and description
-            f.write(f'        {repr(new_section).lower()}, "{name.ljust(name_maxlen)}",\n')
+            ordinal += 1
+            flags = " | ".join("ConfigItem::Flags::" + f for f in flags) or "0"
+            f.write(f'        {ordinal}, {flags},\n')
+            f.write(f'        "{name}",\n')
             desc = desc.replace('"', '\\"')
             f.write(f'        "{desc}",\n')
 
             # write getters and setters
             if type in enums:
                 f.write(f'        [] (const Config& cfg) -> std::string {{ return ConfigItem::formatEnum(static_cast<int>(cfg.{field}), e_{type}); }},\n')
-                f.write(f'        [] (ConfigParserContext& ctx, Config& cfg, const char* s) {{ int value; if (ctx.checkParseResult(ConfigItem::parseEnum(value, s, e_{type}), s)) {{ cfg.{field} = static_cast<{type}>(value); }} }}\n')
+                f.write(f'        [] (ConfigParserContext& ctx, Config& cfg, const char* s) {{ int value; if (ctx.checkParseResult(ConfigItem::parseEnum(value, s, e_{type}), s)) {{ cfg.{field} = static_cast<{type}>(value); }} }},\n')
             elif type == 'std::string':
                 f.write(f'        [] (const Config& cfg) -> std::string {{ return cfg.{field}; }},\n')
-                f.write(f'        [] (ConfigParserContext& ctx, Config& cfg, const char* s) {{ (void)ctx; cfg.{field}.assign(s); }}\n')
+                f.write(f'        [] (ConfigParserContext& ctx, Config& cfg, const char* s) {{ (void)ctx; cfg.{field}.assign(s); }},\n')
             else:
                 type = { "uint32_t": "Color" }.get(type, type.title())
                 f.write(f'        [] (const Config& cfg) -> std::string {{ return ConfigItem::format{type}(cfg.{field}); }},\n')
-                f.write(f'        [] (ConfigParserContext& ctx, Config& cfg, const char* s) {{ ctx.checkParseResult(ConfigItem::parse{type}(cfg.{field}, s), s); }}\n')
+                f.write(f'        [] (ConfigParserContext& ctx, Config& cfg, const char* s) {{ ctx.checkParseResult(ConfigItem::parse{type}(cfg.{field}, s), s); }},\n')
+            f.write(f'        [] (const Config& src, Config& dest) {{ dest.{field} = src.{field}; }}\n')
 
-        f.write('    },\n    { false, nullptr, nullptr, nullptr, nullptr }\n};\n')
+        f.write('    },\n    { false, 0, nullptr, nullptr, nullptr, nullptr, nullptr }\n};\n')
 
         f.write('\nconst char* g_DefaultConfigFileIntro =\n')
         first = True

@@ -73,21 +73,26 @@ The following aspects can be configured:
 
 All items can be changed at runtime when loading a new module or pressing the **F5** key, _except_ those marked with an asterisk (*); these are only evaluated once on startup.
 
-The following locations are searched for configuration files:
-- `tm.ini` in the program's directory (i.e. directly next to `tm.exe`)
-- `tm.ini` in the currently opened module file's directory
-- a file with the same name as the currently opened module file, but with an extra suffix of `.tm`; for example, for `foo.mod`, the configuration file will be `foo.mod.tm`
-
-Configuration files are processed in this exact order, line by line. Options specified later override options specified earlier.
-
 The configuration files can contain multiple sections, delimited by lines containing the section name in square brackets, `[like so]`. The following sections are evaluated, and all other sections are ignored:
-- the unnamed section at the beginning of the file
-- the `[TrackMeister]` or `[TM]` sections
-- sections that match the current module's file name, e.g. `[foo*.mod]`;
+- **global** settings are loaded from ...
+  - the unnamed section at the beginning of the file
+  - sections called `[TrackMeister]` or `[TM]`
+- **file-specific** settings are loaded from
+  sections that match the current module's file name, e.g. `[foo*.mod]`;
   the following rules apply for those:
   - only the filename is matched, no directory names
   - matching is case-insensitive
   - exactly one '`*`' may be used as a wildcard (no '`?`'s, no multiple '`*`'s)
+
+The following files and sections are searched for configuration, in this order, line by line, with later options overriding earlier ones:
+- global settings from `tm.ini` in the program's directory
+  (i.e. directly next to `tm.exe`)
+- global settings from `tm.ini` in the currently opened module file's directory
+- file-specific settings from `tm.ini` in the program directory
+- file-specific settings from `tm.ini` in the module directory
+- any settings from a file with the same name as the currently opened module file, but with an extra suffix of `.tm`; for example, for `foo.mod`, the configuration file will be `foo.mod.tm`
+  - these are parsed like global settings (i.e. there's no need to have any section markers in the `.tm` files), but they are, of course, handled as file-specific settings
+
 
 All other lines contain key-value pairs of the form "`key = value`" or "`key: value`". Spaces, dashes (`-`) and underscores (`_`) in key names are ignored. All parts of a line following a semicolon (`;`) are ignored. It's allowed to put comments at the end of key/value lines.
 
