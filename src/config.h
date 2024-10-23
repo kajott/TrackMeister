@@ -8,6 +8,8 @@
 #include <list>
 #include <string>
 
+#include "numset.h"
+
 enum class FilterMethod {
     None = 0,  //!< OpenMPT INTERPOLATIONFILTER_LENGTH = 1
     Linear,    //!< OpenMPT INTERPOLATIONFILTER_LENGTH = 2
@@ -39,23 +41,23 @@ constexpr bool isValidLoudness(float db) { return (db > -100.0f); }
 //! color is assumed to be fully opaque.
 //! In code, all colors are in the format 0xAABBGGRRu.
 struct Config {
-    bool     fullscreen               = false;        //!< whether to run in fullscreen mode
-    int      windowWidth              = 1920;         //!< initial window width  in non-fullscreen mode, in pixels
-    int      windowHeight             = 1080;         //!< initial window height in non-fullscreen mode, in pixels
+    bool     fullscreen               = false;        //!< whether to run in fullscreen mode [startup]
+    int      windowWidth              = 1920;         //!< initial window width  in non-fullscreen mode, in pixels [startup]
+    int      windowHeight             = 1080;         //!< initial window height in non-fullscreen mode, in pixels [startup]
     float    alphaGamma               = 2.2f;         //!< fake gamma-correct rendering by applying gamma to the alpha channel; higher values = thicker and less aliasing for bright-on-dark text
 
-    int      sampleRate               = 48000;        //!< audio sampling rate
-    int      audioBufferSize          = 512;          //!< size of the audio buffer, in samples; if there are dropouts, try doubling this value
-    FilterMethod filter        = FilterMethod::Auto;  //!< audio resampling filter to be used
-    int      stereoSeparation         = 100;          //!< amount of stereo separation, in percent (0 = mono, 100 = half stereo for MOD / full stereo for others, 200 = full stereo for MOD)
-    int      volumeRamping            = -1;           //!< volume ramping strength (0 = no ramping, 10 = softest ramping, -1 = recommended default)
-    float    gain                     = 0.0f;         //!< global gain to apply, in decibels
-    float    loudness             = InvalidLoudness;  //!< the current track's measured loudness, in decibels; values < -100 mean "no loudness measured"
-    float    targetLoudness           = -18.0f;       //!< target loudness, in decibels (or LUFS); if the 'loudness' parameter is valid, an extra gain will be applied (in addition to 'gain') so that the loudness is corrected to this value
+    int      sampleRate               = 48000;        //!< audio sampling rate [startup]
+    int      audioBufferSize          = 512;          //!< size of the audio buffer, in samples; if there are dropouts, try doubling this value [startup]
+    FilterMethod filter        = FilterMethod::Auto;  //!< audio resampling filter to be used [reload]
+    int      stereoSeparation         = 100;          //!< amount of stereo separation, in percent (0 = mono, 100 = half stereo for MOD / full stereo for others, 200 = full stereo for MOD) [reload]
+    int      volumeRamping            = -1;           //!< volume ramping strength (0 = no ramping, 10 = softest ramping, -1 = recommended default) [reload]
+    float    gain                     = 0.0f;         //!< global gain to apply, in decibels [reload]
+    float    loudness             = InvalidLoudness;  //!< the current track's measured loudness, in decibels; values < -100 mean "no loudness measured" [hidden]
+    float    targetLoudness           = -18.0f;       //!< target loudness, in decibels (or LUFS); if the 'loudness' parameter is valid, an extra gain will be applied (in addition to 'gain') so that the loudness is corrected to this value [reload]
 
-    bool     autoPlay                 = true;         //!< automatically start playing when loading a module; you may want to turn this off for actual competitions
+    bool     autoPlay                 = true;         //!< automatically start playing when loading a module; you may want to turn this off for actual competitions [reload]
     bool     autoAdvance              = false;        //!< automatically continue with the next song in the directory if the current song stopped; allows for jukebox-like functionality
-    bool     shuffle                  = false;        //!< play tracks of the directory endlessly, and in random order
+    bool     shuffle                  = false;        //!< play tracks of the directory endlessly, and in random order [global]
     bool     loop                     = false;        //!< whether to loop the song after it's finished, or play the song's programmed loop if it there is one
     bool     fadeOutAfterLoop         = false;        //!< whether to trigger a slow fade-out after the song looped
     float    fadeOutAt                = 0.0f;         //!< number of seconds after which the song shall be slowly faded out automatically (0 = no auto-fade)
@@ -185,10 +187,12 @@ struct Config {
     uint32_t toastTextColor           = 0xFFFFFFFFu;  //!< text color of a "toast" status message
     float    toastDuration            = 2.0f;         //!< time a "toast" status message shall be visible until it's completely faded out
 
+    NumberSet set;
     inline Config() {}
     inline void reset() { Config defaultConfig; *this = defaultConfig; }
     using PreparedCommandLine = std::list<std::string>;
     static PreparedCommandLine prepareCommandLine(int& argc, char** argv);
+    void import(const Config& src);
     void load(const PreparedCommandLine& cmdline);
     bool load(const char* filename, const char* matchName=nullptr);
     bool save(const char* filename);

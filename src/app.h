@@ -31,8 +31,11 @@ class Application {
     // core data
     SystemInterface& m_sys;
     TextBoxRenderer m_renderer;
-    Config m_config;
     Config::PreparedCommandLine m_cmdline;
+    Config m_globalConfig;
+    Config m_fileConfig;
+    Config m_cmdlineConfig;
+    Config m_config;
     int m_sampleRate;
     bool m_scanning = false;
     std::atomic_bool m_cancelScanning = false;
@@ -42,6 +45,8 @@ class Application {
     std::vector<uint32_t> m_playableExts;
     std::thread* m_scanThread = nullptr;
     std::string m_mainIniFile;
+    std::string m_dirIniFile;
+    std::string m_fileIniFile;
     float m_instanceGain = 0.0f;
 
     // metadata
@@ -156,6 +161,7 @@ private:  // business logic
     int toPixels(int value) const;
     int toTextSize(int value) const;
     int textWidth(int size, const char* text) const;
+    void updateConfig();
     void updateImages();
     void updateImage(ExternalImage& img, const std::string& path, int channels, const char* what);
     void updateLayout(bool resetBoxVisibility=false);

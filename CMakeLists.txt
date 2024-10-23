@@ -233,6 +233,7 @@ add_executable (tm
     src/textarea.cpp
     src/pathutil.cpp
     src/renderer.cpp
+    src/numset.cpp
     font/font_data.cpp
     logo/logo_data.cpp
 )

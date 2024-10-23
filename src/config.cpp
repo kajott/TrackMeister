@@ -172,7 +172,7 @@ bool Config::load(const char* filename, const char* matchName) {
     ctx.filename.assign(filename);
     ctx.lineno = 0;
     bool ignoreNextLineSegment = false;
-    bool validSection = true;
+    bool validSection = !matchName;
     while (std::fgets(line, LineBufferSize, f)) {
         // check end of line
         if (!line[0]) { break; /* EOF */ }
@@ -200,8 +200,9 @@ bool Config::load(const char* filename, const char* matchName) {
         if (!key) { continue; }
         if ((key[0] == '[') && !value && (end >= key) && (end[-1] == ']')) {
             ++key;  end[-1] = '\0';
-            validSection = stringEqualEx(key, "TrackMeister") || stringEqualEx(key, "TM")
-                       || (matchName && PathUtil::matchFilename(key, matchName));
+            validSection = (matchName && matchName[0])
+                         ? PathUtil::matchFilename(key, matchName)
+                         : (stringEqualEx(key, "TrackMeister") || stringEqualEx(key, "TM"));
             Dprintf("  - %s section '%s'\n", validSection ? "parsing" : "ignoring", key);
             continue;
         }
@@ -213,6 +214,7 @@ bool Config::load(const char* filename, const char* matchName) {
             for (item = g_ConfigItems;  item->name;  ++item) {
                 if (stringEqualEx(item->name, key)) {
                     item->setter(ctx, *this, value);
+                    set.add(item->ordinal);
                     break;
                 }
             }
@@ -257,6 +259,7 @@ void Config::load(const Config::PreparedCommandLine& cmdline) {
         for (item = g_ConfigItems;  item->name;  ++item) {
             if (stringEqualEx(item->name, key.c_str())) {
                 item->setter(ctx, *this, arg.substr(sep + 1u).c_str());
+                set.add(item->ordinal);
                 break;
             }
         }
@@ -273,8 +276,12 @@ bool Config::save(const char* filename) {
     if (!f) { return false; }
     bool res = (fwrite(g_DefaultConfigFileIntro, std::strlen(g_DefaultConfigFileIntro), 1, f) == 1);
     for (const ConfigItem *item = g_ConfigItems;  item->name;  ++item) {
-        if (item->newGroup) { fprintf(f, "\n"); }
-        fprintf(f, "%s = %-10s ; %s\n", item->name, item->getter(*this).c_str(), item->description);
+        if (item->flags & ConfigItem::Flags::NewGroup) { fprintf(f, "\n"); }
+        std::string name(item->name);
+        if (int(name.size()) < g_ConfigItemMaxNameLength) {
+            name.resize(g_ConfigItemMaxNameLength, ' ');
+        }
+        fprintf(f, "%s = %-10s ; %s\n", name.c_str(), item->getter(*this).c_str(), item->description);
     }
     fclose(f);
     return res;
@@ -289,4 +296,15 @@ bool Config::saveLoudness(const char* filename) {
                sampleRate, ConfigItem::formatEnum(static_cast<int>(filter), e_FilterMethod).c_str(), stereoSeparation, loudness);
     fclose(f);
     return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void Config::import(const Config& src) {
+    for (const ConfigItem *item = g_ConfigItems;  item->name;  ++item) {
+        if (src.set.contains(item->ordinal)) {
+            item->copy(src, *this);
+        }
+    }
+    set.update(src.set);
 }

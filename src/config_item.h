@@ -26,11 +26,22 @@ struct ConfigParserContext {
 };
 
 struct ConfigItem {
-    bool newGroup;
+    enum Flags : int {
+        NewGroup = (1 << 0),  // new option group (
+        Reload   = (1 << 1),  // module reload required after changing
+        Image    = (1 << 2),  // image reload required after changing
+        Global   = (1 << 3),  // only relevant for global configuration
+        Startup  = (1 << 4),  // only evaluated at application startup (implies Global)
+        Hidden   = (1 << 5),  // hide from interactive configuration UI
+    };
+
+    int ordinal;
+    int flags;
     const char* name;
     const char* description;
     std::function<std::string(const Config& cfg)> getter;
     std::function<void(ConfigParserContext& ctx, Config& cfg, const char* s)> setter;
+    std::function<void(const Config& src, Config& dest)> copy;
 
     static bool parseBool(bool &value, const char* s);
     static std::string formatBool(bool value);
@@ -46,3 +57,4 @@ struct ConfigItem {
 
 extern const ConfigItem g_ConfigItems[];
 extern const char* g_DefaultConfigFileIntro;
+extern const int g_ConfigItemMaxNameLength;
