@@ -10,7 +10,7 @@
 
 #include "numset.h"
 
-enum class FilterMethod {
+enum class FilterMethod : int {
     None = 0,  //!< OpenMPT INTERPOLATIONFILTER_LENGTH = 1
     Linear,    //!< OpenMPT INTERPOLATIONFILTER_LENGTH = 2
     Cubic,     //!< OpenMPT INTERPOLATIONFILTER_LENGTH = 4

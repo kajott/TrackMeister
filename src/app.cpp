@@ -45,12 +45,11 @@ int Application::init(int argc, char* argv[]) {
     }
 
     // load initial configuration (required for video and audio parameters)
-    m_cmdline = Config::prepareCommandLine(argc, argv);
+    m_cmdlineConfig.load(Config::prepareCommandLine(argc, argv));
     m_mainIniFile.assign(argv[0]);
     PathUtil::dirnameInplace(m_mainIniFile);
     PathUtil::joinInplace(m_mainIniFile, "tm.ini");
     m_globalConfig.load(m_mainIniFile.c_str());
-    m_cmdlineConfig.load(m_cmdline);
     updateConfig();
 
     // initialize everything

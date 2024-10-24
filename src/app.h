@@ -31,7 +31,6 @@ class Application {
     // core data
     SystemInterface& m_sys;
     TextBoxRenderer m_renderer;
-    Config::PreparedCommandLine m_cmdline;
     Config m_globalConfig;
     Config m_fileConfig;
     Config m_cmdlineConfig;

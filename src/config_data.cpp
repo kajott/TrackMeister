@@ -8,930 +8,918 @@
 
 const int g_ConfigItemMaxNameLength = 27;
 
-extern "C" const EnumItem e_FilterMethod[] = {
-    { "None",   static_cast<int>(FilterMethod::None)   },
-    { "Linear", static_cast<int>(FilterMethod::Linear) },
-    { "Cubic",  static_cast<int>(FilterMethod::Cubic)  },
-    { "Sinc",   static_cast<int>(FilterMethod::Sinc)   },
-    { "Amiga",  static_cast<int>(FilterMethod::Amiga)  },
-    { "A500",   static_cast<int>(FilterMethod::A500)   },
-    { "A1200",  static_cast<int>(FilterMethod::A1200)  },
-    { "Auto",   static_cast<int>(FilterMethod::Auto)   },
-    { nullptr, 0 }
-};
-
 const ConfigItem g_ConfigItems[] = { {
-        1, ConfigItem::Flags::Startup | ConfigItem::Flags::NewGroup,
+        1, DataType::Bool, ConfigItem::Flags::Startup | ConfigItem::Flags::NewGroup,
         "fullscreen",
         "whether to run in fullscreen mode",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.fullscreen); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.fullscreen, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.fullscreen); },
         [] (const Config& src, Config& dest) { dest.fullscreen = src.fullscreen; }
     }, {
-        2, ConfigItem::Flags::Startup,
+        2, DataType::Int, ConfigItem::Flags::Startup,
         "window width",
         "initial window width  in non-fullscreen mode, in pixels",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.windowWidth); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.windowWidth, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.windowWidth); },
         [] (const Config& src, Config& dest) { dest.windowWidth = src.windowWidth; }
     }, {
-        3, ConfigItem::Flags::Startup,
+        3, DataType::Int, ConfigItem::Flags::Startup,
         "window height",
         "initial window height in non-fullscreen mode, in pixels",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.windowHeight); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.windowHeight, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.windowHeight); },
         [] (const Config& src, Config& dest) { dest.windowHeight = src.windowHeight; }
     }, {
-        4, 0,
+        4, DataType::Float, 0,
         "alpha gamma",
         "fake gamma-correct rendering by applying gamma to the alpha channel; higher values = thicker and less aliasing for bright-on-dark text",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatFloat(cfg.alphaGamma); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseFloat(cfg.alphaGamma, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.alphaGamma); },
         [] (const Config& src, Config& dest) { dest.alphaGamma = src.alphaGamma; }
     }, {
-        5, ConfigItem::Flags::Startup | ConfigItem::Flags::NewGroup,
+        5, DataType::Int, ConfigItem::Flags::Startup | ConfigItem::Flags::NewGroup,
         "sample rate",
         "audio sampling rate",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.sampleRate); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.sampleRate, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.sampleRate); },
         [] (const Config& src, Config& dest) { dest.sampleRate = src.sampleRate; }
     }, {
-        6, ConfigItem::Flags::Startup,
+        6, DataType::Int, ConfigItem::Flags::Startup,
         "audio buffer size",
         "size of the audio buffer, in samples; if there are dropouts, try doubling this value",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.audioBufferSize); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.audioBufferSize, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.audioBufferSize); },
         [] (const Config& src, Config& dest) { dest.audioBufferSize = src.audioBufferSize; }
     }, {
-        7, ConfigItem::Flags::Reload,
+        7, DataType::Enum, ConfigItem::Flags::Reload,
         "filter",
         "audio resampling filter to be used [possible values: 'None', 'Linear', 'Cubic', 'Sinc', 'Amiga', 'A500', 'A1200', 'Auto']",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatEnum(static_cast<int>(cfg.filter), e_FilterMethod); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { int value; if (ctx.checkParseResult(ConfigItem::parseEnum(value, s, e_FilterMethod), s)) { cfg.filter = static_cast<FilterMethod>(value); } },
+        "None\0Linear\0Cubic\0Sinc\0Amiga\0A500\0A1200\0Auto\0\0", 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.filter); },
         [] (const Config& src, Config& dest) { dest.filter = src.filter; }
     }, {
-        8, ConfigItem::Flags::Reload,
+        8, DataType::Int, ConfigItem::Flags::Reload,
         "stereo separation",
         "amount of stereo separation, in percent (0 = mono, 100 = half stereo for MOD / full stereo for others, 200 = full stereo for MOD)",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.stereoSeparation); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.stereoSeparation, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.stereoSeparation); },
         [] (const Config& src, Config& dest) { dest.stereoSeparation = src.stereoSeparation; }
     }, {
-        9, ConfigItem::Flags::Reload,
+        9, DataType::Int, ConfigItem::Flags::Reload,
         "volume ramping",
         "volume ramping strength (0 = no ramping, 10 = softest ramping, -1 = recommended default)",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.volumeRamping); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.volumeRamping, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.volumeRamping); },
         [] (const Config& src, Config& dest) { dest.volumeRamping = src.volumeRamping; }
     }, {
-        10, ConfigItem::Flags::Reload,
+        10, DataType::Float, ConfigItem::Flags::Reload,
         "gain",
         "global gain to apply, in decibels",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatFloat(cfg.gain); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseFloat(cfg.gain, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.gain); },
         [] (const Config& src, Config& dest) { dest.gain = src.gain; }
     }, {
-        11, ConfigItem::Flags::Hidden,
+        11, DataType::Float, ConfigItem::Flags::Hidden,
         "loudness",
         "the current track's measured loudness, in decibels; values < -100 mean \"no loudness measured\"",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatFloat(cfg.loudness); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseFloat(cfg.loudness, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.loudness); },
         [] (const Config& src, Config& dest) { dest.loudness = src.loudness; }
     }, {
-        12, ConfigItem::Flags::Reload,
+        12, DataType::Float, ConfigItem::Flags::Reload,
         "target loudness",
         "target loudness, in decibels (or LUFS); if the 'loudness' parameter is valid, an extra gain will be applied (in addition to 'gain') so that the loudness is corrected to this value",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatFloat(cfg.targetLoudness); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseFloat(cfg.targetLoudness, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.targetLoudness); },
         [] (const Config& src, Config& dest) { dest.targetLoudness = src.targetLoudness; }
     }, {
-        13, ConfigItem::Flags::NewGroup | ConfigItem::Flags::Reload,
+        13, DataType::Bool, ConfigItem::Flags::NewGroup | ConfigItem::Flags::Reload,
         "auto play",
         "automatically start playing when loading a module; you may want to turn this off for actual competitions",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.autoPlay); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.autoPlay, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.autoPlay); },
         [] (const Config& src, Config& dest) { dest.autoPlay = src.autoPlay; }
     }, {
-        14, 0,
+        14, DataType::Bool, 0,
         "auto advance",
         "automatically continue with the next song in the directory if the current song stopped; allows for jukebox-like functionality",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.autoAdvance); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.autoAdvance, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.autoAdvance); },
         [] (const Config& src, Config& dest) { dest.autoAdvance = src.autoAdvance; }
     }, {
-        15, ConfigItem::Flags::Global,
+        15, DataType::Bool, ConfigItem::Flags::Global,
         "shuffle",
         "play tracks of the directory endlessly, and in random order",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.shuffle); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.shuffle, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.shuffle); },
         [] (const Config& src, Config& dest) { dest.shuffle = src.shuffle; }
     }, {
-        16, 0,
+        16, DataType::Bool, 0,
         "loop",
         "whether to loop the song after it's finished, or play the song's programmed loop if it there is one",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.loop); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.loop, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.loop); },
         [] (const Config& src, Config& dest) { dest.loop = src.loop; }
     }, {
-        17, 0,
+        17, DataType::Bool, 0,
         "fade out after loop",
         "whether to trigger a slow fade-out after the song looped",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.fadeOutAfterLoop); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.fadeOutAfterLoop, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.fadeOutAfterLoop); },
         [] (const Config& src, Config& dest) { dest.fadeOutAfterLoop = src.fadeOutAfterLoop; }
     }, {
-        18, 0,
+        18, DataType::Float, 0,
         "fade out at",
         "number of seconds after which the song shall be slowly faded out automatically (0 = no auto-fade)",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatFloat(cfg.fadeOutAt); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseFloat(cfg.fadeOutAt, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.fadeOutAt); },
         [] (const Config& src, Config& dest) { dest.fadeOutAt = src.fadeOutAt; }
     }, {
-        19, 0,
+        19, DataType::Float, 0,
         "fade duration",
         "duration of a fade-out, in seconds",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatFloat(cfg.fadeDuration); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseFloat(cfg.fadeDuration, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.fadeDuration); },
         [] (const Config& src, Config& dest) { dest.fadeDuration = src.fadeDuration; }
     }, {
-        20, ConfigItem::Flags::NewGroup,
+        20, DataType::Bool, ConfigItem::Flags::NewGroup,
         "auto scroll enabled",
         "whether to enable automatic scrolling in the metadata sidebar after loading a module",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.autoScrollEnabled); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.autoScrollEnabled, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.autoScrollEnabled); },
         [] (const Config& src, Config& dest) { dest.autoScrollEnabled = src.autoScrollEnabled; }
     }, {
-        21, 0,
+        21, DataType::Float, 0,
         "max scroll duration",
         "maximum duration after which automatic metadata scrolling reaches the end, in seconds; if the module is shorter than that, the module's duration will be used instead",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatFloat(cfg.maxScrollDuration); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseFloat(cfg.maxScrollDuration, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.maxScrollDuration); },
         [] (const Config& src, Config& dest) { dest.maxScrollDuration = src.maxScrollDuration; }
     }, {
-        22, 0,
+        22, DataType::Float, 0,
         "scroll delay",
         "delay (in seconds) before autoscrolling begins, and ends early before the track end",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatFloat(cfg.scrollDelay); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseFloat(cfg.scrollDelay, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.scrollDelay); },
         [] (const Config& src, Config& dest) { dest.scrollDelay = src.scrollDelay; }
     }, {
-        23, ConfigItem::Flags::NewGroup,
+        23, DataType::String, ConfigItem::Flags::NewGroup,
         "font",
         "font to use for all displays: 'inconsolata' (default), 'iosevka', 'topaz'/'topaz1200'/'topaz500', 'pc' (note: all font sizes will be rounded down to an integer multiple of 16 pixels if a bitmap font is used)",
-        [] (const Config& cfg) -> std::string { return cfg.font; },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { (void)ctx; cfg.font.assign(s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.font); },
         [] (const Config& src, Config& dest) { dest.font = src.font; }
     }, {
-        24, ConfigItem::Flags::NewGroup,
+        24, DataType::Color, ConfigItem::Flags::NewGroup,
         "empty background",
         "background color of \"no module loaded\" screen",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.emptyBackground); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.emptyBackground, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.emptyBackground); },
         [] (const Config& src, Config& dest) { dest.emptyBackground = src.emptyBackground; }
     }, {
-        25, 0,
+        25, DataType::Color, 0,
         "pattern background",
         "background color of pattern display",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.patternBackground); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.patternBackground, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.patternBackground); },
         [] (const Config& src, Config& dest) { dest.patternBackground = src.patternBackground; }
     }, {
-        26, 0,
+        26, DataType::Color, 0,
         "info background",
         "background color of the top information bar",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.infoBackground); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.infoBackground, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.infoBackground); },
         [] (const Config& src, Config& dest) { dest.infoBackground = src.infoBackground; }
     }, {
-        27, 0,
+        27, DataType::Color, 0,
         "meta background",
         "background color of the metadata sidebar",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.metaBackground); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.metaBackground, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.metaBackground); },
         [] (const Config& src, Config& dest) { dest.metaBackground = src.metaBackground; }
     }, {
-        28, 0,
+        28, DataType::Color, 0,
         "shadow color",
         "color of the info and metadata bar's shadows",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.shadowColor); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.shadowColor, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.shadowColor); },
         [] (const Config& src, Config& dest) { dest.shadowColor = src.shadowColor; }
     }, {
-        29, 0,
+        29, DataType::String, 0,
         "background image",
         "background image; must be a PNG file; will be cropped scaled to fill the entire screen (without distorting the aspect ratio)",
-        [] (const Config& cfg) -> std::string { return cfg.backgroundImage; },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { (void)ctx; cfg.backgroundImage.assign(s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.backgroundImage); },
         [] (const Config& src, Config& dest) { dest.backgroundImage = src.backgroundImage; }
     }, {
-        30, ConfigItem::Flags::NewGroup,
+        30, DataType::Bool, ConfigItem::Flags::NewGroup,
         "logo enabled",
         "whether to show a logo at all",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.logoEnabled); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.logoEnabled, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.logoEnabled); },
         [] (const Config& src, Config& dest) { dest.logoEnabled = src.logoEnabled; }
     }, {
-        31, 0,
+        31, DataType::String, 0,
         "logo",
         "custom logo file; must be a grayscale PNG file with high-contrast black-on-white artwork; will be downscaled by a power of two so it fits into the canvas",
-        [] (const Config& cfg) -> std::string { return cfg.logo; },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { (void)ctx; cfg.logo.assign(s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.logo); },
         [] (const Config& src, Config& dest) { dest.logo = src.logo; }
     }, {
-        32, 0,
+        32, DataType::Bool, 0,
         "logo scaling",
         "whether to allow arbitrary downscaling scaling of the logo (if false, only allow power-of-two downscaling)",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.logoScaling); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.logoScaling, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.logoScaling); },
         [] (const Config& src, Config& dest) { dest.logoScaling = src.logoScaling; }
     }, {
-        33, 0,
+        33, DataType::Int, 0,
         "logo margin",
         "minimum distance between the logo image and the surrounding screen or panel edges",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.logoMargin); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.logoMargin, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.logoMargin); },
         [] (const Config& src, Config& dest) { dest.logoMargin = src.logoMargin; }
     }, {
-        34, 0,
+        34, DataType::Int, 0,
         "logo pos X",
         "horizontal logo position, in percent of the available area (0 = left, 50 = center, 100 = right)",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.logoPosX); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.logoPosX, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.logoPosX); },
         [] (const Config& src, Config& dest) { dest.logoPosX = src.logoPosX; }
     }, {
-        35, 0,
+        35, DataType::Int, 0,
         "logo pos Y",
         "vertical logo position, in percent of the available area (0 = top, 50 = center, 100 = bottom)",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.logoPosY); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.logoPosY, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.logoPosY); },
         [] (const Config& src, Config& dest) { dest.logoPosY = src.logoPosY; }
     }, {
-        36, ConfigItem::Flags::NewGroup,
+        36, DataType::Int, ConfigItem::Flags::NewGroup,
         "empty text size",
         "size of the \"no module loaded\" text",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.emptyTextSize); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.emptyTextSize, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.emptyTextSize); },
         [] (const Config& src, Config& dest) { dest.emptyTextSize = src.emptyTextSize; }
     }, {
-        37, 0,
+        37, DataType::Int, 0,
         "empty logo pos Y",
         "vertical position of the center of the logo on the \"no module loaded\" screen",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.emptyLogoPosY); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.emptyLogoPosY, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.emptyLogoPosY); },
         [] (const Config& src, Config& dest) { dest.emptyLogoPosY = src.emptyLogoPosY; }
     }, {
-        38, 0,
+        38, DataType::Int, 0,
         "empty text pos Y",
         "vertical position of the \"no module loaded\" text",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.emptyTextPosY); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.emptyTextPosY, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.emptyTextPosY); },
         [] (const Config& src, Config& dest) { dest.emptyTextPosY = src.emptyTextPosY; }
     }, {
-        39, 0,
+        39, DataType::Color, 0,
         "empty text color",
         "color of the \"no module loaded\" text",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.emptyTextColor); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.emptyTextColor, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.emptyTextColor); },
         [] (const Config& src, Config& dest) { dest.emptyTextColor = src.emptyTextColor; }
     }, {
-        40, 0,
+        40, DataType::Color, 0,
         "empty logo color",
         "logo color on the \"no module loaded\" screen",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.emptyLogoColor); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.emptyLogoColor, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.emptyLogoColor); },
         [] (const Config& src, Config& dest) { dest.emptyLogoColor = src.emptyLogoColor; }
     }, {
-        41, ConfigItem::Flags::NewGroup,
+        41, DataType::Bool, ConfigItem::Flags::NewGroup,
         "info enabled",
         "whether to enable the top information bar by default after loading a module",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.infoEnabled); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.infoEnabled, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.infoEnabled); },
         [] (const Config& src, Config& dest) { dest.infoEnabled = src.infoEnabled; }
     }, {
-        42, 0,
+        42, DataType::Bool, 0,
         "track number enabled",
         "whether to extract and display the track number from the filename; used if the filename starts with two digits followed by a dash (-), underscore (_) or space",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.trackNumberEnabled); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.trackNumberEnabled, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.trackNumberEnabled); },
         [] (const Config& src, Config& dest) { dest.trackNumberEnabled = src.trackNumberEnabled; }
     }, {
-        43, 0,
+        43, DataType::Bool, 0,
         "show time",
         "show current time in track at the end of the details line",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.showTime); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.showTime, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.showTime); },
         [] (const Config& src, Config& dest) { dest.showTime = src.showTime; }
     }, {
-        44, 0,
+        44, DataType::Bool, 0,
         "hide file ext",
         "whether to remove the file extension from the filename in the info bar",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.hideFileExt); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.hideFileExt, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.hideFileExt); },
         [] (const Config& src, Config& dest) { dest.hideFileExt = src.hideFileExt; }
     }, {
-        45, 0,
+        45, DataType::Bool, 0,
         "auto hide file name",
         "whether to hide the filename completely if title and/or artist information is available",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.autoHideFileName); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.autoHideFileName, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.autoHideFileName); },
         [] (const Config& src, Config& dest) { dest.autoHideFileName = src.autoHideFileName; }
     }, {
-        46, 0,
+        46, DataType::String, 0,
         "artist",
         "override artist info from the module with a custom string",
-        [] (const Config& cfg) -> std::string { return cfg.artist; },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { (void)ctx; cfg.artist.assign(s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.artist); },
         [] (const Config& src, Config& dest) { dest.artist = src.artist; }
     }, {
-        47, 0,
+        47, DataType::String, 0,
         "title",
         "override title info from the module with a custom string",
-        [] (const Config& cfg) -> std::string { return cfg.title; },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { (void)ctx; cfg.title.assign(s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.title); },
         [] (const Config& src, Config& dest) { dest.title = src.title; }
     }, {
-        48, 0,
+        48, DataType::Int, 0,
         "info margin X",
         "outer left margin inside the info bar",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.infoMarginX); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.infoMarginX, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.infoMarginX); },
         [] (const Config& src, Config& dest) { dest.infoMarginX = src.infoMarginX; }
     }, {
-        49, 0,
+        49, DataType::Int, 0,
         "info margin Y",
         "upper and lower margin inside the info bar",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.infoMarginY); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.infoMarginY, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.infoMarginY); },
         [] (const Config& src, Config& dest) { dest.infoMarginY = src.infoMarginY; }
     }, {
-        50, 0,
+        50, DataType::Int, 0,
         "info track text size",
         "text size of the track number",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.infoTrackTextSize); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.infoTrackTextSize, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.infoTrackTextSize); },
         [] (const Config& src, Config& dest) { dest.infoTrackTextSize = src.infoTrackTextSize; }
     }, {
-        51, 0,
+        51, DataType::Int, 0,
         "info text size",
         "text size of the filename, title and artist lines",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.infoTextSize); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.infoTextSize, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.infoTextSize); },
         [] (const Config& src, Config& dest) { dest.infoTextSize = src.infoTextSize; }
     }, {
-        52, 0,
+        52, DataType::Int, 0,
         "info details text size",
         "text size of the technical details line",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.infoDetailsTextSize); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.infoDetailsTextSize, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.infoDetailsTextSize); },
         [] (const Config& src, Config& dest) { dest.infoDetailsTextSize = src.infoDetailsTextSize; }
     }, {
-        53, 0,
+        53, DataType::Int, 0,
         "info line spacing",
         "extra space between the info bar's lines",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.infoLineSpacing); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.infoLineSpacing, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.infoLineSpacing); },
         [] (const Config& src, Config& dest) { dest.infoLineSpacing = src.infoLineSpacing; }
     }, {
-        54, 0,
+        54, DataType::Int, 0,
         "info track padding X",
         "horitontal space between the track number and the other information in the info bar",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.infoTrackPaddingX); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.infoTrackPaddingX, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.infoTrackPaddingX); },
         [] (const Config& src, Config& dest) { dest.infoTrackPaddingX = src.infoTrackPaddingX; }
     }, {
-        55, 0,
+        55, DataType::Int, 0,
         "info key padding X",
         "horizontal space between the \"File\", \"Artist\" and \"Title\" heading and the content text",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.infoKeyPaddingX); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.infoKeyPaddingX, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.infoKeyPaddingX); },
         [] (const Config& src, Config& dest) { dest.infoKeyPaddingX = src.infoKeyPaddingX; }
     }, {
-        56, 0,
+        56, DataType::Color, 0,
         "info track color",
         "color of the track number",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.infoTrackColor); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.infoTrackColor, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.infoTrackColor); },
         [] (const Config& src, Config& dest) { dest.infoTrackColor = src.infoTrackColor; }
     }, {
-        57, 0,
+        57, DataType::Color, 0,
         "info key color",
         "color of the \"File\", \"Artist\" and \"Title\" headings",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.infoKeyColor); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.infoKeyColor, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.infoKeyColor); },
         [] (const Config& src, Config& dest) { dest.infoKeyColor = src.infoKeyColor; }
     }, {
-        58, 0,
+        58, DataType::Color, 0,
         "info colon color",
         "color of the colon following the headings",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.infoColonColor); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.infoColonColor, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.infoColonColor); },
         [] (const Config& src, Config& dest) { dest.infoColonColor = src.infoColonColor; }
     }, {
-        59, 0,
+        59, DataType::Color, 0,
         "info value color",
         "color of the file, artist and title texts",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.infoValueColor); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.infoValueColor, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.infoValueColor); },
         [] (const Config& src, Config& dest) { dest.infoValueColor = src.infoValueColor; }
     }, {
-        60, 0,
+        60, DataType::Color, 0,
         "info details color",
         "color of the technical details line",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.infoDetailsColor); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.infoDetailsColor, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.infoDetailsColor); },
         [] (const Config& src, Config& dest) { dest.infoDetailsColor = src.infoDetailsColor; }
     }, {
-        61, 0,
+        61, DataType::Int, 0,
         "info shadow size",
         "width of the shadow below the info bar",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.infoShadowSize); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.infoShadowSize, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.infoShadowSize); },
         [] (const Config& src, Config& dest) { dest.infoShadowSize = src.infoShadowSize; }
     }, {
-        62, ConfigItem::Flags::NewGroup,
+        62, DataType::Bool, ConfigItem::Flags::NewGroup,
         "progress enabled",
         "whether to show a progress bar",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.progressEnabled); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.progressEnabled, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.progressEnabled); },
         [] (const Config& src, Config& dest) { dest.progressEnabled = src.progressEnabled; }
     }, {
-        63, 0,
+        63, DataType::Int, 0,
         "progress height",
         "height (\"thickness\") of the progress bar",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.progressHeight); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.progressHeight, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.progressHeight); },
         [] (const Config& src, Config& dest) { dest.progressHeight = src.progressHeight; }
     }, {
-        64, 0,
+        64, DataType::Int, 0,
         "progress margin top",
         "extra space to insert above the progress bar",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.progressMarginTop); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.progressMarginTop, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.progressMarginTop); },
         [] (const Config& src, Config& dest) { dest.progressMarginTop = src.progressMarginTop; }
     }, {
-        65, 0,
+        65, DataType::Int, 0,
         "progress border size",
         "size/thickness/width of the progress bar's border (0 = no border)",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.progressBorderSize); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.progressBorderSize, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.progressBorderSize); },
         [] (const Config& src, Config& dest) { dest.progressBorderSize = src.progressBorderSize; }
     }, {
-        66, 0,
+        66, DataType::Int, 0,
         "progress border padding",
         "inside padding between the actual progress indicator and the progress bar's border",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.progressBorderPadding); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.progressBorderPadding, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.progressBorderPadding); },
         [] (const Config& src, Config& dest) { dest.progressBorderPadding = src.progressBorderPadding; }
     }, {
-        67, 0,
+        67, DataType::Color, 0,
         "progress border color",
         "color of the progress bar's border",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.progressBorderColor); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.progressBorderColor, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.progressBorderColor); },
         [] (const Config& src, Config& dest) { dest.progressBorderColor = src.progressBorderColor; }
     }, {
-        68, 0,
+        68, DataType::Color, 0,
         "progress outer color",
         "color of the progress bar's empty area (note: this is drawn on top of the border, so be careful with alpha!)",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.progressOuterColor); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.progressOuterColor, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.progressOuterColor); },
         [] (const Config& src, Config& dest) { dest.progressOuterColor = src.progressOuterColor; }
     }, {
-        69, 0,
+        69, DataType::Color, 0,
         "progress inner color",
         "color of the actual progress indicator (note: this is drawn on top of the other two progress bar elements, so be careful with alpha!)",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.progressInnerColor); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.progressInnerColor, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.progressInnerColor); },
         [] (const Config& src, Config& dest) { dest.progressInnerColor = src.progressInnerColor; }
     }, {
-        70, ConfigItem::Flags::NewGroup,
+        70, DataType::Bool, ConfigItem::Flags::NewGroup,
         "meta enabled",
         "whether to enable the metadata sidebar by default after loading a module",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.metaEnabled); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.metaEnabled, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.metaEnabled); },
         [] (const Config& src, Config& dest) { dest.metaEnabled = src.metaEnabled; }
     }, {
-        71, 0,
+        71, DataType::Bool, 0,
         "meta show message",
         "whether the metadata sidebar shall include the module message section",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.metaShowMessage); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.metaShowMessage, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.metaShowMessage); },
         [] (const Config& src, Config& dest) { dest.metaShowMessage = src.metaShowMessage; }
     }, {
-        72, 0,
+        72, DataType::Bool, 0,
         "meta show instrument names",
         "whether the metadata sidebar shall include the instrument names section",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.metaShowInstrumentNames); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.metaShowInstrumentNames, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.metaShowInstrumentNames); },
         [] (const Config& src, Config& dest) { dest.metaShowInstrumentNames = src.metaShowInstrumentNames; }
     }, {
-        73, 0,
+        73, DataType::Bool, 0,
         "meta show sample names",
         "whether the metadata sidebar shall include the sample names section",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.metaShowSampleNames); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.metaShowSampleNames, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.metaShowSampleNames); },
         [] (const Config& src, Config& dest) { dest.metaShowSampleNames = src.metaShowSampleNames; }
     }, {
-        74, 0,
+        74, DataType::Int, 0,
         "meta margin X",
         "left and right margin inside the metadata sidebar",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.metaMarginX); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.metaMarginX, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.metaMarginX); },
         [] (const Config& src, Config& dest) { dest.metaMarginX = src.metaMarginX; }
     }, {
-        75, 0,
+        75, DataType::Int, 0,
         "meta margin Y",
         "upper and lower margin inside the metadata sidebar",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.metaMarginY); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.metaMarginY, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.metaMarginY); },
         [] (const Config& src, Config& dest) { dest.metaMarginY = src.metaMarginY; }
     }, {
-        76, 0,
+        76, DataType::Int, 0,
         "meta text size",
         "text size in the metadata sidebar",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.metaTextSize); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.metaTextSize, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.metaTextSize); },
         [] (const Config& src, Config& dest) { dest.metaTextSize = src.metaTextSize; }
     }, {
-        77, 0,
+        77, DataType::Int, 0,
         "meta message width",
         "approximate number of characters per line to allocate for the module message",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.metaMessageWidth); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.metaMessageWidth, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.metaMessageWidth); },
         [] (const Config& src, Config& dest) { dest.metaMessageWidth = src.metaMessageWidth; }
     }, {
-        78, 0,
+        78, DataType::Int, 0,
         "meta section margin",
         "vertical gap between sections in the metadata sidebar",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.metaSectionMargin); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.metaSectionMargin, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.metaSectionMargin); },
         [] (const Config& src, Config& dest) { dest.metaSectionMargin = src.metaSectionMargin; }
     }, {
-        79, 0,
+        79, DataType::Color, 0,
         "meta heading color",
         "color of a section heading in the metadata sidebar",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.metaHeadingColor); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.metaHeadingColor, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.metaHeadingColor); },
         [] (const Config& src, Config& dest) { dest.metaHeadingColor = src.metaHeadingColor; }
     }, {
-        80, 0,
+        80, DataType::Color, 0,
         "meta text color",
         "color of normal text in the metadata sidebar",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.metaTextColor); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.metaTextColor, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.metaTextColor); },
         [] (const Config& src, Config& dest) { dest.metaTextColor = src.metaTextColor; }
     }, {
-        81, 0,
+        81, DataType::Color, 0,
         "meta index color",
         "color of the instrument/sample numbers in the metadata sidebar",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.metaIndexColor); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.metaIndexColor, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.metaIndexColor); },
         [] (const Config& src, Config& dest) { dest.metaIndexColor = src.metaIndexColor; }
     }, {
-        82, 0,
+        82, DataType::Color, 0,
         "meta colon color",
         "color of the colon between instrument/sample number and name in the metadata sidebar",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.metaColonColor); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.metaColonColor, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.metaColonColor); },
         [] (const Config& src, Config& dest) { dest.metaColonColor = src.metaColonColor; }
     }, {
-        83, 0,
+        83, DataType::Int, 0,
         "meta shadow size",
         "width of the shadow left to the the metadata sidebar",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.metaShadowSize); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.metaShadowSize, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.metaShadowSize); },
         [] (const Config& src, Config& dest) { dest.metaShadowSize = src.metaShadowSize; }
     }, {
-        84, ConfigItem::Flags::NewGroup,
+        84, DataType::Int, ConfigItem::Flags::NewGroup,
         "pattern text size",
         "desired size of the pattern display text",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.patternTextSize); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.patternTextSize, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.patternTextSize); },
         [] (const Config& src, Config& dest) { dest.patternTextSize = src.patternTextSize; }
     }, {
-        85, 0,
+        85, DataType::Int, 0,
         "pattern min text size",
         "minimum allowed size of the pattern display text (if the pattern still doesn't fit with this, some channels won't be visible)",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.patternMinTextSize); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.patternMinTextSize, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.patternMinTextSize); },
         [] (const Config& src, Config& dest) { dest.patternMinTextSize = src.patternMinTextSize; }
     }, {
-        86, 0,
+        86, DataType::Int, 0,
         "pattern line spacing",
         "extra vertical gap between rows in the pattern display",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.patternLineSpacing); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.patternLineSpacing, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.patternLineSpacing); },
         [] (const Config& src, Config& dest) { dest.patternLineSpacing = src.patternLineSpacing; }
     }, {
-        87, 0,
+        87, DataType::Int, 0,
         "pattern margin X",
         "left and right margin inside the pattern display",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.patternMarginX); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.patternMarginX, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.patternMarginX); },
         [] (const Config& src, Config& dest) { dest.patternMarginX = src.patternMarginX; }
     }, {
-        88, 0,
+        88, DataType::Int, 0,
         "pattern bar padding X",
         "extra left and right padding of the current row bar in the pattern display",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.patternBarPaddingX); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.patternBarPaddingX, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.patternBarPaddingX); },
         [] (const Config& src, Config& dest) { dest.patternBarPaddingX = src.patternBarPaddingX; }
     }, {
-        89, 0,
+        89, DataType::Int, 0,
         "pattern bar border percent",
         "border radius of the current row bar, in percent of the text size",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.patternBarBorderPercent); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.patternBarBorderPercent, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.patternBarBorderPercent); },
         [] (const Config& src, Config& dest) { dest.patternBarBorderPercent = src.patternBarBorderPercent; }
     }, {
-        90, 0,
+        90, DataType::Color, 0,
         "pattern logo color",
         "color of the background logo",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.patternLogoColor); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.patternLogoColor, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.patternLogoColor); },
         [] (const Config& src, Config& dest) { dest.patternLogoColor = src.patternLogoColor; }
     }, {
-        91, 0,
+        91, DataType::Color, 0,
         "pattern bar background",
         "fill color of the current row bar",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.patternBarBackground); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.patternBarBackground, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.patternBarBackground); },
         [] (const Config& src, Config& dest) { dest.patternBarBackground = src.patternBarBackground; }
     }, {
-        92, 0,
+        92, DataType::Color, 0,
         "pattern text color",
         "color of normal text in the pattern display (not used, as everything in the pattern display is covered by the following highlighting colors)",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.patternTextColor); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.patternTextColor, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.patternTextColor); },
         [] (const Config& src, Config& dest) { dest.patternTextColor = src.patternTextColor; }
     }, {
-        93, 0,
+        93, DataType::Color, 0,
         "pattern dot color",
         "text color of the dots indicating unset notes/instruments/effects etc.",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.patternDotColor); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.patternDotColor, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.patternDotColor); },
         [] (const Config& src, Config& dest) { dest.patternDotColor = src.patternDotColor; }
     }, {
-        94, 0,
+        94, DataType::Color, 0,
         "pattern note color",
         "text color of normal notes (e.g. \"G#4\")",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.patternNoteColor); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.patternNoteColor, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.patternNoteColor); },
         [] (const Config& src, Config& dest) { dest.patternNoteColor = src.patternNoteColor; }
     }, {
-        95, 0,
+        95, DataType::Color, 0,
         "pattern special color",
         "text color of special notes (e.g. \"===\")",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.patternSpecialColor); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.patternSpecialColor, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.patternSpecialColor); },
         [] (const Config& src, Config& dest) { dest.patternSpecialColor = src.patternSpecialColor; }
     }, {
-        96, 0,
+        96, DataType::Color, 0,
         "pattern instrument color",
         "text color of the instrument/sample index column",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.patternInstrumentColor); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.patternInstrumentColor, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.patternInstrumentColor); },
         [] (const Config& src, Config& dest) { dest.patternInstrumentColor = src.patternInstrumentColor; }
     }, {
-        97, 0,
+        97, DataType::Color, 0,
         "pattern vol effect color",
         "text color of the volume effect column (e.g. the 'v' before the volume)",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.patternVolEffectColor); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.patternVolEffectColor, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.patternVolEffectColor); },
         [] (const Config& src, Config& dest) { dest.patternVolEffectColor = src.patternVolEffectColor; }
     }, {
-        98, 0,
+        98, DataType::Color, 0,
         "pattern vol param color",
         "text color of the volume effect parameter column",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.patternVolParamColor); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.patternVolParamColor, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.patternVolParamColor); },
         [] (const Config& src, Config& dest) { dest.patternVolParamColor = src.patternVolParamColor; }
     }, {
-        99, 0,
+        99, DataType::Color, 0,
         "pattern effect color",
         "text color of the effect type column",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.patternEffectColor); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.patternEffectColor, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.patternEffectColor); },
         [] (const Config& src, Config& dest) { dest.patternEffectColor = src.patternEffectColor; }
     }, {
-        100, 0,
+        100, DataType::Color, 0,
         "pattern effect param color",
         "text color of the effect parameter column",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.patternEffectParamColor); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.patternEffectParamColor, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.patternEffectParamColor); },
         [] (const Config& src, Config& dest) { dest.patternEffectParamColor = src.patternEffectParamColor; }
     }, {
-        101, 0,
+        101, DataType::Color, 0,
         "pattern pos order color",
         "text color of the order number",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.patternPosOrderColor); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.patternPosOrderColor, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.patternPosOrderColor); },
         [] (const Config& src, Config& dest) { dest.patternPosOrderColor = src.patternPosOrderColor; }
     }, {
-        102, 0,
+        102, DataType::Color, 0,
         "pattern pos pattern color",
         "text color of the pattern number",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.patternPosPatternColor); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.patternPosPatternColor, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.patternPosPatternColor); },
         [] (const Config& src, Config& dest) { dest.patternPosPatternColor = src.patternPosPatternColor; }
     }, {
-        103, 0,
+        103, DataType::Color, 0,
         "pattern pos row color",
         "text color of the row number",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.patternPosRowColor); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.patternPosRowColor, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.patternPosRowColor); },
         [] (const Config& src, Config& dest) { dest.patternPosRowColor = src.patternPosRowColor; }
     }, {
-        104, 0,
+        104, DataType::Color, 0,
         "pattern pos dot color",
         "text color of the colon or dot between the order/pattern/row numbers",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.patternPosDotColor); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.patternPosDotColor, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.patternPosDotColor); },
         [] (const Config& src, Config& dest) { dest.patternPosDotColor = src.patternPosDotColor; }
     }, {
-        105, 0,
+        105, DataType::Color, 0,
         "pattern sep color",
         "text color of the bar ('|') between channels",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.patternSepColor); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.patternSepColor, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.patternSepColor); },
         [] (const Config& src, Config& dest) { dest.patternSepColor = src.patternSepColor; }
     }, {
-        106, 0,
+        106, DataType::Float, 0,
         "pattern alpha falloff",
         "amount of alpha falloff for the outermost rows in the pattern display; 0.0 = no falloff, 1.0 = falloff to full transparency",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatFloat(cfg.patternAlphaFalloff); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseFloat(cfg.patternAlphaFalloff, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.patternAlphaFalloff); },
         [] (const Config& src, Config& dest) { dest.patternAlphaFalloff = src.patternAlphaFalloff; }
     }, {
-        107, 0,
+        107, DataType::Float, 0,
         "pattern alpha falloff shape",
         "shape (power) of the alpha falloff in the pattern display; the higher, the more rows will retain a relatively high opacity",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatFloat(cfg.patternAlphaFalloffShape); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseFloat(cfg.patternAlphaFalloffShape, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.patternAlphaFalloffShape); },
         [] (const Config& src, Config& dest) { dest.patternAlphaFalloffShape = src.patternAlphaFalloffShape; }
     }, {
-        108, ConfigItem::Flags::NewGroup,
+        108, DataType::Bool, ConfigItem::Flags::NewGroup,
         "channel names enabled",
         "whether to enable the channel name displays by default after loading a module",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.channelNamesEnabled); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.channelNamesEnabled, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.channelNamesEnabled); },
         [] (const Config& src, Config& dest) { dest.channelNamesEnabled = src.channelNamesEnabled; }
     }, {
-        109, 0,
+        109, DataType::Int, 0,
         "channel name padding Y",
         "extra vertical padding in the channel name boxes",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.channelNamePaddingY); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.channelNamePaddingY, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.channelNamePaddingY); },
         [] (const Config& src, Config& dest) { dest.channelNamePaddingY = src.channelNamePaddingY; }
     }, {
-        110, 0,
+        110, DataType::Color, 0,
         "channel name upper color",
         "color of the upper end of the channel name boxes",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.channelNameUpperColor); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.channelNameUpperColor, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.channelNameUpperColor); },
         [] (const Config& src, Config& dest) { dest.channelNameUpperColor = src.channelNameUpperColor; }
     }, {
-        111, 0,
+        111, DataType::Color, 0,
         "channel name lower color",
         "color of the lower end of the channel name boxes",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.channelNameLowerColor); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.channelNameLowerColor, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.channelNameLowerColor); },
         [] (const Config& src, Config& dest) { dest.channelNameLowerColor = src.channelNameLowerColor; }
     }, {
-        112, 0,
+        112, DataType::Color, 0,
         "channel name text color",
         "channel name text color",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.channelNameTextColor); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.channelNameTextColor, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.channelNameTextColor); },
         [] (const Config& src, Config& dest) { dest.channelNameTextColor = src.channelNameTextColor; }
     }, {
-        113, ConfigItem::Flags::NewGroup,
+        113, DataType::Bool, ConfigItem::Flags::NewGroup,
         "VU enabled",
         "whether to enable the fake VU meters by default after loading a module",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.vuEnabled); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.vuEnabled, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.vuEnabled); },
         [] (const Config& src, Config& dest) { dest.vuEnabled = src.vuEnabled; }
     }, {
-        114, 0,
+        114, DataType::Int, 0,
         "VU height",
         "height of the fake VU meters",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.vuHeight); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.vuHeight, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.vuHeight); },
         [] (const Config& src, Config& dest) { dest.vuHeight = src.vuHeight; }
     }, {
-        115, 0,
+        115, DataType::Color, 0,
         "VU upper color",
         "color of the upper end of the fake VU meters",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.vuUpperColor); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.vuUpperColor, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.vuUpperColor); },
         [] (const Config& src, Config& dest) { dest.vuUpperColor = src.vuUpperColor; }
     }, {
-        116, 0,
+        116, DataType::Color, 0,
         "VU lower color",
         "color of the lower end of the fake VU meters",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.vuLowerColor); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.vuLowerColor, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.vuLowerColor); },
         [] (const Config& src, Config& dest) { dest.vuLowerColor = src.vuLowerColor; }
     }, {
-        117, ConfigItem::Flags::NewGroup,
+        117, DataType::Bool, ConfigItem::Flags::NewGroup,
         "clip enabled",
         "whether the clipping indicator is enabled",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatBool(cfg.clipEnabled); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseBool(cfg.clipEnabled, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.clipEnabled); },
         [] (const Config& src, Config& dest) { dest.clipEnabled = src.clipEnabled; }
     }, {
-        118, 0,
+        118, DataType::Int, 0,
         "clip size",
         "circumference of the clipping indicator",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.clipSize); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.clipSize, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.clipSize); },
         [] (const Config& src, Config& dest) { dest.clipSize = src.clipSize; }
     }, {
-        119, 0,
+        119, DataType::Int, 0,
         "clip pos X",
         "horizontal clipping indicator position, in percent of the available area (0 = left, 50 = center, 100 = right)",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.clipPosX); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.clipPosX, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.clipPosX); },
         [] (const Config& src, Config& dest) { dest.clipPosX = src.clipPosX; }
     }, {
-        120, 0,
+        120, DataType::Int, 0,
         "clip pos Y",
         "vertical clipping indicator position, in percent of the available area (0 = top, 50 = center, 100 = bottom)",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.clipPosY); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.clipPosY, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.clipPosY); },
         [] (const Config& src, Config& dest) { dest.clipPosY = src.clipPosY; }
     }, {
-        121, 0,
+        121, DataType::Int, 0,
         "clip margin",
         "margin around the screen edges that clipPos may not exceed, even at the 0/100 settings",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.clipMargin); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.clipMargin, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.clipMargin); },
         [] (const Config& src, Config& dest) { dest.clipMargin = src.clipMargin; }
     }, {
-        122, 0,
+        122, DataType::Color, 0,
         "clip color",
         "color of the clipping indicator",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.clipColor); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.clipColor, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.clipColor); },
         [] (const Config& src, Config& dest) { dest.clipColor = src.clipColor; }
     }, {
-        123, 0,
+        123, DataType::Float, 0,
         "clip fade time",
         "time the clipping indicator takes to fade out completely, in seconds",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatFloat(cfg.clipFadeTime); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseFloat(cfg.clipFadeTime, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.clipFadeTime); },
         [] (const Config& src, Config& dest) { dest.clipFadeTime = src.clipFadeTime; }
     }, {
-        124, ConfigItem::Flags::NewGroup,
+        124, DataType::Int, ConfigItem::Flags::NewGroup,
         "toast text size",
         "text size of a \"toast\" status message",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.toastTextSize); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.toastTextSize, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.toastTextSize); },
         [] (const Config& src, Config& dest) { dest.toastTextSize = src.toastTextSize; }
     }, {
-        125, 0,
+        125, DataType::Int, 0,
         "toast margin X",
         "left and right margin inside a \"toast\" status message (not including the rounded borders)",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.toastMarginX); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.toastMarginX, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.toastMarginX); },
         [] (const Config& src, Config& dest) { dest.toastMarginX = src.toastMarginX; }
     }, {
-        126, 0,
+        126, DataType::Int, 0,
         "toast margin Y",
         "top and bottom margin inside a \"toast\" status message",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.toastMarginY); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.toastMarginY, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.toastMarginY); },
         [] (const Config& src, Config& dest) { dest.toastMarginY = src.toastMarginY; }
     }, {
-        127, 0,
+        127, DataType::Int, 0,
         "toast position Y",
         "vertical position of a \"toast\" status message, relative to the top of the display",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatInt(cfg.toastPositionY); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseInt(cfg.toastPositionY, s), s); },
+        nullptr, 0.0f, 1000.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.toastPositionY); },
         [] (const Config& src, Config& dest) { dest.toastPositionY = src.toastPositionY; }
     }, {
-        128, 0,
+        128, DataType::Color, 0,
         "toast background color",
         "background color of a \"toast\" status message",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.toastBackgroundColor); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.toastBackgroundColor, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.toastBackgroundColor); },
         [] (const Config& src, Config& dest) { dest.toastBackgroundColor = src.toastBackgroundColor; }
     }, {
-        129, 0,
+        129, DataType::Color, 0,
         "toast text color",
         "text color of a \"toast\" status message",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatColor(cfg.toastTextColor); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseColor(cfg.toastTextColor, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.toastTextColor); },
         [] (const Config& src, Config& dest) { dest.toastTextColor = src.toastTextColor; }
     }, {
-        130, 0,
+        130, DataType::Float, 0,
         "toast duration",
         "time a \"toast\" status message shall be visible until it's completely faded out",
-        [] (const Config& cfg) -> std::string { return ConfigItem::formatFloat(cfg.toastDuration); },
-        [] (ConfigParserContext& ctx, Config& cfg, const char* s) { ctx.checkParseResult(ConfigItem::parseFloat(cfg.toastDuration, s), s); },
+        nullptr, 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.toastDuration); },
         [] (const Config& src, Config& dest) { dest.toastDuration = src.toastDuration; }
     },
-    { false, 0, nullptr, nullptr, nullptr, nullptr, nullptr }
+    { 0, DataType::Bool, 0, nullptr, nullptr, nullptr, 0.0f, 0.0f, nullptr, nullptr }
 };
 
 const char* g_DefaultConfigFileIntro =
