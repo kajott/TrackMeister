@@ -49,15 +49,18 @@ if __name__ == "__main__":
                 continue
 
             # start of enum
-            m = re.match(r'enum class (\w+) {', line)
+            m = re.match(r'enum class (\w+) : int {', line)
             if m:
                 in_enum = m.group(1)
                 enums[in_enum] = []
                 continue
 
             # enum item
-            m = in_enum and re.match(r'(\w+)(\s*=\s*\d+)?,?', line)
+            m = in_enum and re.match(r'(\w+)(\s*=\s*(\d+))?,?', line)
             if m:
+                n = m.group(3)
+                if n:
+                    assert int(n) == len(enums[in_enum]), "invalid enum order"
                 enums[in_enum].append(m.group(1))
                 continue
 
@@ -112,14 +115,6 @@ if __name__ == "__main__":
         f.write('#include "config.h"\n#include "config_item.h"\n')
         f.write(f'\nconst int g_ConfigItemMaxNameLength = {name_maxlen};\n')
 
-        # write string<->enum mapping tables
-        for enum, items in sorted(enums.items()):
-            f.write(f'\nextern "C" const EnumItem e_{enum}[] = {{\n')
-            item_maxlen = max(map(len, items))
-            for item in items:
-                f.write('    { "' + (item + '",').ljust(item_maxlen + 2) + f' static_cast<int>({enum}::' + (item + ')').ljust(item_maxlen + 1) + ' },\n')
-            f.write('    { nullptr, 0 }\n};\n')
-
         # write main config item table
         f.write('\nconst ConfigItem g_ConfigItems[] = { {\n')
         first = True
@@ -132,28 +127,36 @@ if __name__ == "__main__":
             if type in enums:
                 desc += " [possible values: " + ", ".join(f"'{e}'" for e in enums[type]) + "]"
 
+            # resolve DataType
+            if type in enums:
+                dt = "Enum"
+            elif type == "uint32_t":
+                dt = "Color"
+            else:
+                dt = type.split('::', 1)[-1].capitalize()
+
+            # resolve value ranges
+            if type in enums:
+                values = '"{}\\0\\0"'.format('\\0'.join(enums[type]))
+            else:
+                values = "nullptr"
+            vmin = 0.0
+            vmax = 1000.0 if (type == "int") else 1.0
+
             # write name and description
             ordinal += 1
             flags = " | ".join("ConfigItem::Flags::" + f for f in flags) or "0"
-            f.write(f'        {ordinal}, {flags},\n')
+            f.write(f'        {ordinal}, DataType::{dt}, {flags},\n')
             f.write(f'        "{name}",\n')
             desc = desc.replace('"', '\\"')
             f.write(f'        "{desc}",\n')
+            f.write(f'        {values}, {vmin:.1f}f, {vmax:.1f}f,\n')
 
-            # write getters and setters
-            if type in enums:
-                f.write(f'        [] (const Config& cfg) -> std::string {{ return ConfigItem::formatEnum(static_cast<int>(cfg.{field}), e_{type}); }},\n')
-                f.write(f'        [] (ConfigParserContext& ctx, Config& cfg, const char* s) {{ int value; if (ctx.checkParseResult(ConfigItem::parseEnum(value, s, e_{type}), s)) {{ cfg.{field} = static_cast<{type}>(value); }} }},\n')
-            elif type == 'std::string':
-                f.write(f'        [] (const Config& cfg) -> std::string {{ return cfg.{field}; }},\n')
-                f.write(f'        [] (ConfigParserContext& ctx, Config& cfg, const char* s) {{ (void)ctx; cfg.{field}.assign(s); }},\n')
-            else:
-                type = { "uint32_t": "Color" }.get(type, type.title())
-                f.write(f'        [] (const Config& cfg) -> std::string {{ return ConfigItem::format{type}(cfg.{field}); }},\n')
-                f.write(f'        [] (ConfigParserContext& ctx, Config& cfg, const char* s) {{ ctx.checkParseResult(ConfigItem::parse{type}(cfg.{field}, s), s); }},\n')
+            # write methods
+            f.write(f'        [] (Config& src) -> void* {{ return static_cast<void*>(&src.{field}); }},\n')
             f.write(f'        [] (const Config& src, Config& dest) {{ dest.{field} = src.{field}; }}\n')
 
-        f.write('    },\n    { false, 0, nullptr, nullptr, nullptr, nullptr, nullptr }\n};\n')
+        f.write('    },\n    { 0, DataType::Bool, 0, nullptr, nullptr, nullptr, 0.0f, 0.0f, nullptr, nullptr }\n};\n')
 
         f.write('\nconst char* g_DefaultConfigFileIntro =\n')
         first = True

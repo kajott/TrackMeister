@@ -17,8 +17,6 @@
 #include "config.h"
 #include "config_item.h"
 
-extern "C" const EnumItem e_FilterMethod[];  // used in Config::saveLoudness(), declared in config_data.cpp
-
 ////////////////////////////////////////////////////////////////////////////////
 
 //! check if a character is considered as ignored in INI file key comparisons
@@ -43,80 +41,8 @@ inline uint32_t nibbleSwap(uint32_t x) {
     return ((x & 0xF0F0F0F0u) >> 4) | ((x & 0x0F0F0F0Fu) << 4);
 }
 
-////////////////////////////////////////////////////////////////////////////////
-
-void ConfigParserContext::error(const char* msg, const char* s) const {
-    fprintf(stderr, "%s:%d: %s '%s'\n", filename.c_str(), lineno, msg, s);
-}
-
-bool ConfigItem::parseBool(bool &value, const char* s) {
-    const EnumItem e_Bool[] = {
-        { "0",        0 }, { "1",       1 },
-        { "false",    0 }, { "true",    1 },
-        { "off",      0 }, { "on",      1 },
-        { "no",       0 }, { "yes",     1 },
-        { "disabled", 0 }, { "enabled", 1 },
-        { "disable",  0 }, { "enable",  1 },
-        { nullptr, 0 }
-    };
-    int intVal = 0;
-    bool result = parseEnum(intVal, s, e_Bool);
-    if (result) { value = (intVal != 0); }
-    return result;
-}
-
-std::string ConfigItem::formatBool(bool value) {
-    return value ? "true" : "false";
-}
-
-bool ConfigItem::parseInt(int &value, const char* s) {
-    if (!s) { return false; }
-    char* end = nullptr;
-    long longVal = std::strtol(s, &end, 0);
-    bool result = (end && !*end);
-    if (result) { value = int(longVal); }
-    return result;
-}
-
-std::string ConfigItem::formatInt(int value) {
-    return std::to_string(value);
-}
-
-bool ConfigItem::parseFloat(float &value, const char* s) {
-    if (!s) { return false; }
-    char* end = nullptr;
-    float tempVal = std::strtof(s, &end);
-    bool result = (end && !*end);
-    if (result) { value = tempVal; }
-    return result;
-}
-
-std::string ConfigItem::formatFloat(float value) {
-    char buffer[32];
-    ::snprintf(buffer, 32, "%.3f", value);
-    return buffer;
-}
-
-bool ConfigItem::parseEnum(int &value, const char* s, const EnumItem* items) {
-    while (items && items->name) {
-        if (stringEqualEx(items->name, s)) {
-            value = items->value;
-            return true;
-        }
-        ++items;
-    }
-    return false;
-}
-
-std::string ConfigItem::formatEnum(int value, const EnumItem* items) {
-    while (items && items->name) {
-        if (items->value == value) { return items->name; }
-        ++items;
-    }
-    return "???";
-}
-
-bool ConfigItem::parseColor(uint32_t &value, const char* s) {
+//! parse a color value
+bool parseColor(uint32_t *pValue, const char* s) {
     if (!s) { return false; }
     if (*s == '#') { ++s; }
     // parse nibbles
@@ -141,20 +67,146 @@ bool ConfigItem::parseColor(uint32_t &value, const char* s) {
     }
     if      (bit == 24) { accum |= 0xFF000000u;  /* fully opaque */ }
     else if (bit != 32) { return false;  /* invalid number of bits */ }
-    value = nibbleSwap(accum);
+    *pValue = nibbleSwap(accum);
     return true;
 }
 
-std::string ConfigItem::formatColor(uint32_t value) {
-    char str[10], *pos = str;
-    *pos++ = '#';
-    int len = ((value & 0xFF000000u) == 0xFF000000u) ? 24 : 32;
-    value = nibbleSwap(value);
-    for (int bit = 0;  bit < len;  bit += 4) {
-        *pos++ = "0123456789abcdef"[(value >> bit) & 0xFu];
+////////////////////////////////////////////////////////////////////////////////
+
+void ConfigParserContext::error(const char* msg, const char* s) const {
+    fprintf(stderr, "%s:%d: %s '%s'\n", filename.c_str(), lineno, msg, s);
+}
+
+const ConfigItem* ConfigItem::find(const char* key) {
+    for (const ConfigItem* item = g_ConfigItems;  item->name;  ++item) {
+        if (stringEqualEx(item->name, key)) {
+            return item;
+        }
     }
-    *pos = '\0';
-    return str;
+    return nullptr;
+}
+
+bool ConfigItem::parse(ConfigParserContext& ctx, Config& cfg, const char* value) const {
+    if (!value) { return false; }
+    void* pValue = ptr(cfg);
+    bool ok = false;
+    switch (type) {
+        case DataType::String:
+            static_cast<std::string*>(pValue)->assign(value);
+            ok = true;
+            break;
+
+        case DataType::Bool: {
+            bool res = false;
+            ok = true;
+            if      (stringEqualEx(value, "0"))        { res = false; }
+            else if (stringEqualEx(value, "1"))        { res = true; }
+            else if (stringEqualEx(value, "false"))    { res = false; }
+            else if (stringEqualEx(value, "true"))     { res = true; }
+            else if (stringEqualEx(value, "off"))      { res = false; }
+            else if (stringEqualEx(value, "on"))       { res = true; }
+            else if (stringEqualEx(value, "no"))       { res = false; }
+            else if (stringEqualEx(value, "yes"))      { res = true; }
+            else if (stringEqualEx(value, "disabled")) { res = false; }
+            else if (stringEqualEx(value, "enabled"))  { res = true; }
+            else if (stringEqualEx(value, "disable"))  { res = false; }
+            else if (stringEqualEx(value, "enable"))   { res = true; }
+            else { ok = false; }
+            if (ok) { *static_cast<bool*>(pValue) = res; }
+            break; }
+
+        case DataType::Int: {
+            char* end = nullptr;
+            long res = std::strtol(value, &end, 0);
+            ok = (end && !*end);
+            if (ok) { *static_cast<int*>(pValue) = int(res); }
+            break; }
+
+        case DataType::Float: {
+            char* end = nullptr;
+            float res = std::strtof(value, &end);
+            ok = (end && !*end);
+            if (ok) { *static_cast<float*>(pValue) = res; }
+            break; }
+
+        case DataType::Color:
+            ok = parseColor(static_cast<uint32_t*>(pValue), value);
+            break;
+
+        case DataType::Enum: {
+            const char* p = values;
+            if (!p) { ctx.error("internal error: no values for key", ctx.key.c_str()); p = ""; }
+            int n = 0;
+            while (*p) {
+                if (stringEqualEx(p, value)) {
+                    *static_cast<int*>(pValue) = n;
+                    ok = true;
+                    break;
+                }
+                p += strlen(p) + 1u;
+                ++n;
+            }
+            break; }
+
+        default:  // unknown type, WTF?
+            ctx.error("internal error: invalid data type for key", ctx.key.c_str());
+            break;
+    }
+    if (ok) {
+        cfg.set.add(ordinal);
+    } else {
+        ctx.error("invalid value", value);
+    }
+    return ok;
+}
+
+std::string ConfigItem::format(const Config& cfg) const {
+    const void* pValue = ptr(const_cast<Config&>(cfg));
+    std::string res;
+    switch (type) {
+        case DataType::String:
+            res.assign(*static_cast<const std::string*>(pValue));
+            break;
+
+        case DataType::Bool:
+            res.assign(*static_cast<const bool*>(pValue) ? "true" : "false");
+            break;
+
+        case DataType::Int:
+            res.assign(std::to_string(*static_cast<const int*>(pValue)));
+            break;
+
+        case DataType::Float: {
+            char buffer[32];
+            ::snprintf(buffer, 32, "%.3f", *static_cast<const float*>(pValue));
+            res.assign(buffer);
+            break; }
+
+        case DataType::Color: {
+            char str[10], *pos = str;
+            *pos++ = '#';
+            uint32_t value = *static_cast<const uint32_t*>(pValue);
+            int len = ((value & 0xFF000000u) == 0xFF000000u) ? 24 : 32;
+            value = nibbleSwap(value);
+            for (int bit = 0;  bit < len;  bit += 4) {
+                *pos++ = "0123456789abcdef"[(value >> bit) & 0xFu];
+            }
+            *pos = '\0';
+            res.assign(str);
+            break; }
+
+        case DataType::Enum: {
+            const char* p = values ? values : "";
+            for (int n = *static_cast<const int*>(pValue);  *p && (n > 0);  --n) {
+                p += strlen(p) + 1u;
+            }
+            res.assign(p);
+            break; }
+
+        default:  // unknown type, WTF?
+            break;
+    }
+    return res;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -210,15 +262,10 @@ bool Config::load(const char* filename, const char* matchName) {
 
         // parse the actual value
         if (validSection) {
-            const ConfigItem *item;
-            for (item = g_ConfigItems;  item->name;  ++item) {
-                if (stringEqualEx(item->name, key)) {
-                    item->setter(ctx, *this, value);
-                    set.add(item->ordinal);
-                    break;
-                }
-            }
-            if (!item->name) { ctx.error("invalid key", key); }
+            ctx.key.assign(key);
+            const ConfigItem *item = ConfigItem::find(key);
+            if (item) { item->parse(ctx, *this, value); }
+            else      { ctx.error("invalid key", key); }
         }
     }
     fclose(f);
@@ -254,16 +301,10 @@ void Config::load(const Config::PreparedCommandLine& cmdline) {
             ctx.error("syntax error", arg.c_str());
             continue;
         }
-        std::string key = arg.substr(0, sep);
-        const ConfigItem *item;
-        for (item = g_ConfigItems;  item->name;  ++item) {
-            if (stringEqualEx(item->name, key.c_str())) {
-                item->setter(ctx, *this, arg.substr(sep + 1u).c_str());
-                set.add(item->ordinal);
-                break;
-            }
-        }
-        if (!item->name) { ctx.error("invalid key", key.c_str()); }
+        ctx.key = arg.substr(0, sep);
+        const ConfigItem *item = ConfigItem::find(ctx.key.c_str());
+        if (item) { item->parse(ctx, *this, arg.substr(sep + 1u).c_str()); }
+        else      { ctx.error("invalid key", ctx.key.c_str()); }
     }
 }
 
@@ -277,11 +318,12 @@ bool Config::save(const char* filename) {
     bool res = (fwrite(g_DefaultConfigFileIntro, std::strlen(g_DefaultConfigFileIntro), 1, f) == 1);
     for (const ConfigItem *item = g_ConfigItems;  item->name;  ++item) {
         if (item->flags & ConfigItem::Flags::NewGroup) { fprintf(f, "\n"); }
+        if (item->flags & ConfigItem::Flags::Hidden) { continue; }
         std::string name(item->name);
         if (int(name.size()) < g_ConfigItemMaxNameLength) {
             name.resize(g_ConfigItemMaxNameLength, ' ');
         }
-        fprintf(f, "%s = %-10s ; %s\n", name.c_str(), item->getter(*this).c_str(), item->description);
+        fprintf(f, "%s = %-10s ; %s\n", name.c_str(), item->format(*this).c_str(), item->description);
     }
     fclose(f);
     return res;
@@ -293,7 +335,7 @@ bool Config::saveLoudness(const char* filename) {
     FILE* f = fopen(filename, "a");
     if (!f) { return false; }
     fprintf(f, "\n; EBU R128 loudness scan result for samplerate=%d, filter=%s, stereo_separation=%d:\nloudness = %.2f\n",
-               sampleRate, ConfigItem::formatEnum(static_cast<int>(filter), e_FilterMethod).c_str(), stereoSeparation, loudness);
+               sampleRate, ConfigItem::find("filter")->format(*this).c_str(), stereoSeparation, loudness);
     fclose(f);
     return true;
 }
