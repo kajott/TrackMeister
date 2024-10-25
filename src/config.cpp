@@ -78,8 +78,8 @@ void ConfigParserContext::error(const char* msg, const char* s) const {
 }
 
 const ConfigItem* ConfigItem::find(const char* key) {
-    for (const ConfigItem* item = g_ConfigItems;  item->name;  ++item) {
-        if (stringEqualEx(item->name, key)) {
+    for (const ConfigItem* item = g_ConfigItems;  item->valid();  ++item) {
+        if ((item->type != DataType::SectionHeader) && stringEqualEx(item->name, key)) {
             return item;
         }
     }
@@ -87,7 +87,7 @@ const ConfigItem* ConfigItem::find(const char* key) {
 }
 
 bool ConfigItem::parse(ConfigParserContext& ctx, Config& cfg, const char* value) const {
-    if (!value) { return false; }
+    if (!value || !ptr) { return false; }
     void* pValue = ptr(cfg);
     bool ok = false;
     switch (type) {
@@ -161,9 +161,13 @@ bool ConfigItem::parse(ConfigParserContext& ctx, Config& cfg, const char* value)
 }
 
 std::string ConfigItem::format(const Config& cfg) const {
-    const void* pValue = ptr(const_cast<Config&>(cfg));
+    const void* pValue = ptr ? ptr(const_cast<Config&>(cfg)) : nullptr;
     std::string res;
     switch (type) {
+        case DataType::SectionHeader:
+            res.assign(description);
+            break;
+
         case DataType::String:
             res.assign(*static_cast<const std::string*>(pValue));
             break;
@@ -316,8 +320,11 @@ bool Config::save(const char* filename) {
     FILE* f = fopen(filename, "w");
     if (!f) { return false; }
     bool res = (fwrite(g_DefaultConfigFileIntro, std::strlen(g_DefaultConfigFileIntro), 1, f) == 1);
-    for (const ConfigItem *item = g_ConfigItems;  item->name;  ++item) {
-        if (item->flags & ConfigItem::Flags::NewGroup) { fprintf(f, "\n"); }
+    for (const ConfigItem *item = g_ConfigItems;  item->valid();  ++item) {
+        if (item->type == ConfigItem::DataType::SectionHeader) {
+            fprintf(f, "\n; %s\n", item->description);
+            continue;
+        }
         if (item->flags & ConfigItem::Flags::Hidden) { continue; }
         std::string name(item->name);
         if (int(name.size()) < g_ConfigItemMaxNameLength) {
@@ -343,8 +350,8 @@ bool Config::saveLoudness(const char* filename) {
 ////////////////////////////////////////////////////////////////////////////////
 
 void Config::import(const Config& src) {
-    for (const ConfigItem *item = g_ConfigItems;  item->name;  ++item) {
-        if (src.set.contains(item->ordinal)) {
+    for (const ConfigItem *item = g_ConfigItems;  item->valid();  ++item) {
+        if (src.set.contains(item->ordinal) && item->copy) {
             item->copy(src, *this);
         }
     }

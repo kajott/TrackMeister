@@ -10,10 +10,6 @@
 
 #include "config.h"
 
-enum class DataType : int {
-    String, Bool, Int, Float, Color, Enum
-};
-
 struct ConfigParserContext {
     std::string filename;
     int lineno;
@@ -26,13 +22,16 @@ struct ConfigParserContext {
 };
 
 struct ConfigItem {
+    enum class DataType : int {
+        SectionHeader=0, String, Bool, Int, Float, Color, Enum
+    };
+
     enum Flags : int {
-        NewGroup = (1 << 0),  // new option group
-        Reload   = (1 << 1),  // module reload required after changing
-        Image    = (1 << 2),  // image reload required after changing
-        Global   = (1 << 3),  // only relevant for global configuration
-        Startup  = (1 << 4),  // only evaluated at application startup (implies Global)
-        Hidden   = (1 << 5),  // hide from interactive configuration UI
+        Reload   = (1 << 0),  // module reload required after changing
+        Image    = (1 << 1),  // image reload required after changing
+        Global   = (1 << 2),  // only relevant for global configuration
+        Startup  = (1 << 3),  // only evaluated at application startup (implies Global)
+        Hidden   = (1 << 4),  // hide from interactive configuration UI
     };
 
     int ordinal;
@@ -48,6 +47,7 @@ struct ConfigItem {
     static const ConfigItem* find(const char* key);
     bool parse(ConfigParserContext& ctx, Config& cfg, const char* value) const;
     std::string format(const Config& cfg) const;
+    inline bool valid() const { return (type != DataType::SectionHeader) || description; }
 };
 
 extern const ConfigItem g_ConfigItems[];

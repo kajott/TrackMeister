@@ -76,6 +76,12 @@ if __name__ == "__main__":
                 new_section = True
                 continue
 
+            # comment at section start inside config structure
+            m = in_config and new_section and re.match(r'^//(?!!)\s*(.*)', line)
+            if m:
+                fields.append((None, None, None, None, m.group(1)))
+                continue
+
             # config item
             m = in_config and re.match(r'''
                 (?P<type>   [a-zA-Z0-9_:]+) \s*
@@ -90,8 +96,7 @@ if __name__ == "__main__":
                 type = m.group('type')
                 field = m.group('field')
                 flags = m.group('flags')
-                flags = {f.strip().capitalize() for f in flags.split(',')} if flags else set()
-                if new_section: flags.add("NewGroup")
+                flags = {f.strip() for f in flags.split(',')} if flags else set()
                 name = camelCase_to_space_case(field)
                 name_maxlen = max(name_maxlen, len(name))
                 flags_maxlen = max(flags_maxlen, len(flags))
@@ -123,6 +128,18 @@ if __name__ == "__main__":
             if first: first = False
             else: f.write('    }, {\n')
 
+            # handle section header
+            if not type:
+                desc = desc.replace('"', '\\"')
+                f.write(f'        0, ConfigItem::DataType::SectionHeader, 0, nullptr,\n        "{desc}",\n        nullptr, 0.0f, 0.0f, nullptr, nullptr\n')
+                continue
+            lname = name.lower()
+            ldesc = desc.lower()
+
+            # extract special flags
+            xflags = {f for f in flags if f.lower().startswith(("min ", "max ", "values "))}
+            flags -= xflags
+
             # add possible values to description
             if type in enums:
                 desc += " [possible values: " + ", ".join(f"'{e}'" for e in enums[type]) + "]"
@@ -135,18 +152,40 @@ if __name__ == "__main__":
             else:
                 dt = type.split('::', 1)[-1].capitalize()
 
-            # resolve value ranges
+            # resolve value ranges, step 1: load defaults
+            values = "nullptr"
+            vmin = 0
+            vmax = 1000 if (type == "int") else 1
             if type in enums:
-                values = '"{}\\0\\0"'.format('\\0'.join(enums[type]))
-            else:
-                values = "nullptr"
-            vmin = 0.0
-            vmax = 1000.0 if (type == "int") else 1.0
+                values = enums[type]
+            if "pos" in lname:
+                vmax = 100 if ("percent" in ldesc) else 1000
+            elif ("margin" in lname) or ("padding" in lname):
+                vmax = 100
+            elif "textsize" in lname:
+                vmin, vmax = 1, 200
+            elif "spacing" in lname:
+                vmin, vmax = -100, 100
+            elif "shadowsize" in lname:
+                vmax = 100
+            elif ("duration" in lname) or ("fadetime" in lname):
+                vmax = 60
+            elif "decibels" in ldesc:
+                vmin, vmax = -24, 24
+
+            # resolve value ranges, step 2: override with special flags
+            for k, v in (f.split(maxsplit=1) for f in xflags):
+                k = k.lower()
+                if k == "min": vmin = float(v)
+                if k == "max": vmax = float(v)
+                if k == "values": values = [x.strip() for x in v.split("|")]
+            if isinstance(values, (list, tuple)):
+                values = '"{}\\0\\0"'.format('\\0'.join(values))
 
             # write name and description
             ordinal += 1
-            flags = " | ".join("ConfigItem::Flags::" + f for f in flags) or "0"
-            f.write(f'        {ordinal}, DataType::{dt}, {flags},\n')
+            flags = " | ".join("ConfigItem::Flags::" + f.capitalize() for f in flags) or "0"
+            f.write(f'        {ordinal}, ConfigItem::DataType::{dt}, {flags},\n')
             f.write(f'        "{name}",\n')
             desc = desc.replace('"', '\\"')
             f.write(f'        "{desc}",\n')
@@ -156,7 +195,7 @@ if __name__ == "__main__":
             f.write(f'        [] (Config& src) -> void* {{ return static_cast<void*>(&src.{field}); }},\n')
             f.write(f'        [] (const Config& src, Config& dest) {{ dest.{field} = src.{field}; }}\n')
 
-        f.write('    },\n    { 0, DataType::Bool, 0, nullptr, nullptr, nullptr, 0.0f, 0.0f, nullptr, nullptr }\n};\n')
+        f.write('    },\n    { 0, ConfigItem::DataType::SectionHeader, 0, nullptr, nullptr, nullptr, 0.0f, 0.0f, nullptr, nullptr }\n};\n')
 
         f.write('\nconst char* g_DefaultConfigFileIntro =\n')
         first = True

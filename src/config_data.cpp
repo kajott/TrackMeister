@@ -9,917 +9,977 @@
 const int g_ConfigItemMaxNameLength = 27;
 
 const ConfigItem g_ConfigItems[] = { {
-        1, DataType::Bool, ConfigItem::Flags::Startup | ConfigItem::Flags::NewGroup,
+        0, ConfigItem::DataType::SectionHeader, 0, nullptr,
+        "display",
+        nullptr, 0.0f, 0.0f, nullptr, nullptr
+    }, {
+        1, ConfigItem::DataType::Bool, ConfigItem::Flags::Startup,
         "fullscreen",
         "whether to run in fullscreen mode",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.fullscreen); },
         [] (const Config& src, Config& dest) { dest.fullscreen = src.fullscreen; }
     }, {
-        2, DataType::Int, ConfigItem::Flags::Startup,
+        2, ConfigItem::DataType::Int, ConfigItem::Flags::Startup,
         "window width",
         "initial window width  in non-fullscreen mode, in pixels",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 640.0f, 3840.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.windowWidth); },
         [] (const Config& src, Config& dest) { dest.windowWidth = src.windowWidth; }
     }, {
-        3, DataType::Int, ConfigItem::Flags::Startup,
+        3, ConfigItem::DataType::Int, ConfigItem::Flags::Startup,
         "window height",
         "initial window height in non-fullscreen mode, in pixels",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 480.0f, 2160.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.windowHeight); },
         [] (const Config& src, Config& dest) { dest.windowHeight = src.windowHeight; }
     }, {
-        4, DataType::Float, 0,
+        4, ConfigItem::DataType::Float, 0,
         "alpha gamma",
         "fake gamma-correct rendering by applying gamma to the alpha channel; higher values = thicker and less aliasing for bright-on-dark text",
-        nullptr, 0.0f, 1.0f,
+        nullptr, 0.5f, 3.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.alphaGamma); },
         [] (const Config& src, Config& dest) { dest.alphaGamma = src.alphaGamma; }
     }, {
-        5, DataType::Int, ConfigItem::Flags::Startup | ConfigItem::Flags::NewGroup,
+        5, ConfigItem::DataType::String, 0,
+        "font",
+        "font to use for all displays: 'inconsolata' (default), 'iosevka', 'topaz'/'topaz1200'/'topaz500', 'pc' (note: all font sizes will be rounded down to an integer multiple of 16 pixels if a bitmap font is used)",
+        "(default)\0Inconsolata\0Iosevka\0Topaz500\0Topaz1200\0PC\0\0", 0.0f, 1.0f,
+        [] (Config& src) -> void* { return static_cast<void*>(&src.font); },
+        [] (const Config& src, Config& dest) { dest.font = src.font; }
+    }, {
+        0, ConfigItem::DataType::SectionHeader, 0, nullptr,
+        "audio rendering",
+        nullptr, 0.0f, 0.0f, nullptr, nullptr
+    }, {
+        6, ConfigItem::DataType::Int, ConfigItem::Flags::Startup,
         "sample rate",
         "audio sampling rate",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 8000.0f, 96000.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.sampleRate); },
         [] (const Config& src, Config& dest) { dest.sampleRate = src.sampleRate; }
     }, {
-        6, DataType::Int, ConfigItem::Flags::Startup,
+        7, ConfigItem::DataType::Int, ConfigItem::Flags::Startup,
         "audio buffer size",
         "size of the audio buffer, in samples; if there are dropouts, try doubling this value",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 64.0f, 4096.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.audioBufferSize); },
         [] (const Config& src, Config& dest) { dest.audioBufferSize = src.audioBufferSize; }
     }, {
-        7, DataType::Enum, ConfigItem::Flags::Reload,
+        8, ConfigItem::DataType::Enum, ConfigItem::Flags::Reload,
         "filter",
         "audio resampling filter to be used [possible values: 'None', 'Linear', 'Cubic', 'Sinc', 'Amiga', 'A500', 'A1200', 'Auto']",
         "None\0Linear\0Cubic\0Sinc\0Amiga\0A500\0A1200\0Auto\0\0", 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.filter); },
         [] (const Config& src, Config& dest) { dest.filter = src.filter; }
     }, {
-        8, DataType::Int, ConfigItem::Flags::Reload,
+        9, ConfigItem::DataType::Int, ConfigItem::Flags::Reload,
         "stereo separation",
         "amount of stereo separation, in percent (0 = mono, 100 = half stereo for MOD / full stereo for others, 200 = full stereo for MOD)",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 0.0f, 200.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.stereoSeparation); },
         [] (const Config& src, Config& dest) { dest.stereoSeparation = src.stereoSeparation; }
     }, {
-        9, DataType::Int, ConfigItem::Flags::Reload,
+        10, ConfigItem::DataType::Int, ConfigItem::Flags::Reload,
         "volume ramping",
         "volume ramping strength (0 = no ramping, 10 = softest ramping, -1 = recommended default)",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, -1.0f, 10.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.volumeRamping); },
         [] (const Config& src, Config& dest) { dest.volumeRamping = src.volumeRamping; }
     }, {
-        10, DataType::Float, ConfigItem::Flags::Reload,
+        11, ConfigItem::DataType::Float, ConfigItem::Flags::Reload,
         "gain",
         "global gain to apply, in decibels",
-        nullptr, 0.0f, 1.0f,
+        nullptr, -24.0f, 24.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.gain); },
         [] (const Config& src, Config& dest) { dest.gain = src.gain; }
     }, {
-        11, DataType::Float, ConfigItem::Flags::Hidden,
+        12, ConfigItem::DataType::Float, ConfigItem::Flags::Hidden,
         "loudness",
         "the current track's measured loudness, in decibels; values < -100 mean \"no loudness measured\"",
-        nullptr, 0.0f, 1.0f,
+        nullptr, -24.0f, 24.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.loudness); },
         [] (const Config& src, Config& dest) { dest.loudness = src.loudness; }
     }, {
-        12, DataType::Float, ConfigItem::Flags::Reload,
+        13, ConfigItem::DataType::Float, ConfigItem::Flags::Reload,
         "target loudness",
         "target loudness, in decibels (or LUFS); if the 'loudness' parameter is valid, an extra gain will be applied (in addition to 'gain') so that the loudness is corrected to this value",
-        nullptr, 0.0f, 1.0f,
+        nullptr, -24.0f, 24.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.targetLoudness); },
         [] (const Config& src, Config& dest) { dest.targetLoudness = src.targetLoudness; }
     }, {
-        13, DataType::Bool, ConfigItem::Flags::NewGroup | ConfigItem::Flags::Reload,
+        0, ConfigItem::DataType::SectionHeader, 0, nullptr,
+        "playback control",
+        nullptr, 0.0f, 0.0f, nullptr, nullptr
+    }, {
+        14, ConfigItem::DataType::Bool, ConfigItem::Flags::Reload,
         "auto play",
         "automatically start playing when loading a module; you may want to turn this off for actual competitions",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.autoPlay); },
         [] (const Config& src, Config& dest) { dest.autoPlay = src.autoPlay; }
     }, {
-        14, DataType::Bool, 0,
+        15, ConfigItem::DataType::Bool, 0,
         "auto advance",
         "automatically continue with the next song in the directory if the current song stopped; allows for jukebox-like functionality",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.autoAdvance); },
         [] (const Config& src, Config& dest) { dest.autoAdvance = src.autoAdvance; }
     }, {
-        15, DataType::Bool, ConfigItem::Flags::Global,
+        16, ConfigItem::DataType::Bool, ConfigItem::Flags::Global,
         "shuffle",
         "play tracks of the directory endlessly, and in random order",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.shuffle); },
         [] (const Config& src, Config& dest) { dest.shuffle = src.shuffle; }
     }, {
-        16, DataType::Bool, 0,
+        17, ConfigItem::DataType::Bool, 0,
         "loop",
         "whether to loop the song after it's finished, or play the song's programmed loop if it there is one",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.loop); },
         [] (const Config& src, Config& dest) { dest.loop = src.loop; }
     }, {
-        17, DataType::Bool, 0,
+        18, ConfigItem::DataType::Bool, 0,
         "fade out after loop",
         "whether to trigger a slow fade-out after the song looped",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.fadeOutAfterLoop); },
         [] (const Config& src, Config& dest) { dest.fadeOutAfterLoop = src.fadeOutAfterLoop; }
     }, {
-        18, DataType::Float, 0,
+        19, ConfigItem::DataType::Float, 0,
         "fade out at",
         "number of seconds after which the song shall be slowly faded out automatically (0 = no auto-fade)",
-        nullptr, 0.0f, 1.0f,
+        nullptr, 0.0f, 1000.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.fadeOutAt); },
         [] (const Config& src, Config& dest) { dest.fadeOutAt = src.fadeOutAt; }
     }, {
-        19, DataType::Float, 0,
+        20, ConfigItem::DataType::Float, 0,
         "fade duration",
         "duration of a fade-out, in seconds",
-        nullptr, 0.0f, 1.0f,
+        nullptr, 0.0f, 60.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.fadeDuration); },
         [] (const Config& src, Config& dest) { dest.fadeDuration = src.fadeDuration; }
     }, {
-        20, DataType::Bool, ConfigItem::Flags::NewGroup,
+        0, ConfigItem::DataType::SectionHeader, 0, nullptr,
+        "metadata scrolling",
+        nullptr, 0.0f, 0.0f, nullptr, nullptr
+    }, {
+        21, ConfigItem::DataType::Bool, 0,
         "auto scroll enabled",
         "whether to enable automatic scrolling in the metadata sidebar after loading a module",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.autoScrollEnabled); },
         [] (const Config& src, Config& dest) { dest.autoScrollEnabled = src.autoScrollEnabled; }
     }, {
-        21, DataType::Float, 0,
+        22, ConfigItem::DataType::Float, 0,
         "max scroll duration",
         "maximum duration after which automatic metadata scrolling reaches the end, in seconds; if the module is shorter than that, the module's duration will be used instead",
-        nullptr, 0.0f, 1.0f,
+        nullptr, 0.0f, 1000.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.maxScrollDuration); },
         [] (const Config& src, Config& dest) { dest.maxScrollDuration = src.maxScrollDuration; }
     }, {
-        22, DataType::Float, 0,
+        23, ConfigItem::DataType::Float, 0,
         "scroll delay",
         "delay (in seconds) before autoscrolling begins, and ends early before the track end",
-        nullptr, 0.0f, 1.0f,
+        nullptr, 0.0f, 100.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.scrollDelay); },
         [] (const Config& src, Config& dest) { dest.scrollDelay = src.scrollDelay; }
     }, {
-        23, DataType::String, ConfigItem::Flags::NewGroup,
-        "font",
-        "font to use for all displays: 'inconsolata' (default), 'iosevka', 'topaz'/'topaz1200'/'topaz500', 'pc' (note: all font sizes will be rounded down to an integer multiple of 16 pixels if a bitmap font is used)",
-        nullptr, 0.0f, 1.0f,
-        [] (Config& src) -> void* { return static_cast<void*>(&src.font); },
-        [] (const Config& src, Config& dest) { dest.font = src.font; }
+        0, ConfigItem::DataType::SectionHeader, 0, nullptr,
+        "background colors",
+        nullptr, 0.0f, 0.0f, nullptr, nullptr
     }, {
-        24, DataType::Color, ConfigItem::Flags::NewGroup,
+        24, ConfigItem::DataType::Color, 0,
         "empty background",
         "background color of \"no module loaded\" screen",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.emptyBackground); },
         [] (const Config& src, Config& dest) { dest.emptyBackground = src.emptyBackground; }
     }, {
-        25, DataType::Color, 0,
+        25, ConfigItem::DataType::Color, 0,
         "pattern background",
         "background color of pattern display",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.patternBackground); },
         [] (const Config& src, Config& dest) { dest.patternBackground = src.patternBackground; }
     }, {
-        26, DataType::Color, 0,
+        26, ConfigItem::DataType::Color, 0,
         "info background",
         "background color of the top information bar",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.infoBackground); },
         [] (const Config& src, Config& dest) { dest.infoBackground = src.infoBackground; }
     }, {
-        27, DataType::Color, 0,
+        27, ConfigItem::DataType::Color, 0,
         "meta background",
         "background color of the metadata sidebar",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.metaBackground); },
         [] (const Config& src, Config& dest) { dest.metaBackground = src.metaBackground; }
     }, {
-        28, DataType::Color, 0,
+        28, ConfigItem::DataType::Color, 0,
         "shadow color",
         "color of the info and metadata bar's shadows",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.shadowColor); },
         [] (const Config& src, Config& dest) { dest.shadowColor = src.shadowColor; }
     }, {
-        29, DataType::String, 0,
+        29, ConfigItem::DataType::String, ConfigItem::Flags::Image,
         "background image",
-        "background image; must be a PNG file; will be cropped scaled to fill the entire screen (without distorting the aspect ratio)",
+        "background image; must be a PNG file; will be cropped and scaled to fill the entire screen (without distorting the aspect ratio)",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.backgroundImage); },
         [] (const Config& src, Config& dest) { dest.backgroundImage = src.backgroundImage; }
     }, {
-        30, DataType::Bool, ConfigItem::Flags::NewGroup,
+        0, ConfigItem::DataType::SectionHeader, 0, nullptr,
+        "background logo",
+        nullptr, 0.0f, 0.0f, nullptr, nullptr
+    }, {
+        30, ConfigItem::DataType::Bool, 0,
         "logo enabled",
         "whether to show a logo at all",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.logoEnabled); },
         [] (const Config& src, Config& dest) { dest.logoEnabled = src.logoEnabled; }
     }, {
-        31, DataType::String, 0,
+        31, ConfigItem::DataType::String, ConfigItem::Flags::Image,
         "logo",
         "custom logo file; must be a grayscale PNG file with high-contrast black-on-white artwork; will be downscaled by a power of two so it fits into the canvas",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.logo); },
         [] (const Config& src, Config& dest) { dest.logo = src.logo; }
     }, {
-        32, DataType::Bool, 0,
+        32, ConfigItem::DataType::Bool, 0,
         "logo scaling",
         "whether to allow arbitrary downscaling scaling of the logo (if false, only allow power-of-two downscaling)",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.logoScaling); },
         [] (const Config& src, Config& dest) { dest.logoScaling = src.logoScaling; }
     }, {
-        33, DataType::Int, 0,
+        33, ConfigItem::DataType::Int, 0,
         "logo margin",
         "minimum distance between the logo image and the surrounding screen or panel edges",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 0.0f, 100.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.logoMargin); },
         [] (const Config& src, Config& dest) { dest.logoMargin = src.logoMargin; }
     }, {
-        34, DataType::Int, 0,
+        34, ConfigItem::DataType::Int, 0,
         "logo pos X",
         "horizontal logo position, in percent of the available area (0 = left, 50 = center, 100 = right)",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 0.0f, 100.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.logoPosX); },
         [] (const Config& src, Config& dest) { dest.logoPosX = src.logoPosX; }
     }, {
-        35, DataType::Int, 0,
+        35, ConfigItem::DataType::Int, 0,
         "logo pos Y",
         "vertical logo position, in percent of the available area (0 = top, 50 = center, 100 = bottom)",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 0.0f, 100.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.logoPosY); },
         [] (const Config& src, Config& dest) { dest.logoPosY = src.logoPosY; }
     }, {
-        36, DataType::Int, ConfigItem::Flags::NewGroup,
+        0, ConfigItem::DataType::SectionHeader, 0, nullptr,
+        "\"no module loaded\" screen",
+        nullptr, 0.0f, 0.0f, nullptr, nullptr
+    }, {
+        36, ConfigItem::DataType::Int, 0,
         "empty text size",
         "size of the \"no module loaded\" text",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 1.0f, 200.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.emptyTextSize); },
         [] (const Config& src, Config& dest) { dest.emptyTextSize = src.emptyTextSize; }
     }, {
-        37, DataType::Int, 0,
+        37, ConfigItem::DataType::Int, 0,
         "empty logo pos Y",
         "vertical position of the center of the logo on the \"no module loaded\" screen",
         nullptr, 0.0f, 1000.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.emptyLogoPosY); },
         [] (const Config& src, Config& dest) { dest.emptyLogoPosY = src.emptyLogoPosY; }
     }, {
-        38, DataType::Int, 0,
+        38, ConfigItem::DataType::Int, 0,
         "empty text pos Y",
         "vertical position of the \"no module loaded\" text",
         nullptr, 0.0f, 1000.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.emptyTextPosY); },
         [] (const Config& src, Config& dest) { dest.emptyTextPosY = src.emptyTextPosY; }
     }, {
-        39, DataType::Color, 0,
+        39, ConfigItem::DataType::Color, 0,
         "empty text color",
         "color of the \"no module loaded\" text",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.emptyTextColor); },
         [] (const Config& src, Config& dest) { dest.emptyTextColor = src.emptyTextColor; }
     }, {
-        40, DataType::Color, 0,
+        40, ConfigItem::DataType::Color, 0,
         "empty logo color",
         "logo color on the \"no module loaded\" screen",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.emptyLogoColor); },
         [] (const Config& src, Config& dest) { dest.emptyLogoColor = src.emptyLogoColor; }
     }, {
-        41, DataType::Bool, ConfigItem::Flags::NewGroup,
+        0, ConfigItem::DataType::SectionHeader, 0, nullptr,
+        "info bar",
+        nullptr, 0.0f, 0.0f, nullptr, nullptr
+    }, {
+        41, ConfigItem::DataType::Bool, 0,
         "info enabled",
         "whether to enable the top information bar by default after loading a module",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.infoEnabled); },
         [] (const Config& src, Config& dest) { dest.infoEnabled = src.infoEnabled; }
     }, {
-        42, DataType::Bool, 0,
+        42, ConfigItem::DataType::Bool, 0,
         "track number enabled",
         "whether to extract and display the track number from the filename; used if the filename starts with two digits followed by a dash (-), underscore (_) or space",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.trackNumberEnabled); },
         [] (const Config& src, Config& dest) { dest.trackNumberEnabled = src.trackNumberEnabled; }
     }, {
-        43, DataType::Bool, 0,
+        43, ConfigItem::DataType::Bool, 0,
         "show time",
         "show current time in track at the end of the details line",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.showTime); },
         [] (const Config& src, Config& dest) { dest.showTime = src.showTime; }
     }, {
-        44, DataType::Bool, 0,
+        44, ConfigItem::DataType::Bool, 0,
         "hide file ext",
         "whether to remove the file extension from the filename in the info bar",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.hideFileExt); },
         [] (const Config& src, Config& dest) { dest.hideFileExt = src.hideFileExt; }
     }, {
-        45, DataType::Bool, 0,
+        45, ConfigItem::DataType::Bool, 0,
         "auto hide file name",
         "whether to hide the filename completely if title and/or artist information is available",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.autoHideFileName); },
         [] (const Config& src, Config& dest) { dest.autoHideFileName = src.autoHideFileName; }
     }, {
-        46, DataType::String, 0,
+        46, ConfigItem::DataType::String, 0,
         "artist",
         "override artist info from the module with a custom string",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.artist); },
         [] (const Config& src, Config& dest) { dest.artist = src.artist; }
     }, {
-        47, DataType::String, 0,
+        47, ConfigItem::DataType::String, 0,
         "title",
         "override title info from the module with a custom string",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.title); },
         [] (const Config& src, Config& dest) { dest.title = src.title; }
     }, {
-        48, DataType::Int, 0,
+        48, ConfigItem::DataType::Int, 0,
         "info margin X",
         "outer left margin inside the info bar",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 0.0f, 100.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.infoMarginX); },
         [] (const Config& src, Config& dest) { dest.infoMarginX = src.infoMarginX; }
     }, {
-        49, DataType::Int, 0,
+        49, ConfigItem::DataType::Int, 0,
         "info margin Y",
         "upper and lower margin inside the info bar",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 0.0f, 100.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.infoMarginY); },
         [] (const Config& src, Config& dest) { dest.infoMarginY = src.infoMarginY; }
     }, {
-        50, DataType::Int, 0,
+        50, ConfigItem::DataType::Int, 0,
         "info track text size",
         "text size of the track number",
         nullptr, 0.0f, 1000.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.infoTrackTextSize); },
         [] (const Config& src, Config& dest) { dest.infoTrackTextSize = src.infoTrackTextSize; }
     }, {
-        51, DataType::Int, 0,
+        51, ConfigItem::DataType::Int, 0,
         "info text size",
         "text size of the filename, title and artist lines",
         nullptr, 0.0f, 1000.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.infoTextSize); },
         [] (const Config& src, Config& dest) { dest.infoTextSize = src.infoTextSize; }
     }, {
-        52, DataType::Int, 0,
+        52, ConfigItem::DataType::Int, 0,
         "info details text size",
         "text size of the technical details line",
         nullptr, 0.0f, 1000.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.infoDetailsTextSize); },
         [] (const Config& src, Config& dest) { dest.infoDetailsTextSize = src.infoDetailsTextSize; }
     }, {
-        53, DataType::Int, 0,
+        53, ConfigItem::DataType::Int, 0,
         "info line spacing",
         "extra space between the info bar's lines",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, -100.0f, 100.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.infoLineSpacing); },
         [] (const Config& src, Config& dest) { dest.infoLineSpacing = src.infoLineSpacing; }
     }, {
-        54, DataType::Int, 0,
+        54, ConfigItem::DataType::Int, 0,
         "info track padding X",
         "horitontal space between the track number and the other information in the info bar",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 0.0f, 100.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.infoTrackPaddingX); },
         [] (const Config& src, Config& dest) { dest.infoTrackPaddingX = src.infoTrackPaddingX; }
     }, {
-        55, DataType::Int, 0,
+        55, ConfigItem::DataType::Int, 0,
         "info key padding X",
         "horizontal space between the \"File\", \"Artist\" and \"Title\" heading and the content text",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 0.0f, 100.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.infoKeyPaddingX); },
         [] (const Config& src, Config& dest) { dest.infoKeyPaddingX = src.infoKeyPaddingX; }
     }, {
-        56, DataType::Color, 0,
+        56, ConfigItem::DataType::Color, 0,
         "info track color",
         "color of the track number",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.infoTrackColor); },
         [] (const Config& src, Config& dest) { dest.infoTrackColor = src.infoTrackColor; }
     }, {
-        57, DataType::Color, 0,
+        57, ConfigItem::DataType::Color, 0,
         "info key color",
         "color of the \"File\", \"Artist\" and \"Title\" headings",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.infoKeyColor); },
         [] (const Config& src, Config& dest) { dest.infoKeyColor = src.infoKeyColor; }
     }, {
-        58, DataType::Color, 0,
+        58, ConfigItem::DataType::Color, 0,
         "info colon color",
         "color of the colon following the headings",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.infoColonColor); },
         [] (const Config& src, Config& dest) { dest.infoColonColor = src.infoColonColor; }
     }, {
-        59, DataType::Color, 0,
+        59, ConfigItem::DataType::Color, 0,
         "info value color",
         "color of the file, artist and title texts",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.infoValueColor); },
         [] (const Config& src, Config& dest) { dest.infoValueColor = src.infoValueColor; }
     }, {
-        60, DataType::Color, 0,
+        60, ConfigItem::DataType::Color, 0,
         "info details color",
         "color of the technical details line",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.infoDetailsColor); },
         [] (const Config& src, Config& dest) { dest.infoDetailsColor = src.infoDetailsColor; }
     }, {
-        61, DataType::Int, 0,
+        61, ConfigItem::DataType::Int, 0,
         "info shadow size",
         "width of the shadow below the info bar",
         nullptr, 0.0f, 1000.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.infoShadowSize); },
         [] (const Config& src, Config& dest) { dest.infoShadowSize = src.infoShadowSize; }
     }, {
-        62, DataType::Bool, ConfigItem::Flags::NewGroup,
+        0, ConfigItem::DataType::SectionHeader, 0, nullptr,
+        "progress bar",
+        nullptr, 0.0f, 0.0f, nullptr, nullptr
+    }, {
+        62, ConfigItem::DataType::Bool, 0,
         "progress enabled",
         "whether to show a progress bar",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.progressEnabled); },
         [] (const Config& src, Config& dest) { dest.progressEnabled = src.progressEnabled; }
     }, {
-        63, DataType::Int, 0,
+        63, ConfigItem::DataType::Int, 0,
         "progress height",
         "height (\"thickness\") of the progress bar",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 0.0f, 100.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.progressHeight); },
         [] (const Config& src, Config& dest) { dest.progressHeight = src.progressHeight; }
     }, {
-        64, DataType::Int, 0,
+        64, ConfigItem::DataType::Int, 0,
         "progress margin top",
         "extra space to insert above the progress bar",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 0.0f, 100.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.progressMarginTop); },
         [] (const Config& src, Config& dest) { dest.progressMarginTop = src.progressMarginTop; }
     }, {
-        65, DataType::Int, 0,
+        65, ConfigItem::DataType::Int, 0,
         "progress border size",
         "size/thickness/width of the progress bar's border (0 = no border)",
         nullptr, 0.0f, 1000.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.progressBorderSize); },
         [] (const Config& src, Config& dest) { dest.progressBorderSize = src.progressBorderSize; }
     }, {
-        66, DataType::Int, 0,
+        66, ConfigItem::DataType::Int, 0,
         "progress border padding",
         "inside padding between the actual progress indicator and the progress bar's border",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 0.0f, 100.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.progressBorderPadding); },
         [] (const Config& src, Config& dest) { dest.progressBorderPadding = src.progressBorderPadding; }
     }, {
-        67, DataType::Color, 0,
+        67, ConfigItem::DataType::Color, 0,
         "progress border color",
         "color of the progress bar's border",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.progressBorderColor); },
         [] (const Config& src, Config& dest) { dest.progressBorderColor = src.progressBorderColor; }
     }, {
-        68, DataType::Color, 0,
+        68, ConfigItem::DataType::Color, 0,
         "progress outer color",
         "color of the progress bar's empty area (note: this is drawn on top of the border, so be careful with alpha!)",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.progressOuterColor); },
         [] (const Config& src, Config& dest) { dest.progressOuterColor = src.progressOuterColor; }
     }, {
-        69, DataType::Color, 0,
+        69, ConfigItem::DataType::Color, 0,
         "progress inner color",
         "color of the actual progress indicator (note: this is drawn on top of the other two progress bar elements, so be careful with alpha!)",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.progressInnerColor); },
         [] (const Config& src, Config& dest) { dest.progressInnerColor = src.progressInnerColor; }
     }, {
-        70, DataType::Bool, ConfigItem::Flags::NewGroup,
+        0, ConfigItem::DataType::SectionHeader, 0, nullptr,
+        "metadata bar",
+        nullptr, 0.0f, 0.0f, nullptr, nullptr
+    }, {
+        70, ConfigItem::DataType::Bool, 0,
         "meta enabled",
         "whether to enable the metadata sidebar by default after loading a module",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.metaEnabled); },
         [] (const Config& src, Config& dest) { dest.metaEnabled = src.metaEnabled; }
     }, {
-        71, DataType::Bool, 0,
+        71, ConfigItem::DataType::Bool, 0,
         "meta show message",
         "whether the metadata sidebar shall include the module message section",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.metaShowMessage); },
         [] (const Config& src, Config& dest) { dest.metaShowMessage = src.metaShowMessage; }
     }, {
-        72, DataType::Bool, 0,
+        72, ConfigItem::DataType::Bool, 0,
         "meta show instrument names",
         "whether the metadata sidebar shall include the instrument names section",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.metaShowInstrumentNames); },
         [] (const Config& src, Config& dest) { dest.metaShowInstrumentNames = src.metaShowInstrumentNames; }
     }, {
-        73, DataType::Bool, 0,
+        73, ConfigItem::DataType::Bool, 0,
         "meta show sample names",
         "whether the metadata sidebar shall include the sample names section",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.metaShowSampleNames); },
         [] (const Config& src, Config& dest) { dest.metaShowSampleNames = src.metaShowSampleNames; }
     }, {
-        74, DataType::Int, 0,
+        74, ConfigItem::DataType::Int, 0,
         "meta margin X",
         "left and right margin inside the metadata sidebar",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 0.0f, 100.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.metaMarginX); },
         [] (const Config& src, Config& dest) { dest.metaMarginX = src.metaMarginX; }
     }, {
-        75, DataType::Int, 0,
+        75, ConfigItem::DataType::Int, 0,
         "meta margin Y",
         "upper and lower margin inside the metadata sidebar",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 0.0f, 100.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.metaMarginY); },
         [] (const Config& src, Config& dest) { dest.metaMarginY = src.metaMarginY; }
     }, {
-        76, DataType::Int, 0,
+        76, ConfigItem::DataType::Int, 0,
         "meta text size",
         "text size in the metadata sidebar",
         nullptr, 0.0f, 1000.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.metaTextSize); },
         [] (const Config& src, Config& dest) { dest.metaTextSize = src.metaTextSize; }
     }, {
-        77, DataType::Int, 0,
+        77, ConfigItem::DataType::Int, 0,
         "meta message width",
         "approximate number of characters per line to allocate for the module message",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 25.0f, 80.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.metaMessageWidth); },
         [] (const Config& src, Config& dest) { dest.metaMessageWidth = src.metaMessageWidth; }
     }, {
-        78, DataType::Int, 0,
+        78, ConfigItem::DataType::Int, 0,
         "meta section margin",
         "vertical gap between sections in the metadata sidebar",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 0.0f, 100.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.metaSectionMargin); },
         [] (const Config& src, Config& dest) { dest.metaSectionMargin = src.metaSectionMargin; }
     }, {
-        79, DataType::Color, 0,
+        79, ConfigItem::DataType::Color, 0,
         "meta heading color",
         "color of a section heading in the metadata sidebar",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.metaHeadingColor); },
         [] (const Config& src, Config& dest) { dest.metaHeadingColor = src.metaHeadingColor; }
     }, {
-        80, DataType::Color, 0,
+        80, ConfigItem::DataType::Color, 0,
         "meta text color",
         "color of normal text in the metadata sidebar",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.metaTextColor); },
         [] (const Config& src, Config& dest) { dest.metaTextColor = src.metaTextColor; }
     }, {
-        81, DataType::Color, 0,
+        81, ConfigItem::DataType::Color, 0,
         "meta index color",
         "color of the instrument/sample numbers in the metadata sidebar",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.metaIndexColor); },
         [] (const Config& src, Config& dest) { dest.metaIndexColor = src.metaIndexColor; }
     }, {
-        82, DataType::Color, 0,
+        82, ConfigItem::DataType::Color, 0,
         "meta colon color",
         "color of the colon between instrument/sample number and name in the metadata sidebar",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.metaColonColor); },
         [] (const Config& src, Config& dest) { dest.metaColonColor = src.metaColonColor; }
     }, {
-        83, DataType::Int, 0,
+        83, ConfigItem::DataType::Int, 0,
         "meta shadow size",
         "width of the shadow left to the the metadata sidebar",
         nullptr, 0.0f, 1000.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.metaShadowSize); },
         [] (const Config& src, Config& dest) { dest.metaShadowSize = src.metaShadowSize; }
     }, {
-        84, DataType::Int, ConfigItem::Flags::NewGroup,
+        0, ConfigItem::DataType::SectionHeader, 0, nullptr,
+        "pattern display",
+        nullptr, 0.0f, 0.0f, nullptr, nullptr
+    }, {
+        84, ConfigItem::DataType::Int, 0,
         "pattern text size",
         "desired size of the pattern display text",
         nullptr, 0.0f, 1000.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.patternTextSize); },
         [] (const Config& src, Config& dest) { dest.patternTextSize = src.patternTextSize; }
     }, {
-        85, DataType::Int, 0,
+        85, ConfigItem::DataType::Int, 0,
         "pattern min text size",
         "minimum allowed size of the pattern display text (if the pattern still doesn't fit with this, some channels won't be visible)",
         nullptr, 0.0f, 1000.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.patternMinTextSize); },
         [] (const Config& src, Config& dest) { dest.patternMinTextSize = src.patternMinTextSize; }
     }, {
-        86, DataType::Int, 0,
+        86, ConfigItem::DataType::Int, 0,
         "pattern line spacing",
         "extra vertical gap between rows in the pattern display",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, -100.0f, 100.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.patternLineSpacing); },
         [] (const Config& src, Config& dest) { dest.patternLineSpacing = src.patternLineSpacing; }
     }, {
-        87, DataType::Int, 0,
+        87, ConfigItem::DataType::Int, 0,
         "pattern margin X",
         "left and right margin inside the pattern display",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 0.0f, 100.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.patternMarginX); },
         [] (const Config& src, Config& dest) { dest.patternMarginX = src.patternMarginX; }
     }, {
-        88, DataType::Int, 0,
+        88, ConfigItem::DataType::Int, 0,
         "pattern bar padding X",
         "extra left and right padding of the current row bar in the pattern display",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 0.0f, 100.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.patternBarPaddingX); },
         [] (const Config& src, Config& dest) { dest.patternBarPaddingX = src.patternBarPaddingX; }
     }, {
-        89, DataType::Int, 0,
+        89, ConfigItem::DataType::Int, 0,
         "pattern bar border percent",
         "border radius of the current row bar, in percent of the text size",
         nullptr, 0.0f, 1000.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.patternBarBorderPercent); },
         [] (const Config& src, Config& dest) { dest.patternBarBorderPercent = src.patternBarBorderPercent; }
     }, {
-        90, DataType::Color, 0,
+        90, ConfigItem::DataType::Color, 0,
         "pattern logo color",
         "color of the background logo",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.patternLogoColor); },
         [] (const Config& src, Config& dest) { dest.patternLogoColor = src.patternLogoColor; }
     }, {
-        91, DataType::Color, 0,
+        91, ConfigItem::DataType::Color, 0,
         "pattern bar background",
         "fill color of the current row bar",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.patternBarBackground); },
         [] (const Config& src, Config& dest) { dest.patternBarBackground = src.patternBarBackground; }
     }, {
-        92, DataType::Color, 0,
+        92, ConfigItem::DataType::Color, 0,
         "pattern text color",
         "color of normal text in the pattern display (not used, as everything in the pattern display is covered by the following highlighting colors)",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.patternTextColor); },
         [] (const Config& src, Config& dest) { dest.patternTextColor = src.patternTextColor; }
     }, {
-        93, DataType::Color, 0,
+        93, ConfigItem::DataType::Color, 0,
         "pattern dot color",
         "text color of the dots indicating unset notes/instruments/effects etc.",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.patternDotColor); },
         [] (const Config& src, Config& dest) { dest.patternDotColor = src.patternDotColor; }
     }, {
-        94, DataType::Color, 0,
+        94, ConfigItem::DataType::Color, 0,
         "pattern note color",
         "text color of normal notes (e.g. \"G#4\")",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.patternNoteColor); },
         [] (const Config& src, Config& dest) { dest.patternNoteColor = src.patternNoteColor; }
     }, {
-        95, DataType::Color, 0,
+        95, ConfigItem::DataType::Color, 0,
         "pattern special color",
         "text color of special notes (e.g. \"===\")",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.patternSpecialColor); },
         [] (const Config& src, Config& dest) { dest.patternSpecialColor = src.patternSpecialColor; }
     }, {
-        96, DataType::Color, 0,
+        96, ConfigItem::DataType::Color, 0,
         "pattern instrument color",
         "text color of the instrument/sample index column",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.patternInstrumentColor); },
         [] (const Config& src, Config& dest) { dest.patternInstrumentColor = src.patternInstrumentColor; }
     }, {
-        97, DataType::Color, 0,
+        97, ConfigItem::DataType::Color, 0,
         "pattern vol effect color",
         "text color of the volume effect column (e.g. the 'v' before the volume)",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.patternVolEffectColor); },
         [] (const Config& src, Config& dest) { dest.patternVolEffectColor = src.patternVolEffectColor; }
     }, {
-        98, DataType::Color, 0,
+        98, ConfigItem::DataType::Color, 0,
         "pattern vol param color",
         "text color of the volume effect parameter column",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.patternVolParamColor); },
         [] (const Config& src, Config& dest) { dest.patternVolParamColor = src.patternVolParamColor; }
     }, {
-        99, DataType::Color, 0,
+        99, ConfigItem::DataType::Color, 0,
         "pattern effect color",
         "text color of the effect type column",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.patternEffectColor); },
         [] (const Config& src, Config& dest) { dest.patternEffectColor = src.patternEffectColor; }
     }, {
-        100, DataType::Color, 0,
+        100, ConfigItem::DataType::Color, 0,
         "pattern effect param color",
         "text color of the effect parameter column",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.patternEffectParamColor); },
         [] (const Config& src, Config& dest) { dest.patternEffectParamColor = src.patternEffectParamColor; }
     }, {
-        101, DataType::Color, 0,
+        101, ConfigItem::DataType::Color, 0,
         "pattern pos order color",
         "text color of the order number",
-        nullptr, 0.0f, 1.0f,
+        nullptr, 0.0f, 1000.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.patternPosOrderColor); },
         [] (const Config& src, Config& dest) { dest.patternPosOrderColor = src.patternPosOrderColor; }
     }, {
-        102, DataType::Color, 0,
+        102, ConfigItem::DataType::Color, 0,
         "pattern pos pattern color",
         "text color of the pattern number",
-        nullptr, 0.0f, 1.0f,
+        nullptr, 0.0f, 1000.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.patternPosPatternColor); },
         [] (const Config& src, Config& dest) { dest.patternPosPatternColor = src.patternPosPatternColor; }
     }, {
-        103, DataType::Color, 0,
+        103, ConfigItem::DataType::Color, 0,
         "pattern pos row color",
         "text color of the row number",
-        nullptr, 0.0f, 1.0f,
+        nullptr, 0.0f, 1000.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.patternPosRowColor); },
         [] (const Config& src, Config& dest) { dest.patternPosRowColor = src.patternPosRowColor; }
     }, {
-        104, DataType::Color, 0,
+        104, ConfigItem::DataType::Color, 0,
         "pattern pos dot color",
         "text color of the colon or dot between the order/pattern/row numbers",
-        nullptr, 0.0f, 1.0f,
+        nullptr, 0.0f, 1000.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.patternPosDotColor); },
         [] (const Config& src, Config& dest) { dest.patternPosDotColor = src.patternPosDotColor; }
     }, {
-        105, DataType::Color, 0,
+        105, ConfigItem::DataType::Color, 0,
         "pattern sep color",
         "text color of the bar ('|') between channels",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.patternSepColor); },
         [] (const Config& src, Config& dest) { dest.patternSepColor = src.patternSepColor; }
     }, {
-        106, DataType::Float, 0,
+        106, ConfigItem::DataType::Float, 0,
         "pattern alpha falloff",
         "amount of alpha falloff for the outermost rows in the pattern display; 0.0 = no falloff, 1.0 = falloff to full transparency",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.patternAlphaFalloff); },
         [] (const Config& src, Config& dest) { dest.patternAlphaFalloff = src.patternAlphaFalloff; }
     }, {
-        107, DataType::Float, 0,
+        107, ConfigItem::DataType::Float, 0,
         "pattern alpha falloff shape",
         "shape (power) of the alpha falloff in the pattern display; the higher, the more rows will retain a relatively high opacity",
-        nullptr, 0.0f, 1.0f,
+        nullptr, 0.1f, 10.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.patternAlphaFalloffShape); },
         [] (const Config& src, Config& dest) { dest.patternAlphaFalloffShape = src.patternAlphaFalloffShape; }
     }, {
-        108, DataType::Bool, ConfigItem::Flags::NewGroup,
+        0, ConfigItem::DataType::SectionHeader, 0, nullptr,
+        "channel names",
+        nullptr, 0.0f, 0.0f, nullptr, nullptr
+    }, {
+        108, ConfigItem::DataType::Bool, 0,
         "channel names enabled",
         "whether to enable the channel name displays by default after loading a module",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.channelNamesEnabled); },
         [] (const Config& src, Config& dest) { dest.channelNamesEnabled = src.channelNamesEnabled; }
     }, {
-        109, DataType::Int, 0,
+        109, ConfigItem::DataType::Int, 0,
         "channel name padding Y",
         "extra vertical padding in the channel name boxes",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 0.0f, 100.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.channelNamePaddingY); },
         [] (const Config& src, Config& dest) { dest.channelNamePaddingY = src.channelNamePaddingY; }
     }, {
-        110, DataType::Color, 0,
+        110, ConfigItem::DataType::Color, 0,
         "channel name upper color",
         "color of the upper end of the channel name boxes",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.channelNameUpperColor); },
         [] (const Config& src, Config& dest) { dest.channelNameUpperColor = src.channelNameUpperColor; }
     }, {
-        111, DataType::Color, 0,
+        111, ConfigItem::DataType::Color, 0,
         "channel name lower color",
         "color of the lower end of the channel name boxes",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.channelNameLowerColor); },
         [] (const Config& src, Config& dest) { dest.channelNameLowerColor = src.channelNameLowerColor; }
     }, {
-        112, DataType::Color, 0,
+        112, ConfigItem::DataType::Color, 0,
         "channel name text color",
         "channel name text color",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.channelNameTextColor); },
         [] (const Config& src, Config& dest) { dest.channelNameTextColor = src.channelNameTextColor; }
     }, {
-        113, DataType::Bool, ConfigItem::Flags::NewGroup,
+        0, ConfigItem::DataType::SectionHeader, 0, nullptr,
+        "fake VU meters",
+        nullptr, 0.0f, 0.0f, nullptr, nullptr
+    }, {
+        113, ConfigItem::DataType::Bool, 0,
         "VU enabled",
         "whether to enable the fake VU meters by default after loading a module",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.vuEnabled); },
         [] (const Config& src, Config& dest) { dest.vuEnabled = src.vuEnabled; }
     }, {
-        114, DataType::Int, 0,
+        114, ConfigItem::DataType::Int, 0,
         "VU height",
         "height of the fake VU meters",
         nullptr, 0.0f, 1000.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.vuHeight); },
         [] (const Config& src, Config& dest) { dest.vuHeight = src.vuHeight; }
     }, {
-        115, DataType::Color, 0,
+        115, ConfigItem::DataType::Color, 0,
         "VU upper color",
         "color of the upper end of the fake VU meters",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.vuUpperColor); },
         [] (const Config& src, Config& dest) { dest.vuUpperColor = src.vuUpperColor; }
     }, {
-        116, DataType::Color, 0,
+        116, ConfigItem::DataType::Color, 0,
         "VU lower color",
         "color of the lower end of the fake VU meters",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.vuLowerColor); },
         [] (const Config& src, Config& dest) { dest.vuLowerColor = src.vuLowerColor; }
     }, {
-        117, DataType::Bool, ConfigItem::Flags::NewGroup,
+        0, ConfigItem::DataType::SectionHeader, 0, nullptr,
+        "clipping indicator",
+        nullptr, 0.0f, 0.0f, nullptr, nullptr
+    }, {
+        117, ConfigItem::DataType::Bool, 0,
         "clip enabled",
         "whether the clipping indicator is enabled",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.clipEnabled); },
         [] (const Config& src, Config& dest) { dest.clipEnabled = src.clipEnabled; }
     }, {
-        118, DataType::Int, 0,
+        118, ConfigItem::DataType::Int, 0,
         "clip size",
         "circumference of the clipping indicator",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 0.0f, 200.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.clipSize); },
         [] (const Config& src, Config& dest) { dest.clipSize = src.clipSize; }
     }, {
-        119, DataType::Int, 0,
+        119, ConfigItem::DataType::Int, 0,
         "clip pos X",
         "horizontal clipping indicator position, in percent of the available area (0 = left, 50 = center, 100 = right)",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 0.0f, 100.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.clipPosX); },
         [] (const Config& src, Config& dest) { dest.clipPosX = src.clipPosX; }
     }, {
-        120, DataType::Int, 0,
+        120, ConfigItem::DataType::Int, 0,
         "clip pos Y",
         "vertical clipping indicator position, in percent of the available area (0 = top, 50 = center, 100 = bottom)",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 0.0f, 100.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.clipPosY); },
         [] (const Config& src, Config& dest) { dest.clipPosY = src.clipPosY; }
     }, {
-        121, DataType::Int, 0,
+        121, ConfigItem::DataType::Int, 0,
         "clip margin",
         "margin around the screen edges that clipPos may not exceed, even at the 0/100 settings",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 0.0f, 100.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.clipMargin); },
         [] (const Config& src, Config& dest) { dest.clipMargin = src.clipMargin; }
     }, {
-        122, DataType::Color, 0,
+        122, ConfigItem::DataType::Color, 0,
         "clip color",
         "color of the clipping indicator",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.clipColor); },
         [] (const Config& src, Config& dest) { dest.clipColor = src.clipColor; }
     }, {
-        123, DataType::Float, 0,
+        123, ConfigItem::DataType::Float, 0,
         "clip fade time",
         "time the clipping indicator takes to fade out completely, in seconds",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.clipFadeTime); },
         [] (const Config& src, Config& dest) { dest.clipFadeTime = src.clipFadeTime; }
     }, {
-        124, DataType::Int, ConfigItem::Flags::NewGroup,
+        0, ConfigItem::DataType::SectionHeader, 0, nullptr,
+        "toast messages",
+        nullptr, 0.0f, 0.0f, nullptr, nullptr
+    }, {
+        124, ConfigItem::DataType::Int, 0,
         "toast text size",
         "text size of a \"toast\" status message",
         nullptr, 0.0f, 1000.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.toastTextSize); },
         [] (const Config& src, Config& dest) { dest.toastTextSize = src.toastTextSize; }
     }, {
-        125, DataType::Int, 0,
+        125, ConfigItem::DataType::Int, 0,
         "toast margin X",
         "left and right margin inside a \"toast\" status message (not including the rounded borders)",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 0.0f, 100.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.toastMarginX); },
         [] (const Config& src, Config& dest) { dest.toastMarginX = src.toastMarginX; }
     }, {
-        126, DataType::Int, 0,
+        126, ConfigItem::DataType::Int, 0,
         "toast margin Y",
         "top and bottom margin inside a \"toast\" status message",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 0.0f, 100.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.toastMarginY); },
         [] (const Config& src, Config& dest) { dest.toastMarginY = src.toastMarginY; }
     }, {
-        127, DataType::Int, 0,
+        127, ConfigItem::DataType::Int, 0,
         "toast position Y",
         "vertical position of a \"toast\" status message, relative to the top of the display",
         nullptr, 0.0f, 1000.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.toastPositionY); },
         [] (const Config& src, Config& dest) { dest.toastPositionY = src.toastPositionY; }
     }, {
-        128, DataType::Color, 0,
+        128, ConfigItem::DataType::Color, 0,
         "toast background color",
         "background color of a \"toast\" status message",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.toastBackgroundColor); },
         [] (const Config& src, Config& dest) { dest.toastBackgroundColor = src.toastBackgroundColor; }
     }, {
-        129, DataType::Color, 0,
+        129, ConfigItem::DataType::Color, 0,
         "toast text color",
         "text color of a \"toast\" status message",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.toastTextColor); },
         [] (const Config& src, Config& dest) { dest.toastTextColor = src.toastTextColor; }
     }, {
-        130, DataType::Float, 0,
+        130, ConfigItem::DataType::Float, 0,
         "toast duration",
         "time a \"toast\" status message shall be visible until it's completely faded out",
-        nullptr, 0.0f, 1.0f,
+        nullptr, 0.0f, 60.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.toastDuration); },
         [] (const Config& src, Config& dest) { dest.toastDuration = src.toastDuration; }
     },
-    { 0, DataType::Bool, 0, nullptr, nullptr, nullptr, 0.0f, 0.0f, nullptr, nullptr }
+    { 0, ConfigItem::DataType::SectionHeader, 0, nullptr, nullptr, nullptr, 0.0f, 0.0f, nullptr, nullptr }
 };
 
 const char* g_DefaultConfigFileIntro =
