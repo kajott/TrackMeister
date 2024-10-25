@@ -83,7 +83,7 @@ struct Config {
     // background logo
     bool     logoEnabled              = true;         //!< whether to show a logo at all
     std::string logo;                                 //!< custom logo file; must be a grayscale PNG file with high-contrast black-on-white artwork; will be downscaled by a power of two so it fits into the canvas [image]
-    bool     logoScaling              = false;        //!< whether to allow arbitrary downscaling scaling of the logo (if false, only allow power-of-two downscaling)
+    bool     logoScaling              = false;        //!< whether to allow arbitrary downscaling of the logo (if false, only allow power-of-two downscaling)
     int      logoMargin               = 16;           //!< minimum distance between the logo image and the surrounding screen or panel edges
     int      logoPosX                 = 50;           //!< horizontal logo position, in percent of the available area (0 = left, 50 = center, 100 = right)
     int      logoPosY                 = 50;           //!< vertical logo position, in percent of the available area (0 = top, 50 = center, 100 = bottom)
@@ -96,16 +96,16 @@ struct Config {
     uint32_t emptyLogoColor           = 0x80FFFFFFu;  //!< logo color on the "no module loaded" screen
 
     // info bar
-    bool     infoEnabled              = true;         //!< whether to enable the top information bar by default after loading a module
-    bool     trackNumberEnabled       = true;         //!< whether to extract and display the track number from the filename; used if the filename starts with two digits followed by a dash (-), underscore (_) or space
+    bool     infoEnabled              = true;         //!< whether to enable the top information bar by default after loading a module [reload]
+    bool     trackNumberEnabled       = true;         //!< whether to extract and display the track number from the filename; used if the filename starts with two digits followed by a dash (-), underscore (_) or space [reload]
     bool     showTime                 = false;        //!< show current time in track at the end of the details line
-    bool     hideFileExt              = false;        //!< whether to remove the file extension from the filename in the info bar
-    bool     autoHideFileName         = false;        //!< whether to hide the filename completely if title and/or artist information is available
-    std::string artist;                               //!< override artist info from the module with a custom string
-    std::string title;                                //!< override title info from the module with a custom string
+    bool     hideFileExt              = false;        //!< whether to remove the file extension from the filename in the info bar [reload]
+    bool     autoHideFileName         = false;        //!< whether to hide the filename completely if title and/or artist information is available [reload]
+    std::string artist;                               //!< override artist info from the module with a custom string [reload]
+    std::string title;                                //!< override title info from the module with a custom string [reload]
     int      infoMarginX              = 16;           //!< outer left margin inside the info bar
     int      infoMarginY              = 8;            //!< upper and lower margin inside the info bar
-    int      infoTrackTextSize        = 233;          //!< text size of the track number
+    int      infoTrackTextSize        = 233;          //!< text size of the track number [max 500]
     int      infoTextSize             = 48;           //!< text size of the filename, title and artist lines
     int      infoDetailsTextSize      = 24;           //!< text size of the technical details line
     int      infoLineSpacing          = 4;            //!< extra space between the info bar's lines
@@ -122,26 +122,26 @@ struct Config {
     bool     progressEnabled          = true;         //!< whether to show a progress bar
     int      progressHeight           = 16;           //!< height ("thickness") of the progress bar [max 100]
     int      progressMarginTop        = 4;            //!< extra space to insert above the progress bar
-    int      progressBorderSize       = 2;            //!< size/thickness/width of the progress bar's border (0 = no border)
-    int      progressBorderPadding    = 2;            //!< inside padding between the actual progress indicator and the progress bar's border
+    int      progressBorderSize       = 2;            //!< size/thickness/width of the progress bar's border (0 = no border) [max 100]
+    int      progressBorderPadding    = 2;            //!< inside padding between the actual progress indicator and the progress bar's border [max 100]
     uint32_t progressBorderColor      = 0xFF888888u;  //!< color of the progress bar's border
     uint32_t progressOuterColor       = 0xFF222222u;  //!< color of the progress bar's empty area (note: this is drawn on top of the border, so be careful with alpha!)
     uint32_t progressInnerColor       = 0xFF888888u;  //!< color of the actual progress indicator (note: this is drawn on top of the other two progress bar elements, so be careful with alpha!)
 
     // metadata bar
-    bool     metaEnabled              = true;         //!< whether to enable the metadata sidebar by default after loading a module
-    bool     metaShowMessage          = true;         //!< whether the metadata sidebar shall include the module message section
-    bool     metaShowInstrumentNames  = true;         //!< whether the metadata sidebar shall include the instrument names section
-    bool     metaShowSampleNames      = true;         //!< whether the metadata sidebar shall include the sample names section
+    bool     metaEnabled              = true;         //!< whether to enable the metadata sidebar by default after loading a module [reload]
+    bool     metaShowMessage          = true;         //!< whether the metadata sidebar shall include the module message section [reload]
+    bool     metaShowInstrumentNames  = true;         //!< whether the metadata sidebar shall include the instrument names section [reload]
+    bool     metaShowSampleNames      = true;         //!< whether the metadata sidebar shall include the sample names section [reload]
     int      metaMarginX              = 16;           //!< left and right margin inside the metadata sidebar
     int      metaMarginY              = 8;            //!< upper and lower margin inside the metadata sidebar
     int      metaTextSize             = 31;           //!< text size in the metadata sidebar
-    int      metaMessageWidth         = 32;           //!< approximate number of characters per line to allocate for the module message [min 25, max 80]
+    int      metaMessageWidth         = 32;           //!< approximate number of characters per line to allocate for the module message [min 25, max 80, reload]
     int      metaSectionMargin        = 32;           //!< vertical gap between sections in the metadata sidebar
-    uint32_t metaHeadingColor         = 0xFF00FFFFu;  //!< color of a section heading in the metadata sidebar
-    uint32_t metaTextColor            = 0xFFFFFFFFu;  //!< color of normal text in the metadata sidebar
-    uint32_t metaIndexColor           = 0xC000FF00u;  //!< color of the instrument/sample numbers in the metadata sidebar
-    uint32_t metaColonColor           = 0x40FFFFFFu;  //!< color of the colon between instrument/sample number and name in the metadata sidebar
+    uint32_t metaHeadingColor         = 0xFF00FFFFu;  //!< color of a section heading in the metadata sidebar [reload]
+    uint32_t metaTextColor            = 0xFFFFFFFFu;  //!< color of normal text in the metadata sidebar [reload]
+    uint32_t metaIndexColor           = 0xC000FF00u;  //!< color of the instrument/sample numbers in the metadata sidebar [reload]
+    uint32_t metaColonColor           = 0x40FFFFFFu;  //!< color of the colon between instrument/sample number and name in the metadata sidebar [reload]
     int      metaShadowSize           = 8;            //!< width of the shadow left to the the metadata sidebar
 
     // pattern display
@@ -171,14 +171,14 @@ struct Config {
     float    patternAlphaFalloffShape = 1.5f;         //!< shape (power) of the alpha falloff in the pattern display; the higher, the more rows will retain a relatively high opacity [min .1, max 10]
 
     // channel names
-    bool     channelNamesEnabled      = true;         //!< whether to enable the channel name displays by default after loading a module
+    bool     channelNamesEnabled      = true;         //!< whether to enable the channel name displays by default after loading a module [reload]
     int      channelNamePaddingY      = 0;            //!< extra vertical padding in the channel name boxes
     uint32_t channelNameUpperColor    = 0x00000000u;  //!< color of the upper end of the channel name boxes
     uint32_t channelNameLowerColor    = 0xFF000000u;  //!< color of the lower end of the channel name boxes
     uint32_t channelNameTextColor     = 0xFFC0FF40u;  //!< channel name text color
 
     // fake VU meters
-    bool     vuEnabled                = true;         //!< whether to enable the fake VU meters by default after loading a module
+    bool     vuEnabled                = true;         //!< whether to enable the fake VU meters by default after loading a module [reload]
     int      vuHeight                 = 200;          //!< height of the fake VU meters [max 1000]
     uint32_t vuUpperColor             = 0x10FF80FFu;  //!< color of the upper end of the fake VU meters
     uint32_t vuLowerColor             = 0x50FF00FFu;  //!< color of the lower end of the fake VU meters
@@ -207,6 +207,7 @@ struct Config {
     using PreparedCommandLine = std::list<std::string>;
     static PreparedCommandLine prepareCommandLine(int& argc, char** argv);
     void import(const Config& src);
+    void importAllUnset(const Config& src);
     void load(const PreparedCommandLine& cmdline);
     bool load(const char* filename, const char* matchName=nullptr);
     bool save(const char* filename);

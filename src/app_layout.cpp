@@ -23,7 +23,7 @@ int Application::toPixels(int value) const {
 }
 
 int Application::toTextSize(int value) const {
-    value = toPixels(value);
+    value = std::max(toPixels(value), 1);
     int g = m_renderer.textSizeGranularity();
     if (g) { value -= value % g; }
     return value;

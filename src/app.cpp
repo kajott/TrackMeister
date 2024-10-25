@@ -120,8 +120,11 @@ bool Application::hasTrackNumber(const char* basename) {
 void Application::updateConfig() {
     m_config.reset();
     m_config.import(m_globalConfig);
+    m_config.import(m_uiGlobalConfig);
     m_config.import(m_fileConfig);
+    m_config.import(m_uiFileConfig);
     m_config.import(m_cmdlineConfig);
+    m_uiFileConfig.importAllUnset(m_config);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -273,6 +276,16 @@ void Application::handleKey(int key, bool ctrl, bool shift, bool alt) {
             break;
         case 0xF1:  // [F1] toggle help window
             m_showHelp = !m_showHelp;
+            break;
+        case 0xF2:  // [F2] show/hide global configuration
+            if (!m_showConfig) { m_showConfig = true; }
+            else if (m_uiConfigShowGlobal) { m_showConfig = false; }
+            m_uiConfigShowGlobal = true;
+            break;
+        case 0xF3:  // [F3] show/hide per-file configuration
+            if (!m_showConfig) { m_showConfig = true; }
+            else if (!m_uiConfigShowGlobal) { m_showConfig = false; }
+            m_uiConfigShowGlobal = false;
             break;
         case 0xF5: {  // [F5] reload module
             std::string savePath(m_fullpath);
@@ -460,6 +473,7 @@ void Application::updateGain() {
 
 void Application::draw(float dt) {
     float fadeAlpha = 1.0f;
+    m_renderer.setAlphaGamma(m_config.alphaGamma);
 
     // handle end of track
     if (m_endReached) {
@@ -682,7 +696,8 @@ void Application::draw(float dt) {
     #endif
 
     // handle ImGui stuff
-    if (m_showHelp) { uiHelpWindow(); }
+    if (m_showConfig)   { uiConfigWindow(); }
+    if (m_showHelp)     { uiHelpWindow(); }
     #ifndef NDEBUG
         if (m_showDemo) { ImGui::ShowDemoWindow(&m_showDemo); }
     #endif
@@ -822,8 +837,15 @@ bool Application::loadModule(const char* path, bool forScanning) {
     unloadModule();
 
     // set filename metadata
-    if (path) { m_fullpath.assign(path); }
-    Dprintf("\nloadModule(): opening '%s'\n", m_fullpath.c_str());
+    if (path && (m_previousFile != path)) {
+        m_fullpath.assign(path);
+        m_uiFileConfig.set.clear();  // new file -> discard UI per-file config
+        Dprintf("\nloadModule(): opening '%s'\n", m_fullpath.c_str());
+    } else {
+        if (path) { m_fullpath.assign(path); }
+        Dprintf("\nloadModule(): re-opening '%s'\n", m_fullpath.c_str());
+    }
+    m_reloadPending = false;
 
     // trim .tm suffix (we don't want to load sidecar files)
     auto pathLen = m_fullpath.size();
@@ -845,6 +867,7 @@ bool Application::loadModule(const char* path, bool forScanning) {
         else { m_fullpath.assign(newPath); }
     }
     std::string filename(PathUtil::basename(m_fullpath));
+    m_previousFile.assign(m_fullpath);
 
     // load configuration files
     m_dirIniFile = PathUtil::join(PathUtil::dirname(m_fullpath), "tm.ini");
@@ -852,6 +875,7 @@ bool Application::loadModule(const char* path, bool forScanning) {
     m_globalConfig.reset();
     m_globalConfig.load(m_mainIniFile.c_str());
     m_globalConfig.load(m_dirIniFile.c_str());
+    m_uiGlobalConfig.importAllUnset(m_globalConfig);
     m_fileConfig.reset();
     m_fileConfig.load(m_mainIniFile.c_str(), filename.c_str());
     m_fileConfig.load(m_dirIniFile.c_str(), filename.c_str());

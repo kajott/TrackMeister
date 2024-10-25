@@ -357,3 +357,11 @@ void Config::import(const Config& src) {
     }
     set.update(src.set);
 }
+
+void Config::importAllUnset(const Config& src) {
+    for (const ConfigItem *item = g_ConfigItems;  item->valid();  ++item) {
+        if (!set.contains(item->ordinal) && item->copy) {
+            item->copy(src, *this);
+        }
+    }
+}

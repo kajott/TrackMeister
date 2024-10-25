@@ -252,7 +252,7 @@ const ConfigItem g_ConfigItems[] = { {
     }, {
         32, ConfigItem::DataType::Bool, 0,
         "logo scaling",
-        "whether to allow arbitrary downscaling scaling of the logo (if false, only allow power-of-two downscaling)",
+        "whether to allow arbitrary downscaling of the logo (if false, only allow power-of-two downscaling)",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.logoScaling); },
         [] (const Config& src, Config& dest) { dest.logoScaling = src.logoScaling; }
@@ -321,14 +321,14 @@ const ConfigItem g_ConfigItems[] = { {
         "info bar",
         nullptr, 0.0f, 0.0f, nullptr, nullptr
     }, {
-        41, ConfigItem::DataType::Bool, 0,
+        41, ConfigItem::DataType::Bool, ConfigItem::Flags::Reload,
         "info enabled",
         "whether to enable the top information bar by default after loading a module",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.infoEnabled); },
         [] (const Config& src, Config& dest) { dest.infoEnabled = src.infoEnabled; }
     }, {
-        42, ConfigItem::DataType::Bool, 0,
+        42, ConfigItem::DataType::Bool, ConfigItem::Flags::Reload,
         "track number enabled",
         "whether to extract and display the track number from the filename; used if the filename starts with two digits followed by a dash (-), underscore (_) or space",
         nullptr, 0.0f, 1.0f,
@@ -342,28 +342,28 @@ const ConfigItem g_ConfigItems[] = { {
         [] (Config& src) -> void* { return static_cast<void*>(&src.showTime); },
         [] (const Config& src, Config& dest) { dest.showTime = src.showTime; }
     }, {
-        44, ConfigItem::DataType::Bool, 0,
+        44, ConfigItem::DataType::Bool, ConfigItem::Flags::Reload,
         "hide file ext",
         "whether to remove the file extension from the filename in the info bar",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.hideFileExt); },
         [] (const Config& src, Config& dest) { dest.hideFileExt = src.hideFileExt; }
     }, {
-        45, ConfigItem::DataType::Bool, 0,
+        45, ConfigItem::DataType::Bool, ConfigItem::Flags::Reload,
         "auto hide file name",
         "whether to hide the filename completely if title and/or artist information is available",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.autoHideFileName); },
         [] (const Config& src, Config& dest) { dest.autoHideFileName = src.autoHideFileName; }
     }, {
-        46, ConfigItem::DataType::String, 0,
+        46, ConfigItem::DataType::String, ConfigItem::Flags::Reload,
         "artist",
         "override artist info from the module with a custom string",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.artist); },
         [] (const Config& src, Config& dest) { dest.artist = src.artist; }
     }, {
-        47, ConfigItem::DataType::String, 0,
+        47, ConfigItem::DataType::String, ConfigItem::Flags::Reload,
         "title",
         "override title info from the module with a custom string",
         nullptr, 0.0f, 1.0f,
@@ -387,21 +387,21 @@ const ConfigItem g_ConfigItems[] = { {
         50, ConfigItem::DataType::Int, 0,
         "info track text size",
         "text size of the track number",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 1.0f, 500.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.infoTrackTextSize); },
         [] (const Config& src, Config& dest) { dest.infoTrackTextSize = src.infoTrackTextSize; }
     }, {
         51, ConfigItem::DataType::Int, 0,
         "info text size",
         "text size of the filename, title and artist lines",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 1.0f, 200.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.infoTextSize); },
         [] (const Config& src, Config& dest) { dest.infoTextSize = src.infoTextSize; }
     }, {
         52, ConfigItem::DataType::Int, 0,
         "info details text size",
         "text size of the technical details line",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 1.0f, 200.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.infoDetailsTextSize); },
         [] (const Config& src, Config& dest) { dest.infoDetailsTextSize = src.infoDetailsTextSize; }
     }, {
@@ -464,7 +464,7 @@ const ConfigItem g_ConfigItems[] = { {
         61, ConfigItem::DataType::Int, 0,
         "info shadow size",
         "width of the shadow below the info bar",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 0.0f, 100.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.infoShadowSize); },
         [] (const Config& src, Config& dest) { dest.infoShadowSize = src.infoShadowSize; }
     }, {
@@ -496,7 +496,7 @@ const ConfigItem g_ConfigItems[] = { {
         65, ConfigItem::DataType::Int, 0,
         "progress border size",
         "size/thickness/width of the progress bar's border (0 = no border)",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 0.0f, 100.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.progressBorderSize); },
         [] (const Config& src, Config& dest) { dest.progressBorderSize = src.progressBorderSize; }
     }, {
@@ -532,28 +532,28 @@ const ConfigItem g_ConfigItems[] = { {
         "metadata bar",
         nullptr, 0.0f, 0.0f, nullptr, nullptr
     }, {
-        70, ConfigItem::DataType::Bool, 0,
+        70, ConfigItem::DataType::Bool, ConfigItem::Flags::Reload,
         "meta enabled",
         "whether to enable the metadata sidebar by default after loading a module",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.metaEnabled); },
         [] (const Config& src, Config& dest) { dest.metaEnabled = src.metaEnabled; }
     }, {
-        71, ConfigItem::DataType::Bool, 0,
+        71, ConfigItem::DataType::Bool, ConfigItem::Flags::Reload,
         "meta show message",
         "whether the metadata sidebar shall include the module message section",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.metaShowMessage); },
         [] (const Config& src, Config& dest) { dest.metaShowMessage = src.metaShowMessage; }
     }, {
-        72, ConfigItem::DataType::Bool, 0,
+        72, ConfigItem::DataType::Bool, ConfigItem::Flags::Reload,
         "meta show instrument names",
         "whether the metadata sidebar shall include the instrument names section",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.metaShowInstrumentNames); },
         [] (const Config& src, Config& dest) { dest.metaShowInstrumentNames = src.metaShowInstrumentNames; }
     }, {
-        73, ConfigItem::DataType::Bool, 0,
+        73, ConfigItem::DataType::Bool, ConfigItem::Flags::Reload,
         "meta show sample names",
         "whether the metadata sidebar shall include the sample names section",
         nullptr, 0.0f, 1.0f,
@@ -577,11 +577,11 @@ const ConfigItem g_ConfigItems[] = { {
         76, ConfigItem::DataType::Int, 0,
         "meta text size",
         "text size in the metadata sidebar",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 1.0f, 200.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.metaTextSize); },
         [] (const Config& src, Config& dest) { dest.metaTextSize = src.metaTextSize; }
     }, {
-        77, ConfigItem::DataType::Int, 0,
+        77, ConfigItem::DataType::Int, ConfigItem::Flags::Reload,
         "meta message width",
         "approximate number of characters per line to allocate for the module message",
         nullptr, 25.0f, 80.0f,
@@ -595,28 +595,28 @@ const ConfigItem g_ConfigItems[] = { {
         [] (Config& src) -> void* { return static_cast<void*>(&src.metaSectionMargin); },
         [] (const Config& src, Config& dest) { dest.metaSectionMargin = src.metaSectionMargin; }
     }, {
-        79, ConfigItem::DataType::Color, 0,
+        79, ConfigItem::DataType::Color, ConfigItem::Flags::Reload,
         "meta heading color",
         "color of a section heading in the metadata sidebar",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.metaHeadingColor); },
         [] (const Config& src, Config& dest) { dest.metaHeadingColor = src.metaHeadingColor; }
     }, {
-        80, ConfigItem::DataType::Color, 0,
+        80, ConfigItem::DataType::Color, ConfigItem::Flags::Reload,
         "meta text color",
         "color of normal text in the metadata sidebar",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.metaTextColor); },
         [] (const Config& src, Config& dest) { dest.metaTextColor = src.metaTextColor; }
     }, {
-        81, ConfigItem::DataType::Color, 0,
+        81, ConfigItem::DataType::Color, ConfigItem::Flags::Reload,
         "meta index color",
         "color of the instrument/sample numbers in the metadata sidebar",
         nullptr, 0.0f, 1.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.metaIndexColor); },
         [] (const Config& src, Config& dest) { dest.metaIndexColor = src.metaIndexColor; }
     }, {
-        82, ConfigItem::DataType::Color, 0,
+        82, ConfigItem::DataType::Color, ConfigItem::Flags::Reload,
         "meta colon color",
         "color of the colon between instrument/sample number and name in the metadata sidebar",
         nullptr, 0.0f, 1.0f,
@@ -626,7 +626,7 @@ const ConfigItem g_ConfigItems[] = { {
         83, ConfigItem::DataType::Int, 0,
         "meta shadow size",
         "width of the shadow left to the the metadata sidebar",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 0.0f, 100.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.metaShadowSize); },
         [] (const Config& src, Config& dest) { dest.metaShadowSize = src.metaShadowSize; }
     }, {
@@ -637,14 +637,14 @@ const ConfigItem g_ConfigItems[] = { {
         84, ConfigItem::DataType::Int, 0,
         "pattern text size",
         "desired size of the pattern display text",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 1.0f, 200.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.patternTextSize); },
         [] (const Config& src, Config& dest) { dest.patternTextSize = src.patternTextSize; }
     }, {
         85, ConfigItem::DataType::Int, 0,
         "pattern min text size",
         "minimum allowed size of the pattern display text (if the pattern still doesn't fit with this, some channels won't be visible)",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 1.0f, 200.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.patternMinTextSize); },
         [] (const Config& src, Config& dest) { dest.patternMinTextSize = src.patternMinTextSize; }
     }, {
@@ -672,7 +672,7 @@ const ConfigItem g_ConfigItems[] = { {
         89, ConfigItem::DataType::Int, 0,
         "pattern bar border percent",
         "border radius of the current row bar, in percent of the text size",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 0.0f, 100.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.patternBarBorderPercent); },
         [] (const Config& src, Config& dest) { dest.patternBarBorderPercent = src.patternBarBorderPercent; }
     }, {
@@ -806,7 +806,7 @@ const ConfigItem g_ConfigItems[] = { {
         "channel names",
         nullptr, 0.0f, 0.0f, nullptr, nullptr
     }, {
-        108, ConfigItem::DataType::Bool, 0,
+        108, ConfigItem::DataType::Bool, ConfigItem::Flags::Reload,
         "channel names enabled",
         "whether to enable the channel name displays by default after loading a module",
         nullptr, 0.0f, 1.0f,
@@ -845,7 +845,7 @@ const ConfigItem g_ConfigItems[] = { {
         "fake VU meters",
         nullptr, 0.0f, 0.0f, nullptr, nullptr
     }, {
-        113, ConfigItem::DataType::Bool, 0,
+        113, ConfigItem::DataType::Bool, ConfigItem::Flags::Reload,
         "VU enabled",
         "whether to enable the fake VU meters by default after loading a module",
         nullptr, 0.0f, 1.0f,
@@ -922,7 +922,7 @@ const ConfigItem g_ConfigItems[] = { {
         123, ConfigItem::DataType::Float, 0,
         "clip fade time",
         "time the clipping indicator takes to fade out completely, in seconds",
-        nullptr, 0.0f, 1.0f,
+        nullptr, 0.0f, 60.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.clipFadeTime); },
         [] (const Config& src, Config& dest) { dest.clipFadeTime = src.clipFadeTime; }
     }, {
@@ -933,7 +933,7 @@ const ConfigItem g_ConfigItems[] = { {
         124, ConfigItem::DataType::Int, 0,
         "toast text size",
         "text size of a \"toast\" status message",
-        nullptr, 0.0f, 1000.0f,
+        nullptr, 1.0f, 200.0f,
         [] (Config& src) -> void* { return static_cast<void*>(&src.toastTextSize); },
         [] (const Config& src, Config& dest) { dest.toastTextSize = src.toastTextSize; }
     }, {

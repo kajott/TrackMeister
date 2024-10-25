@@ -133,7 +133,7 @@ if __name__ == "__main__":
                 desc = desc.replace('"', '\\"')
                 f.write(f'        0, ConfigItem::DataType::SectionHeader, 0, nullptr,\n        "{desc}",\n        nullptr, 0.0f, 0.0f, nullptr, nullptr\n')
                 continue
-            lname = name.lower()
+            lname = field.lower()
             ldesc = desc.lower()
 
             # extract special flags
@@ -158,8 +158,10 @@ if __name__ == "__main__":
             vmax = 1000 if (type == "int") else 1
             if type in enums:
                 values = enums[type]
-            if "pos" in lname:
-                vmax = 100 if ("percent" in ldesc) else 1000
+            if "percent" in ldesc:
+                vmax = 100
+            elif "pos" in lname:
+                vmax = 1000
             elif ("margin" in lname) or ("padding" in lname):
                 vmax = 100
             elif "textsize" in lname:

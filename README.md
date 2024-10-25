@@ -203,3 +203,4 @@ It is built upon the following third-party libraries:
 - [LodePNG](https://lodev.org/lodepng/) is used to decode PNG files
 - [libopenmpt](https://lib.openmpt.org/libopenmpt/) is doing all the heavy lifting concerning module file parsing and audio rendering
 - [libebur128](https://github.com/jiixyj/libebur128) is used for loudness normalization
+- [Dear ImGui](https://github.com/ocornut/imgui) handles the help and interactive configuration UI

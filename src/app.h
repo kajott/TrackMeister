@@ -34,6 +34,8 @@ class Application {
     Config m_globalConfig;
     Config m_fileConfig;
     Config m_cmdlineConfig;
+    Config m_uiGlobalConfig;
+    Config m_uiFileConfig;
     Config m_config;
     int m_sampleRate;
     bool m_scanning = false;
@@ -50,6 +52,7 @@ class Application {
 
     // metadata
     std::string m_fullpath;
+    std::string m_previousFile;
     char m_track[3] = {0,0,0};
     std::vector<std::pair<std::string, std::string>> m_info;
     std::vector<std::string> m_shortDetails;
@@ -133,6 +136,9 @@ class Application {
     // debug/config UI
     bool m_showDemo = false;
     bool m_showHelp = false;
+    bool m_showConfig = false;
+    bool m_uiConfigShowGlobal = true;
+    bool m_reloadPending = false;
 
 public:  // interface from SystemInterface
     explicit inline Application(SystemInterface& sys) : m_sys(sys), m_metadata(m_renderer) {}
@@ -182,4 +188,5 @@ private:  // business logic
     void runScan();
     void stopScan();
     void uiHelpWindow();
+    void uiConfigWindow();
 };
