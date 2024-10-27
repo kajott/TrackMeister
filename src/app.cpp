@@ -440,7 +440,7 @@ void Application::toastPosition() {
     char line[80];
     AudioMutexGuard mtx_(m_sys);
     auto sec = m_mod->get_position_seconds();
-    sprintf(line, "current track position: %d:%02d (%.2f seconds)", int(sec) / 60, int(sec) % 60, sec);
+    snprintf(line, 80, "current track position: %d:%02d (%.2f seconds)", int(sec) / 60, int(sec) % 60, sec);
     toast(line);
 }
 
@@ -658,7 +658,7 @@ void Application::draw(float dt) {
             if (m_config.showTime) {
                 char suffix[20];
                 int sec = int(m_position);
-                sprintf(suffix, " (%d:%02d)", sec / 60, sec % 60);
+                snprintf(suffix, 20, " (%d:%02d)", sec / 60, sec % 60);
                 m_renderer.text(float(m_infoKeyX), float(m_infoDetailsY), float(m_infoDetailsSize), (m_details + suffix).c_str(), 0, m_config.infoDetailsColor);
             } else {
                 m_renderer.text(float(m_infoKeyX), float(m_infoDetailsY), float(m_infoDetailsSize), m_details.c_str(), 0, m_config.infoDetailsColor);
@@ -727,7 +727,7 @@ void Application::draw(float dt) {
             int y = 0;
             char line[80];
             while (y < m_screenSizeY) {
-                sprintf(line, "This is text in font size %d.", size);
+                snprintf(line, 80, "This is text in font size %d.", size);
                 m_renderer.text(float(x), float(y), float(size), line, align);
                 y += int(size * 1.2f + 0.5f);
                 size += sizeStep;
