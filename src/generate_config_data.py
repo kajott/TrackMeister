@@ -137,7 +137,7 @@ if __name__ == "__main__":
             # extract special flags
             xflags = {f for f in flags if f.lower().startswith(("min ", "max ", "values "))}
             flags -= xflags
-            flags = " | ".join("ConfigItem::Flags::" + f.capitalize() for f in flags) or "0"
+            flags = " | ".join("ConfigItem::Flags::" + f.capitalize() for f in sorted(flags)) or "0"
 
             # handle section header
             if not type:
