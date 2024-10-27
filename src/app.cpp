@@ -234,6 +234,10 @@ void Application::handleKey(int key, bool ctrl, bool shift, bool alt) {
             if (m_scanning) {  // cancel loudness scan
                 m_multiScan = false;
                 stopScan();
+            } else if (m_showHelp) {  // dismiss help window
+                m_showHelp = false;
+            } else if (m_showConfig) {  // dismiss config window
+                m_showConfig = false;
             } else if (m_mod && m_sys.isPlaying()) {  // pause
                 m_sys.pause();
             } else if (!m_escapePressedOnce) {  // first Esc while paused -> do nothing (yet)

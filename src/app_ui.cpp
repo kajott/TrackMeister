@@ -9,6 +9,7 @@
 
 #include "version.h"
 #include "app.h"
+#include "util.h"
 #include "config.h"
 #include "config_item.h"
 
@@ -76,10 +77,12 @@ void Application::uiConfigWindow() {
         return;
     }
 
+    ImGui::SetNextItemShortcut(ImGuiKey_F2);
     ImGui::PushStyleColor(ImGuiCol_Button, m_uiConfigShowGlobal ? ImGui::GetStyle().Colors[ImGuiCol_ButtonActive] : ImVec4(0.5f, 0.5f, 0.5f, 0.5f));
     if (ImGui::Button("Global Configuration")) { m_uiConfigShowGlobal = true; }
     ImGui::PopStyleColor(1);
     ImGui::SameLine();
+    ImGui::SetNextItemShortcut(ImGuiKey_F3);
     ImGui::PushStyleColor(ImGuiCol_Button, m_uiConfigShowGlobal ? ImVec4(0.5f, 0.5f, 0.5f, 0.5f) : ImGui::GetStyle().Colors[ImGuiCol_ButtonActive]);
     if (ImGui::Button("File-Specific Configuration")) { m_uiConfigShowGlobal = false; }
     ImGui::PopStyleColor(1);
@@ -209,8 +212,15 @@ void Application::uiConfigWindow() {
         updateLayout();
     }
     ImGui::Spacing();
+    ImGui::SetNextItemShortcut(ImGuiKey_S | ImGuiMod_Ctrl);
     if (ImGui::Button("Save Configuration")) {
         uiSaveConfig();
     }
+
+    // forward a few relevant keystrokes to the main application
+    if (ImGui::Shortcut(ImGuiKey_F5))       { handleKey(0xF5); }
+    if (ImGui::Shortcut(ImGuiKey_PageDown)) { handleKey(makeFourCC("PgDn")); }
+    if (ImGui::Shortcut(ImGuiKey_PageUp))   { handleKey(makeFourCC("PgUp")); }
+
     ImGui::End();
 }
