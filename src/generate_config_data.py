@@ -77,9 +77,16 @@ if __name__ == "__main__":
                 continue
 
             # comment at section start inside config structure
-            m = in_config and new_section and re.match(r'^//(?!!)\s*(.*)', line)
+            m = in_config and new_section and re.match(r'''
+                ^ // (?!!)
+                \s* (?P<name>.*?)
+                (\s* \[ (?P<flags> .*?) \] \s* )?
+            $''', line, flags=re.X)
             if m:
-                fields.append((None, None, None, None, m.group(1)))
+                name = m.group('name')
+                flags = m.group('flags')
+                flags = {f.strip() for f in flags.split(',')} if flags else set()
+                fields.append((flags, None, None, None, name))
                 continue
 
             # config item
@@ -89,9 +96,8 @@ if __name__ == "__main__":
                 ( = \s* (?P<default> .*?) )? ;
                 \s* //!< \s*
                 (?P<comment> .*?)
-                (\s* \[ (?P<flags> .*?) \] )?
-                $
-            ''', line, flags=re.X)
+                (\s* \[ (?P<flags> .*?) \] \s* )?
+            $''', line, flags=re.X)
             if m:
                 type = m.group('type')
                 field = m.group('field')
@@ -128,17 +134,18 @@ if __name__ == "__main__":
             if first: first = False
             else: f.write('    }, {\n')
 
-            # handle section header
-            if not type:
-                desc = desc.replace('"', '\\"')
-                f.write(f'        0, ConfigItem::DataType::SectionHeader, 0, nullptr,\n        "{desc}",\n        nullptr, 0.0f, 0.0f, nullptr, nullptr\n')
-                continue
-            lname = field.lower()
-            ldesc = desc.lower()
-
             # extract special flags
             xflags = {f for f in flags if f.lower().startswith(("min ", "max ", "values "))}
             flags -= xflags
+            flags = " | ".join("ConfigItem::Flags::" + f.capitalize() for f in flags) or "0"
+
+            # handle section header
+            if not type:
+                desc = desc.replace('"', '\\"')
+                f.write(f'        0, ConfigItem::DataType::SectionHeader, {flags}, nullptr,\n        "{desc}",\n        nullptr, 0.0f, 0.0f, nullptr, nullptr\n')
+                continue
+            lname = field.lower()
+            ldesc = desc.lower()
 
             # add possible values to description
             if type in enums:
@@ -186,7 +193,6 @@ if __name__ == "__main__":
 
             # write name and description
             ordinal += 1
-            flags = " | ".join("ConfigItem::Flags::" + f.capitalize() for f in flags) or "0"
             f.write(f'        {ordinal}, ConfigItem::DataType::{dt}, {flags},\n')
             f.write(f'        "{name}",\n')
             desc = desc.replace('"', '\\"')

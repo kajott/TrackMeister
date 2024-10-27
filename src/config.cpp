@@ -341,8 +341,8 @@ bool Config::saveLoudness(const char* filename) {
     if (!filename || !filename[0]) { return false; }
     FILE* f = fopen(filename, "a");
     if (!f) { return false; }
-    fprintf(f, "\n; EBU R128 loudness scan result for samplerate=%d, filter=%s, stereo_separation=%d:\nloudness = %.2f\n",
-               sampleRate, ConfigItem::find("filter")->format(*this).c_str(), stereoSeparation, loudness);
+    fprintf(f, "\nloudness = %.2f  ; EBU R128 loudness scan result for samplerate=%d, filter=%s, stereo_separation=%d\n",
+               loudness, sampleRate, ConfigItem::find("filter")->format(*this).c_str(), stereoSeparation);
     fclose(f);
     return true;
 }

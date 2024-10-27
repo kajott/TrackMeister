@@ -41,6 +41,10 @@ constexpr bool isValidLoudness(float db) { return (db > -100.0f); }
 //! color is assumed to be fully opaque.
 //! In code, all colors are in the format 0xAABBGGRRu.
 struct Config {
+    // manual metadata [file]
+    std::string artist;                               //!< override artist info from the module with a custom string [file, reload]
+    std::string title;                                //!< override title info from the module with a custom string [file, reload]
+
     // display
     bool     fullscreen               = false;        //!< whether to run in fullscreen mode [startup]
     int      windowWidth              = 1920;         //!< initial window width  in non-fullscreen mode, in pixels [startup, min 640, max 3840]
@@ -56,7 +60,7 @@ struct Config {
     int      volumeRamping            = -1;           //!< volume ramping strength (0 = no ramping, 10 = softest ramping, -1 = recommended default) [reload, min -1, max 10]
     float    gain                     = 0.0f;         //!< global gain to apply, in decibels [reload]
     float    loudness             = InvalidLoudness;  //!< the current track's measured loudness, in decibels; values < -100 mean "no loudness measured" [hidden]
-    float    targetLoudness           = -18.0f;       //!< target loudness, in decibels (or LUFS); if the 'loudness' parameter is valid, an extra gain will be applied (in addition to 'gain') so that the loudness is corrected to this value [reload]
+    float    targetLoudness           = -18.0f;       //!< target loudness, in decibels (or LUFS); if the automatically measured 'loudness' parameter is valid, an extra gain will be applied (in addition to 'gain') so that the loudness is corrected to this value [reload]
 
     // playback control
     bool     autoPlay                 = true;         //!< automatically start playing when loading a module; you may want to turn this off for actual competitions [reload]
@@ -101,8 +105,6 @@ struct Config {
     bool     showTime                 = false;        //!< show current time in track at the end of the details line
     bool     hideFileExt              = false;        //!< whether to remove the file extension from the filename in the info bar [reload]
     bool     autoHideFileName         = false;        //!< whether to hide the filename completely if title and/or artist information is available [reload]
-    std::string artist;                               //!< override artist info from the module with a custom string [reload]
-    std::string title;                                //!< override title info from the module with a custom string [reload]
     int      infoMarginX              = 16;           //!< outer left margin inside the info bar
     int      infoMarginY              = 8;            //!< upper and lower margin inside the info bar
     int      infoTrackTextSize        = 233;          //!< text size of the track number [max 500]

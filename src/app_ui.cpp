@@ -91,12 +91,14 @@ void Application::uiConfigWindow() {
 
     for (const ConfigItem *item = g_ConfigItems;  item->valid();  ++item) {
         // shortcuts / skips
-        if (item->type == ConfigItem::DataType::SectionHeader) {
-            collapsed = !ImGui::CollapsingHeader(item->description, ImGuiTreeNodeFlags_DefaultOpen);
+        if ((collapsed && (item->type != ConfigItem::DataType::SectionHeader))
+        || (item->flags & ConfigItem::Flags::Hidden)
+        || (!m_uiConfigShowGlobal && (item->flags & (ConfigItem::Flags::Global | ConfigItem::Flags::Startup)))
+        || ( m_uiConfigShowGlobal && (item->flags &  ConfigItem::Flags::File))) {
             continue;
         }
-        if (collapsed || (item->flags & ConfigItem::Flags::Hidden)
-        || (!m_uiConfigShowGlobal && (item->flags & (ConfigItem::Flags::Global | ConfigItem::Flags::Startup)))) {
+        if (item->type == ConfigItem::DataType::SectionHeader) {
+            collapsed = !ImGui::CollapsingHeader(item->description, ImGuiTreeNodeFlags_DefaultOpen);
             continue;
         }
 

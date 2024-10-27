@@ -27,11 +27,12 @@ struct ConfigItem {
     };
 
     enum Flags : int {
-        Reload   = (1 << 0),  // module reload required after changing
-        Image    = (1 << 1),  // image reload required after changing
+        Hidden   = (1 << 0),  // hide from interactive configuration UI
+        File     = (1 << 1),  // only relevant for per-file configuration
         Global   = (1 << 2),  // only relevant for global configuration
         Startup  = (1 << 3),  // only evaluated at application startup (implies Global)
-        Hidden   = (1 << 4),  // hide from interactive configuration UI
+        Reload   = (1 << 4),  // module reload required after changing
+        Image    = (1 << 5),  // image reload required after changing
     };
 
     int ordinal;
