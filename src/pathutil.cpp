@@ -117,6 +117,18 @@ bool matchFilename(const std::string& pattern, const std::string& filename) {
     return (patternPos == pattern.size()) && (filenamePos == filename.size());
 }
 
+bool isFile(const char* path) {
+    #ifdef _WIN32
+        DWORD attr = GetFileAttributesA(path);
+        if (attr == INVALID_FILE_ATTRIBUTES) { return false; }
+        return !(attr & FILE_ATTRIBUTE_DIRECTORY);
+    #else
+        struct stat st;
+        if (stat(path, &st) < 0) { return false; }
+        return !!S_ISREG(st.st_mode);
+    #endif
+}
+
 bool isDir(const char* path) {
     #ifdef _WIN32
         DWORD attr = GetFileAttributesA(path);

@@ -83,6 +83,7 @@ void Application::uiConfigWindow() {
     ImGui::PushStyleColor(ImGuiCol_Button, m_uiConfigShowGlobal ? ImVec4(0.5f, 0.5f, 0.5f, 0.5f) : ImGui::GetStyle().Colors[ImGuiCol_ButtonActive]);
     if (ImGui::Button("File-Specific Configuration")) { m_uiConfigShowGlobal = false; }
     ImGui::PopStyleColor(1);
+    ImGui::Spacing();
 
     Config& cfg = m_uiConfigShowGlobal ? m_uiGlobalConfig : m_uiFileConfig;
     bool collapsed = false;
@@ -204,6 +205,10 @@ void Application::uiConfigWindow() {
         updateConfig();
         updateImages();
         updateLayout();
+    }
+    ImGui::Spacing();
+    if (ImGui::Button("Save Configuration")) {
+        uiSaveConfig();
     }
     ImGui::End();
 }

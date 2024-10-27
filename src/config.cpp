@@ -365,3 +365,120 @@ void Config::importAllUnset(const Config& src) {
         }
     }
 }
+
+////////////////////////////////////////////////////////////////////////////////
+
+bool Config::updateFile(const char* filename) {
+    if (set.empty()) { return true; }  // nothing to do
+
+    // create an image of the config file as a string
+    std::string data;
+    FILE *f = fopen(filename, "rb");
+    if (f) {
+        fseek(f, 0, SEEK_END);
+        data.resize(ftell(f));
+        fseek(f, 0, SEEK_SET);
+        size_t res = fread(static_cast<void*>(data.data()), 1, data.size(), f);
+        fclose(f);
+        if (res != data.size()) { return false; }
+    }
+
+    // detect EOL scheme for newly-inserted lines
+    int nCR = 0, nLF = 0;
+    for (size_t pos = 0;  pos < data.size();  ++pos) {
+        if (data[pos] == 13) { nCR++; }
+        if (data[pos] == 10) { nLF++; }
+    }
+    const std::string eol((nLF && (nCR < (nLF >> 1))) ? "\n" : "\r\n");
+
+    // iterate over changed items
+    for (const ConfigItem *item = g_ConfigItems;  item->valid();  ++item) {
+        if (!set.contains(item->ordinal)) { continue; }
+        Dprintf("updateFile: searching for '%s' ... ", item->name);
+
+        // find the last place where this item has been found (if any),
+        // and the last non-empty line in the common parts of the INI file
+        size_t changePos = 0, lastLine = 0, lineStart = 0;
+        enum { psNewLine, psIgnore, psKey, psSection } state = psNewLine;
+        const char* itemNamePos = item->name;
+        bool skipSection = false;
+        for (size_t pos = 0;  pos < data.size();  ++pos) {
+            char c = data[pos];
+            if (c == '\n') {
+                lineStart = pos + 1u;
+                if ((state != psNewLine) && !skipSection) {
+                    lastLine = lineStart;  // non-empty line -> mark as insert location
+                }
+                state = psNewLine;
+                itemNamePos = item->name;
+                continue;
+            } else if (c == ';') { state = psIgnore; }
+            switch (state) {
+                case psNewLine:
+                    if (c == '[') { state = psSection; lineStart = pos + 1u; break; }
+                    if (isSpace(c)) { break; }
+                    if (skipSection) { state = psIgnore; break; }
+                    state = psKey;
+                    /* fall-through */
+                case psKey:
+                    if (isIgnored(c)) { break; }
+                    if ((c == '=') || (c == ':')) {
+                        if (!*itemNamePos) { changePos = pos + 1u; }
+                        state = psIgnore;
+                    } else if (!*itemNamePos) {
+                        state = psIgnore;  // key longer than expected -> no match
+                    } else if (toLower(c) == toLower(*itemNamePos)) {
+                        ++itemNamePos;  // match
+                        while (isIgnored(*itemNamePos)) { ++itemNamePos; }
+                    } else {
+                        state = psIgnore;  // key deviates from expected -> no match
+                    }
+                    break;
+                case psSection:
+                    if (c == ']') {
+                        std::string section(data.substr(lineStart, pos - lineStart));
+                        skipSection = !stringEqualEx(section.c_str(), "TM")
+                                   && !stringEqualEx(section.c_str(), "TrackMeister");
+                        state = psIgnore;
+                    }
+                    break;
+                default:  // psIgnore
+                    break;
+            }
+        }
+
+        // update existing line, or insert as a new line
+        if (changePos) {
+            Dprintf("found at index %d, replacing\n", int(changePos));
+            while ((changePos < data.size()) && (isSpace(data[changePos]))) {
+                ++changePos;  // keep initial whitespace
+            }
+            size_t end = changePos;
+            while ((end < data.size()) && (data[end] != ';') && (data[end] != '\r') && (data[end] != '\n')) {
+                ++end;  // mark end of the value range
+            }
+            size_t length = end - changePos;
+            std::string value(item->format(*this));
+            if ((end < data.size()) && (data[end] == ';')) {
+                // if a comment follows, keep the existing whitespace (but ensure
+                // that the value fits, and at least one whitespace follows)
+                value.resize(std::max(length, value.size() + 1u), ' ');
+            }
+            data.replace(changePos, length, value);
+        } else {
+            Dprintf("not found, adding new line at index %d\n", int(lastLine));
+            std::string line(item->name);
+            line.append(" = ");
+            line.append(item->format(*this));
+            line.append(eol);
+            data.insert(lastLine, line);
+        }
+    }
+
+    // write back the file
+    f = fopen(filename, "wb");
+    if (!f) { return false; }
+    size_t res = fwrite(static_cast<const void*>(data.data()), 1, data.size(), f);
+    fclose(f);
+    return (res == data.size());
+}

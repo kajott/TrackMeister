@@ -86,6 +86,12 @@ inline void stripExtInplace(std::string& filename)
 //! <br> - only supports one '*' wildcard; no '?', no multiple wildcards!
 bool matchFilename(const std::string& pattern, const std::string& filename);
 
+//! check whether a path refers to a file
+bool isFile(const char* path);
+//! check whether a path refers to a file
+inline bool isFile(const std::string& path)
+    { return isFile(path.c_str()); }
+
 //! check whether a path refers to a directory
 bool isDir(const char* path);
 //! check whether a path refers to a directory

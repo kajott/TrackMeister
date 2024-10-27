@@ -117,6 +117,19 @@ bool Application::hasTrackNumber(const char* basename) {
         && ((basename[2] == '-') || (basename[2] == '_') || (basename[2] == ' '));
 }
 
+void Application::reloadConfig() {
+    m_globalConfig.reset();
+    m_globalConfig.load(m_mainIniFile.c_str());
+    m_globalConfig.load(m_dirIniFile.c_str());
+    m_uiGlobalConfig.importAllUnset(m_globalConfig);
+    m_fileConfig.reset();
+    m_fileConfig.load(m_mainIniFile.c_str(), m_basename.c_str());
+    m_fileConfig.load(m_dirIniFile.c_str(), m_basename.c_str());
+    m_fileConfig.load(m_fileIniFile.c_str());
+    updateConfig();
+    updateImages();
+}
+
 void Application::updateConfig() {
     m_config.reset();
     m_config.import(m_globalConfig);
@@ -244,7 +257,7 @@ void Application::handleKey(int key, bool ctrl, bool shift, bool alt) {
         case 'A':  // toggle autoscroll
             m_metaTextAutoScroll = !m_metaTextAutoScroll;
             break;
-        case 'S':  // [Ctrl+Shift+S] save config
+        case 'S':  // [Ctrl+(Shift+)S] save config
             if (ctrl && shift) {
                 Config defaultConfig;
                 if (defaultConfig.save("tm_default.ini")) {
@@ -252,6 +265,8 @@ void Application::handleKey(int key, bool ctrl, bool shift, bool alt) {
                 } else {
                     toast("saving tm_default.ini failed");
                 }
+            } else if (ctrl) {
+                uiSaveConfig();
             }
             break;
         case 'L':  // [Ctrl+L] run (or stop) loudness scan
@@ -465,6 +480,29 @@ void Application::updateGain() {
     Dprintf("master gain: %.2f dB\n", gain);
     AudioMutexGuard mtx_(m_sys);
     m_mod->set_render_param(openmpt::module::render_param::RENDER_MASTERGAIN_MILLIBEL, int(gain * 100.0f + 0.5f));
+}
+
+void Application::uiSaveConfig() {
+    Config& cfg = m_uiConfigShowGlobal ? m_uiGlobalConfig : m_uiFileConfig;
+    if (cfg.set.empty()) {
+        toast("configuration not changed");
+        return;
+    }
+    const std::string& iniFile = (!m_uiConfigShowGlobal)        ? m_fileIniFile
+                               : PathUtil::isFile(m_dirIniFile) ? m_dirIniFile
+                               :                                  m_mainIniFile;
+    if (cfg.updateFile(iniFile.c_str())) {
+        std::string msg("saved ");
+        msg.append(iniFile);
+        toast(msg);
+        cfg.set.clear();
+        reloadConfig();
+    } else {
+        std::string msg("saving ");
+        msg.append(iniFile);
+        msg.append(" failed");
+        toast(msg);
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -866,30 +904,20 @@ bool Application::loadModule(const char* path, bool forScanning) {
         if (newPath.empty()) { dirFail = true; }
         else { m_fullpath.assign(newPath); }
     }
-    std::string filename(PathUtil::basename(m_fullpath));
+    m_basename = PathUtil::basename(m_fullpath);
     m_previousFile.assign(m_fullpath);
 
     // load configuration files
     m_dirIniFile = PathUtil::join(PathUtil::dirname(m_fullpath), "tm.ini");
     m_fileIniFile = m_fullpath + ".tm";
-    m_globalConfig.reset();
-    m_globalConfig.load(m_mainIniFile.c_str());
-    m_globalConfig.load(m_dirIniFile.c_str());
-    m_uiGlobalConfig.importAllUnset(m_globalConfig);
-    m_fileConfig.reset();
-    m_fileConfig.load(m_mainIniFile.c_str(), filename.c_str());
-    m_fileConfig.load(m_dirIniFile.c_str(), filename.c_str());
-    m_fileConfig.load(m_fileIniFile.c_str());
-    updateConfig();
-    updateImages();
-    m_renderer.setAlphaGamma(m_config.alphaGamma);
+    reloadConfig();
 
     // split off track number
-    if (m_config.trackNumberEnabled && hasTrackNumber(filename.c_str())) {
-        m_track[0] = filename[0];
-        m_track[1] = filename[1];
+    if (m_config.trackNumberEnabled && hasTrackNumber(m_basename.c_str())) {
+        m_track[0] = m_basename[0];
+        m_track[1] = m_basename[1];
         m_track[2] = '\0';
-        filename.erase(0, 3);
+        m_basename.erase(0, 3);
     }
 
     // stop here if there's no file to load
@@ -960,13 +988,13 @@ bool Application::loadModule(const char* path, bool forScanning) {
     std::string title (m_config.title.empty()  ? m_mod->get_metadata("title")  : m_config.title);
     if (!m_config.autoHideFileName || (artist.empty() && title.empty())) {
         if (m_config.hideFileExt) {
-            if (isOldModPrefix(filename.c_str())) {
-                filename.erase(0, 4);
+            if (isOldModPrefix(m_basename.c_str())) {
+                m_basename.erase(0, 4);
             } else {
-                PathUtil::stripExtInplace(filename);
+                PathUtil::stripExtInplace(m_basename);
             }
         }
-        m_info.emplace_back(std::make_pair("File", filename));
+        m_info.emplace_back(std::make_pair("File", m_basename));
     }
     if (!artist.empty()) { m_info.emplace_back(std::make_pair("Artist", artist)); }
     if (!title.empty())  { m_info.emplace_back(std::make_pair("Title",  title)); }

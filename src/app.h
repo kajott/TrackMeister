@@ -52,6 +52,7 @@ class Application {
 
     // metadata
     std::string m_fullpath;
+    std::string m_basename;
     std::string m_previousFile;
     char m_track[3] = {0,0,0};
     std::vector<std::pair<std::string, std::string>> m_info;
@@ -166,6 +167,7 @@ private:  // business logic
     int toPixels(int value) const;
     int toTextSize(int value) const;
     int textWidth(int size, const char* text) const;
+    void reloadConfig();
     void updateConfig();
     void updateImages();
     void updateImage(ExternalImage& img, const std::string& path, int channels, const char* what);
@@ -189,4 +191,5 @@ private:  // business logic
     void stopScan();
     void uiHelpWindow();
     void uiConfigWindow();
+    void uiSaveConfig();
 };

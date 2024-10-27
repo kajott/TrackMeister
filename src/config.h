@@ -212,4 +212,5 @@ struct Config {
     bool load(const char* filename, const char* matchName=nullptr);
     bool save(const char* filename);
     bool saveLoudness(const char* filename);
+    bool updateFile(const char* filename);
 };
