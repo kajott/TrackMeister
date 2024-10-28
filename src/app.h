@@ -21,6 +21,7 @@
 #include "renderer.h"
 #include "textarea.h"
 #include "pathutil.h"
+#include "numset.h"
 #include "config.h"
 
 namespace openmpt {
@@ -31,12 +32,6 @@ class Application {
     // core data
     SystemInterface& m_sys;
     TextBoxRenderer m_renderer;
-    Config m_globalConfig;
-    Config m_fileConfig;
-    Config m_cmdlineConfig;
-    Config m_uiGlobalConfig;
-    Config m_uiFileConfig;
-    Config m_config;
     int m_sampleRate;
     bool m_scanning = false;
     std::atomic_bool m_cancelScanning = false;
@@ -45,10 +40,21 @@ class Application {
     std::vector<std::byte> m_mod_data;
     std::vector<uint32_t> m_playableExts;
     std::thread* m_scanThread = nullptr;
+    float m_instanceGain = 0.0f;
+
+    // configuration
     std::string m_mainIniFile;
     std::string m_dirIniFile;
     std::string m_fileIniFile;
-    float m_instanceGain = 0.0f;
+    Config m_globalConfig;
+    Config m_fileConfig;
+    Config m_cmdlineConfig;
+    Config m_uiGlobalConfig;
+    Config m_uiFileConfig;
+    Config m_config;
+    NumberSet m_fileReloadPending;
+    NumberSet m_globalReloadPending;
+    NumberSet m_restartPending;
 
     // metadata
     std::string m_fullpath;
@@ -139,7 +145,6 @@ class Application {
     bool m_showHelp = false;
     bool m_showConfig = false;
     bool m_uiConfigShowGlobal = true;
-    bool m_reloadPending = false;
 
 public:  // interface from SystemInterface
     explicit inline Application(SystemInterface& sys) : m_sys(sys), m_metadata(m_renderer) {}

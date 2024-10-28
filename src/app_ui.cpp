@@ -88,7 +88,8 @@ void Application::uiConfigWindow() {
     ImGui::PopStyleColor(1);
     ImGui::Spacing();
 
-    Config& cfg = m_uiConfigShowGlobal ? m_uiGlobalConfig : m_uiFileConfig;
+    Config&    cfg       = m_uiConfigShowGlobal ? m_uiGlobalConfig      : m_uiFileConfig;
+    NumberSet& reloadSet = m_uiConfigShowGlobal ? m_globalReloadPending : m_fileReloadPending;
     bool collapsed = false;
     bool cfgChanged = false;
 
@@ -106,36 +107,35 @@ void Application::uiConfigWindow() {
         }
 
         // generic stuff (status bubble)
-        bool isset = cfg.set.contains(item->ordinal);
-        bool colored = false;
+        bool itemChanged = false, itemReverted = false;
+        bool isset          = cfg.set.contains(item->ordinal);
+        bool shadowed       = m_uiConfigShowGlobal && (m_fileConfig.set.contains(item->ordinal) || m_uiFileConfig.set.contains(item->ordinal));
+        bool reloadPending  = reloadSet.contains(item->ordinal);
+        bool restartPending = m_restartPending.contains(item->ordinal);
         std::string reason;
-        if (isset && m_uiConfigShowGlobal && (m_fileConfig.set.contains(item->ordinal) || m_uiFileConfig.set.contains(item->ordinal))) {
-            reason.append("setting is overridden by a file-specific setting\n");
-            ImGui::PushStyleColor(ImGuiCol_CheckMark, ImVec4(0.8f, 0.2f, 0.0f, 1.0f)); colored = true;
-        }
-        if (isset && (item->flags & ConfigItem::Flags::Reload) && m_reloadPending) {
-            reason.append("setting will become active after reloading (F5)\n");
-            if (!colored) { ImGui::PushStyleColor(ImGuiCol_CheckMark, ImVec4(0.8f, 0.0f, 0.5f, 1.0f)); colored = true; }
-        }
-        if (isset && (item->flags & ConfigItem::Flags::Startup)) {
-            reason.append("setting requires a restart\n");
-            if (!colored) { ImGui::PushStyleColor(ImGuiCol_CheckMark, ImVec4(0.8f, 0.3f, 0.3f, 1.0f)); colored = true; }
-        }
-        if (isset) {
-            if (!colored) { reason.append("setting modified\n"); }
-            reason.append("click to revert");
-        }
-        if (ImGui::RadioButton((std::string("##RB") + item->name).c_str(), isset)) {
+        if (isset)          { reason.append("setting modified\n"); }
+        if (shadowed)       { reason.append("setting is overridden by a file-specific setting\n"); }
+        if (reloadPending)  { reason.append("setting will become active after reloading (F5)\n"); }
+        if (restartPending) { reason.append("setting will become active after an application restart\n"); }
+        if (isset)          { reason.append("click to revert\n"); }
+        ImVec4 bubbleColor;
+        if      (shadowed       && isset) { bubbleColor = ImVec4(1.0f, 0.3f, 0.0f, 1.0f); }
+        else if (shadowed)                { bubbleColor = ImVec4(0.5f, 0.1f, 0.0f, 1.0f); }
+        else if (reloadPending  && isset) { bubbleColor = ImVec4(1.0f, 0.0f, 0.7f, 1.0f); }
+        else if (reloadPending)           { bubbleColor = ImVec4(0.7f, 0.0f, 0.5f, 1.0f); }
+        else if (restartPending && isset) { bubbleColor = ImVec4(1.0f, 0.5f, 0.5f, 1.0f); }
+        else if (restartPending)          { bubbleColor = ImVec4(0.7f, 0.3f, 0.2f, 1.0f); }
+        if (bubbleColor.w > 0.0f) { ImGui::PushStyleColor(ImGuiCol_CheckMark, bubbleColor); }
+        if (ImGui::RadioButton((std::string("##RB") + item->name).c_str(), isset || (bubbleColor.w > 0.0f))) {
             if (isset) {
                 cfg.set.remove(item->ordinal);
                 item->copy((m_uiConfigShowGlobal || !m_fileConfig.set.contains(item->ordinal)) ? m_globalConfig : m_fileConfig, cfg);
-                cfgChanged = true;
+                itemReverted = true;
             }
         }
-        if (colored) { ImGui::PopStyleColor(1); }
+        if (bubbleColor.w > 0.0f) { ImGui::PopStyleColor(); }
         if (!reason.empty()) { ImGui::SetItemTooltip("%s", reason.c_str()); }
         ImGui::SameLine();
-        bool itemChanged = false;
 
         // type-dependent UI
         if (item->type == ConfigItem::DataType::Bool) {
@@ -197,11 +197,10 @@ void Application::uiConfigWindow() {
             ImGui::PopTextWrapPos();
             ImGui::EndTooltip();
         }
-        if (itemChanged) {
-            if (item->flags & ConfigItem::Flags::Reload) {
-                m_reloadPending = true;
-            }
-            cfg.set.add(item->ordinal);
+        if (itemChanged || itemReverted) {
+            if (item->flags & ConfigItem::Flags::Reload)  { reloadSet.add(item->ordinal); }
+            if (item->flags & ConfigItem::Flags::Startup) { m_restartPending.add(item->ordinal); }
+            if (itemChanged) { cfg.set.add(item->ordinal); }
             cfgChanged = true;
         }
     }

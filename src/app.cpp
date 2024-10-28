@@ -887,7 +887,6 @@ bool Application::loadModule(const char* path, bool forScanning) {
         if (path) { m_fullpath.assign(path); }
         Dprintf("\nloadModule(): re-opening '%s'\n", m_fullpath.c_str());
     }
-    m_reloadPending = false;
 
     // trim .tm suffix (we don't want to load sidecar files)
     auto pathLen = m_fullpath.size();
@@ -915,6 +914,8 @@ bool Application::loadModule(const char* path, bool forScanning) {
     m_dirIniFile = PathUtil::join(PathUtil::dirname(m_fullpath), "tm.ini");
     m_fileIniFile = m_fullpath + ".tm";
     reloadConfig();
+    m_fileReloadPending.clear();
+    m_globalReloadPending.clear();
 
     // split off track number
     if (m_config.trackNumberEnabled && hasTrackNumber(m_basename.c_str())) {

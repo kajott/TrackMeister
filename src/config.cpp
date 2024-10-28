@@ -217,7 +217,7 @@ std::string ConfigItem::format(const Config& cfg) const {
 
 bool Config::load(const char* filename, const char* matchName) {
     if (!filename || !filename[0]) { return false; }
-    Dprintf("Config::load('%s', '%s')\n", filename, matchName ? matchName : "");
+    Dprintf("Config::load('%s', '%s')\n", filename, matchName ? matchName : "<null>");
     FILE* f = fopen(filename, "r");
     if (!f) { return false; }
 
@@ -256,7 +256,7 @@ bool Config::load(const char* filename, const char* matchName) {
         if (!key) { continue; }
         if ((key[0] == '[') && !value && (end >= key) && (end[-1] == ']')) {
             ++key;  end[-1] = '\0';
-            validSection = (matchName && matchName[0])
+            validSection = matchName
                          ? PathUtil::matchFilename(key, matchName)
                          : (stringEqualEx(key, "TrackMeister") || stringEqualEx(key, "TM"));
             Dprintf("  - %s section '%s'\n", validSection ? "parsing" : "ignoring", key);
