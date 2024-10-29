@@ -89,6 +89,7 @@ void Application::uiConfigWindow() {
     ImGui::Spacing();
 
     Config&    cfg       = m_uiConfigShowGlobal ? m_uiGlobalConfig      : m_uiFileConfig;
+    Config&    base      = m_uiConfigShowGlobal ? m_globalConfig        : m_fileConfig;
     NumberSet& reloadSet = m_uiConfigShowGlobal ? m_globalReloadPending : m_fileReloadPending;
     bool collapsed = false;
     bool cfgChanged = false;
@@ -108,26 +109,30 @@ void Application::uiConfigWindow() {
 
         // generic stuff (status bubble)
         bool itemChanged = false, itemReverted = false;
-        bool isset          = cfg.set.contains(item->ordinal);
+        bool isSet          = cfg.set.contains(item->ordinal);
+        bool isSaved        = base.set.contains(item->ordinal);
         bool shadowed       = m_uiConfigShowGlobal && (m_fileConfig.set.contains(item->ordinal) || m_uiFileConfig.set.contains(item->ordinal));
         bool reloadPending  = reloadSet.contains(item->ordinal);
         bool restartPending = m_restartPending.contains(item->ordinal);
         std::string reason;
-        if (isset)          { reason.append("setting modified\n"); }
-        if (shadowed)       { reason.append("setting is overridden by a file-specific setting\n"); }
-        if (reloadPending)  { reason.append("setting will become active after reloading (F5)\n"); }
-        if (restartPending) { reason.append("setting will become active after an application restart\n"); }
-        if (isset)          { reason.append("click to revert\n"); }
+        if (!isSaved && !isSet) { reason.append("setting is at its default"); }
+        if (isSaved)            { reason.append("setting is configured in the config file"); }
+        if (isSet)              { reason.append("setting modified\n"); }
+        if (shadowed)           { reason.append("setting is overridden by a file-specific setting\n"); }
+        if (reloadPending)      { reason.append("setting will become active after reloading (F5)\n"); }
+        if (restartPending)     { reason.append("setting will become active after an application restart\n"); }
+        if (isSet)              { reason.append("click to revert\n"); }
         ImVec4 bubbleColor;
-        if      (shadowed       && isset) { bubbleColor = ImVec4(1.0f, 0.3f, 0.0f, 1.0f); }
-        else if (shadowed)                { bubbleColor = ImVec4(0.5f, 0.1f, 0.0f, 1.0f); }
-        else if (reloadPending  && isset) { bubbleColor = ImVec4(1.0f, 0.0f, 0.7f, 1.0f); }
-        else if (reloadPending)           { bubbleColor = ImVec4(0.7f, 0.0f, 0.5f, 1.0f); }
-        else if (restartPending && isset) { bubbleColor = ImVec4(1.0f, 0.5f, 0.5f, 1.0f); }
-        else if (restartPending)          { bubbleColor = ImVec4(0.7f, 0.3f, 0.2f, 1.0f); }
+        if      (shadowed       &&  isSet) { bubbleColor = ImVec4(1.0f, 0.3f, 0.0f, 1.0f); }
+        else if (shadowed)                 { bubbleColor = ImVec4(0.5f, 0.1f, 0.0f, 1.0f); }
+        else if (reloadPending  &&  isSet) { bubbleColor = ImVec4(1.0f, 0.0f, 0.7f, 1.0f); }
+        else if (reloadPending)            { bubbleColor = ImVec4(0.7f, 0.0f, 0.5f, 1.0f); }
+        else if (restartPending &&  isSet) { bubbleColor = ImVec4(1.0f, 0.5f, 0.5f, 1.0f); }
+        else if (restartPending)           { bubbleColor = ImVec4(0.7f, 0.3f, 0.2f, 1.0f); }
+        else if (isSaved        && !isSet) { bubbleColor = ImVec4(0.5f, 0.5f, 0.5f, 1.0f); }
         if (bubbleColor.w > 0.0f) { ImGui::PushStyleColor(ImGuiCol_CheckMark, bubbleColor); }
-        if (ImGui::RadioButton((std::string("##RB") + item->name).c_str(), isset || (bubbleColor.w > 0.0f))) {
-            if (isset) {
+        if (ImGui::RadioButton((std::string("##RB") + item->name).c_str(), isSet || (bubbleColor.w > 0.0f))) {
+            if (isSet) {
                 cfg.set.remove(item->ordinal);
                 item->copy((m_uiConfigShowGlobal || !m_fileConfig.set.contains(item->ordinal)) ? m_globalConfig : m_fileConfig, cfg);
                 itemReverted = true;
