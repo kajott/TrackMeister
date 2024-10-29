@@ -66,13 +66,18 @@ void Application::uiHelpWindow() {
 ////////////////////////////////////////////////////////////////////////////////
 
 void Application::uiConfigWindow() {
+    if (m_fullpath.empty()) {
+        m_uiConfigShowGlobal = true;  // can't show file-specific config if no file loaded
+    }
+
     float margin = float(m_screenSizeY >> 6);
     ImGui::SetNextWindowPos(ImVec2(
         float(m_metaStartX) - margin,
         0.5f * float(m_infoEndY + m_screenSizeY)
     ), ImGuiCond_FirstUseEver, ImVec2(1.0f, 0.5f));
     ImGui::SetNextWindowSize(ImVec2(640.0f, float(m_screenSizeY - m_infoEndY) - 2.0f * margin), ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin("Configuration", &m_showConfig, ImGuiWindowFlags_NoCollapse)) {
+    if (!ImGui::Begin(m_uiConfigShowGlobal ? "Global Configuration###cfgWindow"
+                                    : "File-Specific Configuration###cfgWindow", &m_showConfig, ImGuiWindowFlags_NoCollapse)) {
         ImGui::End();
         return;
     }
