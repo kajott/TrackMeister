@@ -368,8 +368,9 @@ void Config::importAllUnset(const Config& src) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool Config::updateFile(const char* filename) {
-    if (set.empty()) { return true; }  // nothing to do
+bool Config::updateFile(const char* filename, const NumberSet* resetSet) {
+    if (set.empty() && (!resetSet || resetSet->empty())) { return true; }  // nothing to do
+    Dprintf("updateFile('%s') ==> ...\n", filename);
 
     // create an image of the config file as a string
     std::string data;
@@ -393,12 +394,14 @@ bool Config::updateFile(const char* filename) {
 
     // iterate over changed items
     for (const ConfigItem *item = g_ConfigItems;  item->valid();  ++item) {
-        if (!set.contains(item->ordinal)) { continue; }
-        Dprintf("updateFile: searching for '%s' ... ", item->name);
+        bool isSet   = set.contains(item->ordinal);
+        bool isReset = resetSet && resetSet->contains(item->ordinal);
+        if (!isSet && !isReset) { continue; }
+        Dprintf("updateFile: searching for '%s' for %s ... ", item->name, isSet ? "update" : isReset ? "removal" : "... I don't know myself");
 
         // find the last place where this item has been found (if any),
         // and the last non-empty line in the common parts of the INI file
-        size_t changePos = 0, lastLine = 0, lineStart = 0;
+        size_t changePos = 0, changeKeyStart = 0, lastLine = 0, lineStart = 0, keyStart = 0;
         enum { psNewLine, psIgnore, psKey, psSection } state = psNewLine;
         const char* itemNamePos = item->name;
         bool skipSection = false;
@@ -419,11 +422,15 @@ bool Config::updateFile(const char* filename) {
                     if (isSpace(c)) { break; }
                     if (skipSection) { state = psIgnore; break; }
                     state = psKey;
+                    keyStart = pos;
                     /* fall-through */
                 case psKey:
                     if (isIgnored(c)) { break; }
                     if ((c == '=') || (c == ':')) {
-                        if (!*itemNamePos) { changePos = pos + 1u; }
+                        if (!*itemNamePos) {
+                            changePos = pos + 1u;
+                            changeKeyStart = keyStart;
+                        }
                         state = psIgnore;
                     } else if (!*itemNamePos) {
                         state = psIgnore;  // key longer than expected -> no match
@@ -448,7 +455,10 @@ bool Config::updateFile(const char* filename) {
         }
 
         // update existing line, or insert as a new line
-        if (changePos) {
+        if (changePos && isReset) {
+            Dprintf("found at index %d, commenting out\n", int(changePos));
+            data.insert(changeKeyStart, ";");
+        } else if (changePos) {
             Dprintf("found at index %d, replacing\n", int(changePos));
             while ((changePos < data.size()) && (isSpace(data[changePos]))) {
                 ++changePos;  // keep initial whitespace
@@ -465,13 +475,15 @@ bool Config::updateFile(const char* filename) {
                 value.resize(std::max(length, value.size() + 1u), ' ');
             }
             data.replace(changePos, length, value);
-        } else {
+        } else if (isSet) {
             Dprintf("not found, adding new line at index %d\n", int(lastLine));
             std::string line(item->name);
             line.append(" = ");
             line.append(item->format(*this));
             line.append(eol);
             data.insert(lastLine, line);
+        } else {
+            Dprintf("not found, nothing to do\n");
         }
     }
 

@@ -55,6 +55,8 @@ class Application {
     NumberSet m_fileReloadPending;
     NumberSet m_globalReloadPending;
     NumberSet m_restartPending;
+    NumberSet m_uiGlobalReset;
+    NumberSet m_uiFileReset;
 
     // metadata
     std::string m_fullpath;

@@ -90,6 +90,7 @@ void Application::uiConfigWindow() {
 
     Config&    cfg       = m_uiConfigShowGlobal ? m_uiGlobalConfig      : m_uiFileConfig;
     Config&    base      = m_uiConfigShowGlobal ? m_globalConfig        : m_fileConfig;
+    NumberSet& resetSet  = m_uiConfigShowGlobal ? m_uiGlobalReset       : m_uiFileReset;
     NumberSet& reloadSet = m_uiConfigShowGlobal ? m_globalReloadPending : m_fileReloadPending;
     bool collapsed = false;
     bool cfgChanged = false;
@@ -111,30 +112,43 @@ void Application::uiConfigWindow() {
         bool itemChanged = false, itemReverted = false;
         bool isSet          = cfg.set.contains(item->ordinal);
         bool isSaved        = base.set.contains(item->ordinal);
-        bool shadowed       = m_uiConfigShowGlobal && (m_fileConfig.set.contains(item->ordinal) || m_uiFileConfig.set.contains(item->ordinal));
+        bool isShadowed     = m_uiConfigShowGlobal && (m_fileConfig.set.contains(item->ordinal) || m_uiFileConfig.set.contains(item->ordinal));
+        bool isReset        = resetSet.contains(item->ordinal);
         bool reloadPending  = reloadSet.contains(item->ordinal);
         bool restartPending = m_restartPending.contains(item->ordinal);
+        bool isMod = isSet || isReset;
         std::string reason;
-        if (!isSaved && !isSet) { reason.append("setting is at its default"); }
-        if (isSaved)            { reason.append("setting is configured in the config file"); }
+        if (!isSaved && !isSet) { reason.append("setting is at its default\n"); }
+        if (isSaved)            { reason.append("setting is configured in the config file\n"); }
         if (isSet)              { reason.append("setting modified\n"); }
-        if (shadowed)           { reason.append("setting is overridden by a file-specific setting\n"); }
+        if (isReset)            { reason.append("setting will be reset to default (removed from config file)\n"); }
+        if (isShadowed)         { reason.append("setting is overridden by a file-specific setting\n"); }
         if (reloadPending)      { reason.append("setting will become active after reloading (F5)\n"); }
         if (restartPending)     { reason.append("setting will become active after an application restart\n"); }
         if (isSet)              { reason.append("click to revert\n"); }
+        if (isSaved && !isSet && !isReset) { reason.append("click to restore default\n"); }
         ImVec4 bubbleColor;
-        if      (shadowed       &&  isSet) { bubbleColor = ImVec4(1.0f, 0.3f, 0.0f, 1.0f); }
-        else if (shadowed)                 { bubbleColor = ImVec4(0.5f, 0.1f, 0.0f, 1.0f); }
-        else if (reloadPending  &&  isSet) { bubbleColor = ImVec4(1.0f, 0.0f, 0.7f, 1.0f); }
+        if      (isShadowed     &&  isMod) { bubbleColor = ImVec4(1.0f, 0.3f, 0.0f, 1.0f); }
+        else if (isShadowed)               { bubbleColor = ImVec4(0.5f, 0.1f, 0.0f, 1.0f); }
+        else if (reloadPending  &&  isMod) { bubbleColor = ImVec4(1.0f, 0.0f, 0.7f, 1.0f); }
         else if (reloadPending)            { bubbleColor = ImVec4(0.7f, 0.0f, 0.5f, 1.0f); }
-        else if (restartPending &&  isSet) { bubbleColor = ImVec4(1.0f, 0.5f, 0.5f, 1.0f); }
+        else if (restartPending &&  isMod) { bubbleColor = ImVec4(1.0f, 0.5f, 0.5f, 1.0f); }
         else if (restartPending)           { bubbleColor = ImVec4(0.7f, 0.3f, 0.2f, 1.0f); }
-        else if (isSaved        && !isSet) { bubbleColor = ImVec4(0.5f, 0.5f, 0.5f, 1.0f); }
+        else if (isSaved        && !isMod) { bubbleColor = ImVec4(0.5f, 0.5f, 0.5f, 1.0f); }
         if (bubbleColor.w > 0.0f) { ImGui::PushStyleColor(ImGuiCol_CheckMark, bubbleColor); }
         if (ImGui::RadioButton((std::string("##RB") + item->name).c_str(), isSet || (bubbleColor.w > 0.0f))) {
             if (isSet) {
                 cfg.set.remove(item->ordinal);
                 item->copy((m_uiConfigShowGlobal || !m_fileConfig.set.contains(item->ordinal)) ? m_globalConfig : m_fileConfig, cfg);
+                itemReverted = true;
+            } else if (isSaved && !isReset) {
+                resetSet.add(item->ordinal);
+                if (m_uiConfigShowGlobal) {
+                    Config defaultConfig;
+                    item->copy(defaultConfig, cfg);
+                } else {
+                    item->copy(m_globalConfig, cfg);
+                }
                 itemReverted = true;
             }
         }
@@ -205,7 +219,10 @@ void Application::uiConfigWindow() {
         if (itemChanged || itemReverted) {
             if (item->flags & ConfigItem::Flags::Reload)  { reloadSet.add(item->ordinal); }
             if (item->flags & ConfigItem::Flags::Startup) { m_restartPending.add(item->ordinal); }
-            if (itemChanged) { cfg.set.add(item->ordinal); }
+            if (itemChanged) {
+                cfg.set.add(item->ordinal);
+                resetSet.remove(item->ordinal);
+            }
             cfgChanged = true;
         }
     }

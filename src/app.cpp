@@ -487,15 +487,16 @@ void Application::updateGain() {
 }
 
 void Application::uiSaveConfig() {
-    Config& cfg = m_uiConfigShowGlobal ? m_uiGlobalConfig : m_uiFileConfig;
-    if (cfg.set.empty()) {
+    Config&    cfg      = m_uiConfigShowGlobal ? m_uiGlobalConfig : m_uiFileConfig;
+    NumberSet& resetSet = m_uiConfigShowGlobal ? m_uiGlobalReset  : m_uiFileReset;
+    if (cfg.set.empty() && resetSet.empty()) {
         toast("configuration not changed");
         return;
     }
     const std::string& iniFile = (!m_uiConfigShowGlobal)        ? m_fileIniFile
                                : PathUtil::isFile(m_dirIniFile) ? m_dirIniFile
                                :                                  m_mainIniFile;
-    if (cfg.updateFile(iniFile.c_str())) {
+    if (cfg.updateFile(iniFile.c_str(), &resetSet)) {
         std::string msg("saved ");
         msg.append(iniFile);
         toast(msg);
@@ -882,6 +883,7 @@ bool Application::loadModule(const char* path, bool forScanning) {
     if (path && (m_previousFile != path)) {
         m_fullpath.assign(path);
         m_uiFileConfig.set.clear();  // new file -> discard UI per-file config
+        m_uiFileReset.clear();
         Dprintf("\nloadModule(): opening '%s'\n", m_fullpath.c_str());
     } else {
         if (path) { m_fullpath.assign(path); }
