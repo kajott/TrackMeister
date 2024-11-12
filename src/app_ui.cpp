@@ -17,6 +17,8 @@
 
 static const char* helpText[] = {
     "F1",                  "show/hide help window",
+    "F2",                  "show/hide global configuration window",
+    "F3",                  "show/hide file-specific configuration window",
     "F5",                  "reaload the current module and configuration",
     "F10 or Q",            "quit the application immediately",
     "F11",                 "toggle fullscreen mode",
@@ -36,6 +38,7 @@ static const char* helpText[] = {
     "+ / -",               "increase / decrease volume temporarily",
     "Ctrl+L",              "start loudness scan for the current module",
     "Ctrl+Shift+L",        "start loudness scan for all modules in the directory",
+    "Ctrl+S",              "save changed settings",
     "Ctrl+Shift+S",        "save default configuration (tm_default.ini)",
     nullptr
 };

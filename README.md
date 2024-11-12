@@ -14,6 +14,8 @@ This application is a player for [tracker music files](https://en.wikipedia.org/
 - fake VU meters (based on note velocity and channel, not the actual audio samples)
 - smooth fade out (triggered manually, automatically after looping, or after a configurable time)
 - loudness normalization, with a built-in EBU R128 (a.k.a. ReplayGain 2.0) loudness analyzer
+- many customization options
+- configuration using INI files or an internal UI
 - cross-platform (tested on Windows and Linux)
 - single executable; no extra DLLs/`.so`s needed
 - open source (MIT license)
@@ -47,11 +49,15 @@ The following other controls are available:
 | **F** | slowly fade out the song
 | **P** | show the current track position in seconds (hold key to update continuously)
 | **V** | show the TrackMeister and libopenmpt version numbers
+| **F1** | show or hide the help window
+| **F2** | show the global configuration dialog, or hide it if it's already visible
+| **F3** | show the file-specific configuration dialog, or hide it if it's already visible
 | **F5** | reload the current module and the application's configuration
 | **F11** | toggle fullscreen mode
 | **+** / **-** | adjust volume; this adjustment will _not_ be saved (i.e. restarting TrackMeister will start with the default volume again); furthermore, making the sound louder can lead to audio distortion
 | **Ctrl+L** | start (or cancel) EBU R128 loudness scan for the currently loaded module
 | **Ctrl+Shift+L** | start EBU R128 loudness scan for the currently loaded module and all following modules in the current directory <br> (this ignores shuffle mode; it's recommended to press **Ctrl+Home** first!)
+| **Ctrl+S** | save the changed settings in the currently visible configuration dialog
 | **Ctrl+Shift+S** | save `tm_default.ini` (see below)
 
 For directory navigation, "previous" and "next" refer to case-insensitive lexicographical ordering.
@@ -61,7 +67,7 @@ To use the loudness normalization feature, perform a loudness scan on the desire
 
 ## Configuration
 
-TrackMeister can be configured using configuration files with an INI-like syntax.
+TrackMeister can be configured using configuration files with an INI-like syntax, either with an external text editor or the built-in configuration window.
 
 The following aspects can be configured:
 - display colors, font sizes and font
@@ -90,13 +96,15 @@ The following files and sections are searched for configuration, in this order, 
 - global settings from `tm.ini` in the currently opened module file's directory
 - file-specific settings from `tm.ini` in the program directory
 - file-specific settings from `tm.ini` in the module directory
-- any settings from a file with the same name as the currently opened module file, but with an extra suffix of `.tm`; for example, for `foo.mod`, the configuration file will be `foo.mod.tm`
+- any settings from a "sidecar" file with the same name as the currently opened module file, but with an extra suffix of `.tm`; for example, for `foo.mod`, the configuration file will be `foo.mod.tm`
   - these are parsed like global settings (i.e. there's no need to have any section markers in the `.tm` files), but they are, of course, handled as file-specific settings
 
+When saving changes made in the configuration UI (using the **Ctrl+S** shortcut, or the "Save" button at the bottom of the configuration window), *global* settings are saved to the `tm.ini` file in the currently playing module file's directory if it exists, or the `tm.ini` file in the program directory otherwise; *file-specific* settings are always saves to the `.tm` sidecar file next to the currently playing module. <br>
+Saving the configuration from the UI always only updates the global sections of the file; file-specific settings from filename-matched sections in the global `tm.ini` files are never modified by the UI.
 
-All other lines contain key-value pairs of the form "`key = value`" or "`key: value`". Spaces, dashes (`-`) and underscores (`_`) in key names are ignored. All parts of a line following a semicolon (`;`) are ignored. It's allowed to put comments at the end of key/value lines.
+In the configuration files, all lines that are neither empty nor section headers shall contain key-value pairs of the form "`key = value`" or "`key: value`". Spaces, dashes (`-`) and underscores (`_`) in key names are ignored. All parts of a line following a semicolon (`;`) are ignored. It's allowed to put comments at the end of key/value lines.
 
-To get a list of all possible settings, along with documentation and the default values for each setting, run TrackMeister normally and press **Ctrl+Shift+S**, or run `tm --save-default-config` from a command line. This will generate a file `tm_default.ini` in the current directory (usually the program directory) that also be used as a template for an individual configuration.
+To get a list of all possible settings, along with documentation and the default values for each setting, run TrackMeister normally and press **Ctrl+Shift+S**, or run `tm --save-default-config` from a command line. This will generate a file `tm_default.ini` in the current directory (usually the program directory) that also be used as a template for an individual configuration. Alternatively, the same information is provided as tooltips in the built-in configuration window that can be opened with the **F2** or **F3** keys.
 
 All sizes (font sizes, margins etc.) are specified in 1/1000s of the display width, so they are more or less resolution-independent. <br>
 Boolean values can use any of the `1`/`0`, `false`/`true`, `yes`/`no` or `enabled`/`disabled` nomenclatures. <br>
@@ -157,20 +165,22 @@ Options can also be specified on the command line, in the syntax "`+key=value`" 
 - Create a `tm.ini` file with general options in the `[TM]` section. The chapter above has a nice example to get started with.
 - Listen through the files (simply double-clicking `tm.exe` should suffice). Make mental or written notes about the play order as you want to have it in the compo.
 - Rename the module files by prepending exactly two digits with the running order number, followed by a space, underscore or dash. For example, if you want to play `pt.mod` at position 8 in the compo, it becomes `08_pt.mod`, `08 pt.mod` or `08-pt.mod`.
-- Listen to the tracks again and set track-specific options in `tm.ini`. For each track you want to set special options for, you create a new section based on the running order, e.g. `[08*]` for the options of the file in the aforementioned example. <br> Typical per-track options are:
+- Listen to the tracks again and configure track-specific options by pressing the **F3** key to open the file-specific configuration window, making the desired changes, and pressing **Ctrl+S** to save them in the end.
+<br> Typical per-track options are:
   - If the track shall loop, set `loop = true`. If you also set `fade out after loop = true`, the track will also fade out at this point.
   - If the track shall fade out at some position, set `fade out at =` to the number of seconds after which fading shall start (e.g. `fade out at = 123` fades out after 123 seconds, i.e. 2 minutes and 3 seconds).
     - To determine the proper value, just pause playback at the position where you want the fade to start (using the **Space** key) and press the **P** key to display the position. The raw value in seconds can be directly used for the `fade out at` option.
   - If the track shall be played in mono, set `stereo separation = 0`.
-  - If the track shall be played with some volume ramping, set `volume ramping = 10`; if it shall not use ramping, set `volume ramping = 0`.
+  - If the track shall be played with some volume ramping, set `volume ramping = -1`; if it shall not use ramping, set `volume ramping = 0`.
   - You can also override the track's title/artist metadata by setting it manually, e.g. `title = Professional Tracker` and `artist = H0ffman feat. Daytripper`.
   - If the instrument/sample texts in the sidebar are utterly uninteresting, you can hide the sidebar completely with `meta enabled = false`.
-  - In general, you can override almost every option that TrackMeister has! Custom colors per entry? No problem. Or even an image? Sure. Have a look into `tm_default.ini` for a list of all possible settings.
-  - When tuning per-track options, it can be useful to put TrackMeister into windowed mode if it was running fullscreen (**F11**), have an editor with `tm.ini` open and use the **F5** key to re-load the configuration and re-start the currently playing track.
+  - In general, you can override almost every option that TrackMeister has! Custom colors per entry? No problem. Or even an image? Sure. Just scroll through the configuration window to see what can be done.
+  - Note that some option changes don't take place immediately after changing them in the UI, but require reloading the module to become active (**F5** key). The status indicator left of each setting gets a difference color (and tooltip) in these cases.
   - Do **not** set a per-track `gain` (volume) yet; we're going to use TrackMeister's assistance for that!
+  - Don't forget to save the settings when done, using **Ctrl+S**! All changes file-specific settings are lost when changing the currently played track.
 - When done with the per-track configuration, navigate to track 1 and press **Ctrl**+**Shift**+**L**. This will start loudness measurement of the entire playlist. After restarting TrackMeister, the tracks should play a bit quieter on average, but without loudness jumps between tracks.
   - If you really want to fine-tune the volume for each track, this is the time. Use the `gain =` option with the desired adjustment in decibels.
-- For the compo itself, make sure that the options `autoplay = false` is set, and that `auto advance` is *not* set (or set to `false` too).
+- For the compo itself, make sure that the option `autoplay = false` is set, and that `auto advance` is *not* set (or set to `false` too).
 - During the compo:
   - Show the first entry's slide on the bigscreen. In the meantime, run `tm.exe`; it should start with entry #1 loaded, but in paused state.
   - Switch the bigscreen over to the TrackMeister computer and press **Space** to start playback.
