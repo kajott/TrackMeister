@@ -85,14 +85,14 @@ void Application::uiConfigWindow() {
         return;
     }
 
-    ImGui::SetNextItemShortcut(ImGuiKey_F2);
     ImGui::PushStyleColor(ImGuiCol_Button, m_uiConfigShowGlobal ? ImGui::GetStyle().Colors[ImGuiCol_ButtonActive] : ImVec4(0.5f, 0.5f, 0.5f, 0.5f));
     if (ImGui::Button("Global Configuration")) { m_uiConfigShowGlobal = true; }
+    if (ImGui::Shortcut(ImGuiKey_F2)) { m_showConfig = !m_uiConfigShowGlobal; m_uiConfigShowGlobal = true; }
     ImGui::PopStyleColor(1);
     ImGui::SameLine();
-    ImGui::SetNextItemShortcut(ImGuiKey_F3);
     ImGui::PushStyleColor(ImGuiCol_Button, m_uiConfigShowGlobal ? ImVec4(0.5f, 0.5f, 0.5f, 0.5f) : ImGui::GetStyle().Colors[ImGuiCol_ButtonActive]);
     if (ImGui::Button("File-Specific Configuration")) { m_uiConfigShowGlobal = false; }
+    if (ImGui::Shortcut(ImGuiKey_F3)) { m_showConfig = m_uiConfigShowGlobal; m_uiConfigShowGlobal = false; }
     ImGui::PopStyleColor(1);
     ImGui::Spacing();
 
