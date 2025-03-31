@@ -1,3 +1,18 @@
+# 1.4.0
+
+Another pre-party release, just in time for Revision. The main feature this time is a fully built-in configuration UI, making preparations and customizations quite a bit easier for compo organizers and theme designers.
+
+Here's the full list of features:
+- updated to libopenmpt 0.7.13 with several fixes - see [here](https://lib.openmpt.org/libopenmpt/2024/10/26/releases-0.7.11-0.6.20-0.5.34-0.4.46/), [here](https://lib.openmpt.org/libopenmpt/2024/12/01/releases-0.7.12-0.6.21-0.5.35-0.4.47/) and [here](https://lib.openmpt.org/libopenmpt/2025/01/06/releases-0.7.13-0.6.22-0.5.36-0.4.48/)
+- configuration system changed: there's now a clear separation between global configuration (global section of `tm.ini`) and per-file configuration (filename-pattern sections of `tm.ini` and sidecar `.mod.tm` files), with the latter taking precedence over the former
+- added configuration UI (F2/F3 keys)
+  - can modify almost all settings, both global and file-specific
+  - can revert settings to their defaults
+  - changes become effective immediately, if possible (most visual settings do), or after reloading the current module (F5)
+  - can save `tm.ini` and `.tm` sidecar files (Ctrl+S)
+- added built-in help screen (F1 key)
+
+
 # 1.3.0
 
 This release packs together all the small changes and (literal!) last-minute fixes that happened at Evoke, and a few others:
