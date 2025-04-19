@@ -207,8 +207,7 @@ void Application::uiConfigWindow() {
                 static char buf[BufSize];
                 strncpy(buf, value.c_str(), BufSize);
                 buf[BufSize - 1] = '\0';
-                ImGui::InputText(item->name, buf, BufSize);
-                if (ImGui::IsItemDeactivatedAfterEdit()) {
+                if (ImGui::InputText(item->name, buf, BufSize)) {
                     value.assign(buf);
                     itemChanged = true;
                 }
