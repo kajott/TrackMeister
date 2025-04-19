@@ -460,7 +460,7 @@ bool Config::updateFile(const char* filename, const NumberSet* resetSet) {
             data.insert(changeKeyStart, ";");
         } else if (changePos) {
             Dprintf("found at index %d, replacing\n", int(changePos));
-            while ((changePos < data.size()) && (isSpace(data[changePos]))) {
+            while ((changePos < data.size()) && (isSpaceNoNewline(data[changePos]))) {
                 ++changePos;  // keep initial whitespace
             }
             size_t end = changePos;

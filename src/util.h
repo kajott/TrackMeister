@@ -28,6 +28,10 @@ constexpr inline bool isDigit(char c)
 constexpr inline bool isSpace(char c)
     { return (c == ' ') || (c == '\t') || (c == '\r') || (c == '\n'); }
 
+//! as isSpace, but doesn't match any newline characters
+constexpr inline bool isSpaceNoNewline(char c)
+    { return (c == ' ') || (c == '\t'); }
+
 //! clone of std::tolower() that's guaranteed to not choke on 8-bit input
 constexpr inline char toLower(char c)
     { return ((c >= 'A') && (c <= 'Z')) ? (c + ('a' - 'A')) : c; }
