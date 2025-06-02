@@ -64,8 +64,6 @@ add_library (libopenmpt STATIC
     external/openmpt/common/ComponentManager.cpp
     external/openmpt/common/Logging.cpp
     external/openmpt/common/Profiler.cpp
-    external/openmpt/common/mptFileIO.cpp
-    external/openmpt/common/mptFileTemporary.cpp
     external/openmpt/common/mptFileType.cpp
     external/openmpt/common/mptPathString.cpp
     external/openmpt/common/mptRandom.cpp
@@ -91,24 +89,33 @@ add_library (libopenmpt STATIC
     external/openmpt/soundlib/ITCompression.cpp
     external/openmpt/soundlib/ITTools.cpp
     external/openmpt/soundlib/InstrumentExtensions.cpp
+    external/openmpt/soundlib/InstrumentSynth.cpp
     external/openmpt/soundlib/Load_667.cpp
     external/openmpt/soundlib/Load_669.cpp
     external/openmpt/soundlib/Load_amf.cpp
     external/openmpt/soundlib/Load_ams.cpp
     external/openmpt/soundlib/Load_c67.cpp
+    external/openmpt/soundlib/Load_cba.cpp
     external/openmpt/soundlib/Load_dbm.cpp
     external/openmpt/soundlib/Load_digi.cpp
     external/openmpt/soundlib/Load_dmf.cpp
     external/openmpt/soundlib/Load_dsm.cpp
     external/openmpt/soundlib/Load_dsym.cpp
     external/openmpt/soundlib/Load_dtm.cpp
+    external/openmpt/soundlib/Load_etx.cpp
     external/openmpt/soundlib/Load_far.cpp
+    external/openmpt/soundlib/Load_fc.cpp
     external/openmpt/soundlib/Load_fmt.cpp
+    external/openmpt/soundlib/Load_ftm.cpp
     external/openmpt/soundlib/Load_gdm.cpp
+    external/openmpt/soundlib/Load_gmc.cpp
     external/openmpt/soundlib/Load_gt2.cpp
+    external/openmpt/soundlib/Load_ice.cpp
     external/openmpt/soundlib/Load_imf.cpp
+    external/openmpt/soundlib/Load_ims.cpp
     external/openmpt/soundlib/Load_it.cpp
     external/openmpt/soundlib/Load_itp.cpp
+    external/openmpt/soundlib/Load_kris.cpp
     external/openmpt/soundlib/Load_mdl.cpp
     external/openmpt/soundlib/Load_med.cpp
     external/openmpt/soundlib/Load_mid.cpp
@@ -120,19 +127,27 @@ add_library (libopenmpt STATIC
     external/openmpt/soundlib/Load_okt.cpp
     external/openmpt/soundlib/Load_plm.cpp
     external/openmpt/soundlib/Load_psm.cpp
+    external/openmpt/soundlib/Load_pt36.cpp
     external/openmpt/soundlib/Load_ptm.cpp
+    external/openmpt/soundlib/Load_puma.cpp
+    external/openmpt/soundlib/Load_rtm.cpp
     external/openmpt/soundlib/Load_s3m.cpp
     external/openmpt/soundlib/Load_sfx.cpp
+    external/openmpt/soundlib/Load_stk.cpp
     external/openmpt/soundlib/Load_stm.cpp
     external/openmpt/soundlib/Load_stp.cpp
     external/openmpt/soundlib/Load_symmod.cpp
+    external/openmpt/soundlib/Load_tcb.cpp
     external/openmpt/soundlib/Load_uax.cpp
     external/openmpt/soundlib/Load_ult.cpp
+    external/openmpt/soundlib/Load_unic.cpp
     external/openmpt/soundlib/Load_wav.cpp
     external/openmpt/soundlib/Load_xm.cpp
     external/openmpt/soundlib/Load_xmf.cpp
     external/openmpt/soundlib/MIDIEvents.cpp
+    external/openmpt/soundlib/MIDIMacroParser.cpp
     external/openmpt/soundlib/MIDIMacros.cpp
+    external/openmpt/soundlib/MODTools.cpp
     external/openmpt/soundlib/MPEGFrame.cpp
     external/openmpt/soundlib/Message.cpp
     external/openmpt/soundlib/MixFuncTable.cpp
@@ -145,6 +160,8 @@ add_library (libopenmpt STATIC
     external/openmpt/soundlib/OPL.cpp
     external/openmpt/soundlib/OggStream.cpp
     external/openmpt/soundlib/Paula.cpp
+    external/openmpt/soundlib/PlayState.cpp
+    external/openmpt/soundlib/PlaybackTest.cpp
     external/openmpt/soundlib/RowVisitor.cpp
     external/openmpt/soundlib/S3MTools.cpp
     external/openmpt/soundlib/SampleFormatBRR.cpp
