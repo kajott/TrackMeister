@@ -34,6 +34,7 @@ class Application {
     TextBoxRenderer m_renderer;
     int m_sampleRate;
     bool m_scanning = false;
+    bool m_loop = false;
     std::atomic_bool m_cancelScanning = false;
     std::atomic_bool m_clipped = false;
     openmpt::module* m_mod = nullptr;

@@ -120,6 +120,7 @@ Here's an example for a useful INI file as a compo organizer would set it up for
     ; and we want fullscreen too!
     fullscreen=yes
     ; if the track has a loop, we want to fade out automatically at this point
+    auto loop = true
     fade out after loop = true
 
     [*.mod]
@@ -129,9 +130,11 @@ Here's an example for a useful INI file as a compo organizer would set it up for
         volume-ramping: 0;
 
     [03*]
-        ; the entry with the track number 3 in the filename has a loop;
-        ; we want to play the loop, but fade out directly after it;
+        ; the entry with the track number 3 in the filename has a loop that
+        ; isn't recognized by the "auto loop" heuristics; we want to play the
+        ; loop, but fade out directly after it;
         ; the fade has been configured above already, now set up the loop:
+        auto loop: false
         loop: true
 
 Note that in practice, the track-specific options would rather be written into the `tm.ini` file in the directory where the entries reside, or the even into the `.tm` file next to the module file itself, and maybe not into the "global" config file that's located next to `tm.exe`.
@@ -168,6 +171,7 @@ Options can also be specified on the command line, in the syntax "`+key=value`" 
 - Listen to the tracks again and configure track-specific options by pressing the **F3** key to open the file-specific configuration window, making the desired changes, and pressing **Ctrl+S** to save them in the end.
 <br> Typical per-track options are:
   - If the track shall loop, set `loop = true`. If you also set `fade out after loop = true`, the track will also fade out at this point.
+  - Conversely, if the track shall **not** loop, but `auto loop` is enabled and it mis-detects the track as looping, set `auto loop = false` and `loop = false`.
   - If the track shall fade out at some position, set `fade out at =` to the number of seconds after which fading shall start (e.g. `fade out at = 123` fades out after 123 seconds, i.e. 2 minutes and 3 seconds).
     - To determine the proper value, just pause playback at the position where you want the fade to start (using the **Space** key) and press the **P** key to display the position. The raw value in seconds can be directly used for the `fade out at` option.
   - If the track shall be played in mono, set `stereo separation = 0`.

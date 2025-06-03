@@ -201,7 +201,7 @@ bool Application::renderAudio(int16_t* data, int sampleCount, bool stereo, int s
     }
 
     // start fade-out after loop, if so desired
-    if (hadNullRead && m_config.loop && m_config.fadeOutAfterLoop && !m_autoFadeInitiated) {
+    if (hadNullRead && m_loop && m_config.fadeOutAfterLoop && !m_autoFadeInitiated) {
         fadeOut();
         m_autoFadeInitiated = true;
     }
@@ -955,7 +955,6 @@ bool Application::loadModule(const char* path, bool forScanning) {
     // load and setup OpenMPT instance
     AudioMutexGuard mtx_(m_sys);
     std::map<std::string, std::string> ctls;
-    ctls["play.at_end"] = (m_config.loop && !forScanning) ? "continue" : "stop";
     switch (m_config.filter) {
         case FilterMethod::Auto:
         case FilterMethod::Amiga:
@@ -988,6 +987,8 @@ bool Application::loadModule(const char* path, bool forScanning) {
     }
     m_mod->set_render_param(openmpt::module::render_param::RENDER_STEREOSEPARATION_PERCENT, m_config.stereoSeparation);
     m_mod->set_render_param(openmpt::module::render_param::RENDER_VOLUMERAMPING_STRENGTH,   m_config.volumeRamping);
+    m_loop = !forScanning && (m_config.loop || (m_config.autoLoop && ((m_mod->get_restart_order(0) != 0) || (m_mod->get_restart_row(0) != 0))));
+    m_mod->ctl_set_text("play.at_end", m_loop ? "continue" : "stop");
     if (!forScanning) { updateGain(); }
 
     // get info box metadata
