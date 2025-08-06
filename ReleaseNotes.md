@@ -1,3 +1,15 @@
+# 1.4.1
+
+It's again just before [some larger party](https://2024.evoke.eu), so here's a release that collects all the changes of the past months and ships with the latest OpenMPT libraries:
+
+- updated to libopenmpt-0.8.2; for details, see [here](https://lib.openmpt.org/libopenmpt/2025/05/31/release-0.8.0/), [here](https://lib.openmpt.org/libopenmpt/2025/06/14/releases-0.8.1-0.7.14-0.6.23-0.5.37-0.4.49/) and [here](https://lib.openmpt.org/libopenmpt/2025/07/19/security-updates-0.8.2-0.7.15-0.6.24-0.5.37-0.4.50/)
+- thanks to a new API in libopenmpt-0.8, TrackMeister now offers an `auto loop` option that tries to detect whether a module is supposed to be looped or not
+  - it's not 100% reliable, nor can it ever be, but at least it's a useful heuristic
+- fixed a few bugs in the configuration editor:
+  - changes to string values were lost when pressing Ctrl+S without de-focussing the edit field before
+  - fixed slight config file corruption when changing a string value from empty to non-empty
+
+
 # 1.4.0
 
 Another pre-party release, just in time for Revision. The main feature this time is a fully built-in configuration UI, making preparations and customizations quite a bit easier for compo organizers and theme designers.
@@ -24,7 +36,6 @@ This release packs together all the small changes and (literal!) last-minute fix
 - metadata auto-scrolling now only starts 10 seconds into the track and stops 10 seconds before the end, at latest
   - makes it easier for the audience to read longer scrolltexts
   - the delay can be adjusted with the `scroll delay` option (setting it to zero restores the old behavior)
-
 
 
 # 1.2.2
