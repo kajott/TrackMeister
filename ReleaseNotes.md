@@ -1,6 +1,6 @@
 # 1.4.1
 
-It's again just before [some larger party](https://2024.evoke.eu), so here's a release that collects all the changes of the past months and ships with the latest OpenMPT libraries:
+It's again just before [some larger party](https://2025.evoke.eu), so here's a release that collects all the changes of the past months and ships with the latest OpenMPT libraries:
 
 - updated to libopenmpt-0.8.2; for details, see [here](https://lib.openmpt.org/libopenmpt/2025/05/31/release-0.8.0/), [here](https://lib.openmpt.org/libopenmpt/2025/06/14/releases-0.8.1-0.7.14-0.6.23-0.5.37-0.4.49/) and [here](https://lib.openmpt.org/libopenmpt/2025/07/19/security-updates-0.8.2-0.7.15-0.6.24-0.5.37-0.4.50/)
 - thanks to a new API in libopenmpt-0.8, TrackMeister now offers an `auto loop` option that tries to detect whether a module is supposed to be looped or not
