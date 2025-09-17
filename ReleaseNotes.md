@@ -1,3 +1,10 @@
+# 1.4.2
+
+Just a minor update. There are no new features or fixes in TrackMeister itself, but libopenmpt got a bugfix in its IT playback routine which we don't want to withhold.
+
+- updated to libopenmpt-0.8.3; for details, see [here](https://lib.openmpt.org/libopenmpt/2025/09/06/releases-0.8.3-0.7.16-0.6.25-0.5.39-0.4.51/)
+
+
 # 1.4.1
 
 It's again just before [some larger party](https://2025.evoke.eu), so here's a release that collects all the changes of the past months and ships with the latest OpenMPT libraries:
