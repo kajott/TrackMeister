@@ -25,7 +25,7 @@ static const char* helpText[] = {
     "Esc",                 "pause / cancel scanning / press twice to quit",
     "Space",               "pause / continue playback",
     "Tab",                 "show / hide the info and metadata bars",
-    "Enter",               "show / hide the hake VU meters",
+    "Enter",               "show / hide the fake VU meters",
     "Cursor Left/Right",   "seek backward / forward one order",
     "PageUp / PageDown",   "load previous / next module in the current directory",
     "Ctrl+Home / Ctrl+End","load first / next module in the current directory",
