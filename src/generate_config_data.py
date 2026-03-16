@@ -3,7 +3,7 @@ import io
 import re
 import sys
 
-uppercase_words = "X Y VU".lower().split()
+uppercase_words = "X Y VU UI".lower().split()
 def camelCase_to_space_case(x):
     words = ''.join(((' ' + c.lower()) if c.isupper() else c) for c in x).split()
     return ' '.join((word.upper() if (word in uppercase_words) else word) for word in words)

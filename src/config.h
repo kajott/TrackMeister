@@ -50,6 +50,7 @@ struct Config {
     int      windowWidth              = 1920;         //!< initial window width  in non-fullscreen mode, in pixels [startup, min 640, max 3840]
     int      windowHeight             = 1080;         //!< initial window height in non-fullscreen mode, in pixels [startup, min 480, max 2160]
     float    alphaGamma               = 2.2f;         //!< fake gamma-correct rendering by applying gamma to the alpha channel; higher values = thicker and less aliasing for bright-on-dark text [min .5, max 3]
+    float    configUiScale            = 1.0f;         //!< configuration UI scaling factor [global, reload, min .5, max 2]
     std::string font;                                 //!< font to use for all displays: 'inconsolata' (default), 'iosevka', 'topaz'/'topaz1200'/'topaz500', 'pc' (note: all font sizes will be rounded down to an integer multiple of 16 pixels if a bitmap font is used) [values (default) | Inconsolata | Iosevka | Topaz500 | Topaz1200 | PC]
 
     // audio rendering

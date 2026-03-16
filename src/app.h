@@ -148,6 +148,9 @@ class Application {
     bool m_showHelp = false;
     bool m_showConfig = false;
     bool m_uiConfigShowGlobal = true;
+    float m_uiConfigScale = 1.0f;
+    void *m_uiBitmapFont = nullptr;
+    void *m_uiVectorFont = nullptr;
 
 public:  // interface from SystemInterface
     explicit inline Application(SystemInterface& sys) : m_sys(sys), m_metadata(m_renderer) {}

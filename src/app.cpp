@@ -739,11 +739,20 @@ void Application::draw(float dt) {
     #endif
 
     // handle ImGui stuff
+    if (m_uiConfigScale <= 1.0f) {
+        if (!m_uiBitmapFont) { m_uiBitmapFont = static_cast<void*>(ImGui::GetIO().Fonts->AddFontDefaultBitmap()); }
+        ImGui::PushFont(static_cast<ImFont*>(m_uiBitmapFont));
+    } else {
+        if (!m_uiVectorFont) { m_uiVectorFont = static_cast<void*>(ImGui::GetIO().Fonts->AddFontDefaultVector()); }
+        ImGui::PushFont(static_cast<ImFont*>(m_uiVectorFont));
+    }
+    ImGui::GetStyle().FontScaleMain = m_uiConfigScale;
     if (m_showConfig)   { uiConfigWindow(); }
     if (m_showHelp)     { uiHelpWindow(); }
     #ifndef NDEBUG
         if (m_showDemo) { ImGui::ShowDemoWindow(&m_showDemo); }
     #endif
+    ImGui::PopFont();
 
     // done
     m_renderer.flush();
@@ -872,6 +881,7 @@ void Application::unloadModule() {
     m_clipped = false;
     m_clipAlpha = 0.0f;
     Dprintf("module unloaded\n");
+    m_uiConfigScale = m_config.configUiScale;
     updateLayout(true);
 }
 
