@@ -1,3 +1,15 @@
+# 1.4.3
+
+Another small update, just in time for [a certain party](https://2026.revision-party.net).
+There's little in terms of new features here, apart from the usual library updates.
+
+- updated to libopenmpt-0.8.6; for details, see [here](https://lib.openmpt.org/libopenmpt/2025/12/14/releases-0.8.4-0.7.17-0.6.26-0.5.40-0.4.52/), [here](https://lib.openmpt.org/libopenmpt/2026/03/22/security-updates-0.8.5-0.7.18-0.6.27-0.5.41-0.4.53/) and [here](https://lib.openmpt.org/libopenmpt/2026/03/24/security-updates-0.8.6-0.7.19-0.6.28-0.5.42-0.4.54/)
+- updated config UI to [Dear ImGui 1.92.6](https://github.com/ocornut/imgui/releases/tag/v1.92.6)
+- added option to scale the config UI, as it can become really tiny on high-DPI screens
+  - this is made possible by the new scalable default font in the aforementioned Dear ImGui release
+  - the scaling factor needs to be set manually, at least now
+
+
 # 1.4.2
 
 Just a minor update. There are no new features or fixes in TrackMeister itself, but libopenmpt got a bugfix in its IT playback routine which we don't want to withhold.
