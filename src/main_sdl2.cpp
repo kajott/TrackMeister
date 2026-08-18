@@ -209,6 +209,10 @@ void SystemInterface::toggleFullscreen() {
     SDL_ShowCursor(m_priv->fullscreen ? SDL_DISABLE : SDL_ENABLE);
 }
 
+bool SystemInterface::isFullscreen() {
+    return m_priv->fullscreen;
+}
+
 int main(int argc, char* argv[]) {
     SystemInterfacePrivateData priv;
     SystemInterface sys(priv);

@@ -42,6 +42,7 @@ public:
 
     void setWindowTitle(const char* title);
     void toggleFullscreen();
+    bool isFullscreen();
 };
 
 class AudioMutexGuard {

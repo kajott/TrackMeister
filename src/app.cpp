@@ -747,6 +747,9 @@ void Application::draw(float dt) {
         ImGui::PushFont(static_cast<ImFont*>(m_uiVectorFont));
     }
     ImGui::GetStyle().FontScaleMain = m_uiConfigScale;
+    if (m_sys.isFullscreen() && !m_showConfig && !m_showHelp && !m_showDemo) {
+        ImGui::SetMouseCursor(ImGuiMouseCursor_None);
+    }
     if (m_showConfig)   { uiConfigWindow(); }
     if (m_showHelp)     { uiHelpWindow(); }
     #ifndef NDEBUG
