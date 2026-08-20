@@ -2,7 +2,7 @@
 
 A tiny update that only consists of library upgrades and a small (but kinda important) bugfix.
 
-- updated to libopenmpt-0.8.8; for details, see [here](https://lib.openmpt.org/libopenmpt/2026/05/17/release-0.8.7/) and [here](https://lib.openmpt.org/libopenmpt/2026/08/15/releases-0.8.8-0.7.20-0.6.29-0.5.43-0.4.55/)
+- updated to libopenmpt-0.8.9; for details, see [here](https://lib.openmpt.org/libopenmpt/2026/05/17/release-0.8.7/), [here](https://lib.openmpt.org/libopenmpt/2026/08/15/releases-0.8.8-0.7.20-0.6.29-0.5.43-0.4.55/) and [here](https://lib.openmpt.org/libopenmpt/2026/08/19/security-updates-0.8.9-0.7.21-0.6.30-0.5.44-0.4.56/)
 - now hiding the mouse cursor in fullscreen mode again (was broken since 1.4.0)
 
 
